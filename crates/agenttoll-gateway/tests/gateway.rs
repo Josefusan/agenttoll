@@ -110,6 +110,8 @@ mcp:
   endpoint: /mcp
   tools:
     search_docs: "0.005"
+ledger:
+  url: "sqlite::memory:"
 "#
     );
     let config = Config::parse(&text, |_| None).unwrap();
@@ -250,7 +252,7 @@ async fn path_tricks_still_pay() {
 async fn unverified_payment_is_refused_not_forwarded() {
     let h = start(true).await;
     for (header, error) in [
-        ("payment-signature", "not enabled"),
+        ("payment-signature", "only x402Version 2"),
         ("x-payment", "v1 X-PAYMENT is not supported"),
     ] {
         let res = h

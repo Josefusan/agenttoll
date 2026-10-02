@@ -94,7 +94,7 @@ Exact header names, CAIP-2 IDs, mint addresses and facilitator URLs are pinned i
 ```sql
 CREATE TABLE revenue_events (
   id            INTEGER PRIMARY KEY,
-  ts            TIMESTAMP NOT NULL,
+  ts            INTEGER NOT NULL,   -- unix milliseconds
   route         TEXT NOT NULL,
   mcp_tool      TEXT,
   agent_name    TEXT,

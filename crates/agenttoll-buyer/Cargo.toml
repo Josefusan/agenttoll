@@ -1,0 +1,24 @@
+[package]
+name = "agenttoll-buyer"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+agenttoll-core = { version = "0.1.0", path = "../agenttoll-core" }
+alloy-signer-local = "2"
+anyhow = "1.0.104"
+base64 = "0.23.1"
+clap = { version = "4.6.7", features = ["derive", "env"] }
+dotenvy = "0.15.7"
+reqwest = "0.13"
+serde_json = "1.0.151"
+solana-client = "3"
+solana-keypair = "3"
+solana-signer = "3"
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread"] }
+x402-chain-eip155 = { version = "2.0.2", features = ["client", "telemetry"] }
+x402-chain-solana = { version = "2.0.2", features = ["client"] }
+x402-reqwest = "2.0.2"
+x402-types = "2.0.2"

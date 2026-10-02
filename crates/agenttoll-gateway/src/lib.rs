@@ -1,6 +1,10 @@
 //! AgentToll gateway: a reverse proxy that lets humans through free and answers priced
-//! agent requests with an x402 v2 challenge (ARCHITECTURE.md §1.1).
+//! agent requests with an x402 v2 challenge, then verifies and settles their payments
+//! (ARCHITECTURE.md §1.1).
 
+pub mod facilitator;
+pub mod ledger;
+pub mod pay;
 pub mod proxy;
 pub mod supported;
 pub mod x402;
@@ -21,6 +25,8 @@ use axum::http::{HeaderValue, Method, StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use serde_json::json;
 
+use crate::ledger::Ledger;
+use crate::pay::{PaidRequest, ReplayGuard};
 use crate::x402::QuoteNetwork;
 
 /// MCP POST bodies are buffered for tool-name inspection, up to this size.
@@ -31,6 +37,8 @@ pub struct Gateway {
     pricer: Pricer,
     networks: Vec<QuoteNetwork>,
     client: reqwest::Client,
+    ledger: Ledger,
+    replay: ReplayGuard,
 }
 
 impl Gateway {
@@ -57,16 +65,23 @@ impl Gateway {
             };
             networks.push(QuoteNetwork::new(net.clone(), fee_payer).map_err(anyhow::Error::msg)?);
         }
+        let ledger = Ledger::open(&config.ledger.url)?;
         Ok(Arc::new(Gateway {
             config,
             pricer,
             networks,
             client,
+            ledger,
+            replay: ReplayGuard::default(),
         }))
     }
 
     pub fn networks(&self) -> &[QuoteNetwork] {
         &self.networks
+    }
+
+    pub fn ledger(&self) -> &Ledger {
+        &self.ledger
     }
 }
 
@@ -129,22 +144,59 @@ async fn handle(State(gw): State<Arc<Gateway>>, req: Request) -> Response {
     );
 
     if let Some(tag) = charge {
-        // Verify → forward → settle lands in D3. Until then a payment is refused, never
-        // forwarded unverified.
-        let error = if parts.headers.contains_key(headers::PAYMENT_SIGNATURE) {
-            "payment verification is not enabled on this gateway yet"
-        } else if parts.headers.contains_key(headers::X_PAYMENT) {
-            "x402 v1 X-PAYMENT is not supported; pay with x402 v2 PAYMENT-SIGNATURE"
-        } else {
-            "PAYMENT-SIGNATURE header is required"
+        let payment = parts
+            .headers
+            .get(headers::PAYMENT_SIGNATURE)
+            .map(|v| v.to_str().map(str::to_owned));
+        return match payment {
+            Some(Ok(header)) => {
+                pay::handle_paid(
+                    &gw,
+                    PaidRequest {
+                        parts,
+                        body,
+                        peer,
+                        tag,
+                        verdict: &verdict,
+                        header,
+                    },
+                )
+                .await
+            }
+            Some(Err(_)) => (
+                StatusCode::BAD_REQUEST,
+                "PAYMENT-SIGNATURE is not valid ASCII",
+            )
+                .into_response(),
+            None if parts.headers.contains_key(headers::X_PAYMENT) => challenge(
+                &gw,
+                &parts,
+                tag,
+                &verdict,
+                "x402 v1 X-PAYMENT is not supported; pay with x402 v2 PAYMENT-SIGNATURE",
+            ),
+            None => challenge(
+                &gw,
+                &parts,
+                tag,
+                &verdict,
+                "PAYMENT-SIGNATURE header is required",
+            ),
         };
-        return challenge(&gw, &parts, tag, &verdict, error);
     }
 
-    proxy::forward(&gw.client, &gw.config, parts, body, peer).await
+    proxy::forward(
+        &gw.client,
+        &gw.config,
+        parts,
+        body,
+        peer,
+        Default::default(),
+    )
+    .await
 }
 
-fn challenge(
+pub(crate) fn challenge(
     gw: &Gateway,
     parts: &axum::http::request::Parts,
     tag: &PriceTag,
