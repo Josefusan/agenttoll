@@ -1,0 +1,43 @@
+{
+  "name": "@agenttoll/pay-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that gives an AI agent an x402 wallet with hard spend caps (Solana devnet USDC first, Base Sepolia backup)",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "pay-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    ".env.example",
+    "scripts"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && chmod +x dist/index.js",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "@solana/kit": "^5.5.1",
+    "@x402/core": "^2.28.0",
+    "@x402/evm": "^2.28.0",
+    "@x402/fetch": "^2.28.0",
+    "@x402/svm": "^2.28.0",
+    "viem": "^2.57.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
+  }
+}
