@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" width="1600" height="640">
+<defs><linearGradient id="bannerbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#120F2E"/><stop offset="1" stop-color="#07060F"/></linearGradient>
+<linearGradient id="word" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C4B5FD"/><stop offset="0.5" stop-color="#93C5FD"/><stop offset="1" stop-color="#5EEAD4"/></linearGradient></defs>
+<rect width="1600" height="640" fill="url(#bannerbg)"/>
+<svg x="90" y="100" width="440" height="440" viewBox="0 0 1024 1024"><defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0" stop-color="#1B1640"/>
+      <stop offset="0.55" stop-color="#0E0C24"/>
+      <stop offset="1" stop-color="#07060F"/>
+    </radialGradient>
+    <linearGradient id="head" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="0.55" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <linearGradient id="headShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="0.45" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.18"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FDE68A"/>
+      <stop offset="0.5" stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#D97706"/>
+    </linearGradient>
+    <linearGradient id="eye" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A7F3D0"/>
+      <stop offset="1" stop-color="#34D399"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+    <clipPath id="barClip"><rect x="322" y="664" width="380" height="64" rx="32"/></clipPath>
+    <pattern id="hazard" width="64" height="64" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+      <rect width="64" height="64" fill="#0B0A1A"/>
+      <rect width="32" height="64" fill="#FBBF24"/>
+    </pattern>
+  </defs>
+
+  <!-- background tile -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <ellipse cx="512" cy="600" rx="330" ry="250" fill="#6D28D9" opacity="0.35" filter="url(#soft)"/>
+
+  <g transform="translate(0,62)">
+  <!-- coin motion trail -->
+  <g opacity="0.55" stroke="#FBBF24" stroke-width="10" stroke-linecap="round">
+    <line x1="512" y1="70" x2="512" y2="100" opacity="0.4"/>
+    <line x1="452" y1="88" x2="452" y2="128" opacity="0.6"/>
+    <line x1="572" y1="88" x2="572" y2="128" opacity="0.6"/>
+  </g>
+
+  <!-- coin -->
+  <g filter="url(#glow)">
+    <circle cx="512" cy="212" r="88" fill="url(#coin)"/>
+    <circle cx="512" cy="212" r="66" fill="none" stroke="#B45309" stroke-width="8" opacity="0.55"/>
+    <text x="512" y="248" text-anchor="middle" font-family="Inter" font-weight="900" font-size="104" fill="#7C2D12" opacity="0.85">$</text>
+  </g>
+
+  <!-- ears / antenna nubs -->
+  <rect x="160" y="500" width="72" height="150" rx="30" fill="#4C1D95"/>
+  <rect x="792" y="500" width="72" height="150" rx="30" fill="#115E59"/>
+
+  <!-- head -->
+  <rect x="212" y="330" width="600" height="480" rx="132" fill="url(#head)"/>
+  <rect x="212" y="330" width="600" height="480" rx="132" fill="url(#headShade)"/>
+
+  <!-- coin slot -->
+  <rect x="432" y="352" width="160" height="30" rx="15" fill="#0B0A1A" opacity="0.9"/>
+
+  <!-- visor -->
+  <rect x="282" y="430" width="460" height="176" rx="88" fill="#0B0A1A"/>
+  <rect x="282" y="430" width="460" height="176" rx="88" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="4"/>
+  <!-- eyes -->
+  <g filter="url(#glow)">
+    <rect x="372" y="478" width="92" height="80" rx="40" fill="url(#eye)"/>
+    <rect x="560" y="478" width="92" height="80" rx="40" fill="url(#eye)"/>
+  </g>
+
+  <!-- toll barrier mouth -->
+  <rect x="322" y="664" width="380" height="64" rx="32" fill="url(#hazard)" clip-path="url(#barClip)"/>
+  <rect x="322" y="664" width="380" height="64" rx="32" fill="none" stroke="#0B0A1A" stroke-width="6"/>
+  </g>
+</svg>
+<text x="600" y="300" font-family="Inter Display, Inter" font-weight="800" font-size="150" fill="url(#word)" letter-spacing="-4">AgentToll</text>
+<text x="606" y="385" font-family="Inter" font-weight="500" font-size="38" fill="#E5E7EB">Charge AI agents per request. Keep humans free.</text>
+<g font-family="Inter" font-weight="600" font-size="30">
+<rect x="606" y="430" width="190" height="56" rx="28" fill="#1F1B3D" stroke="#8B5CF6" stroke-opacity="0.6"/><text x="701" y="468" text-anchor="middle" fill="#C4B5FD">x402</text>
+<rect x="812" y="430" width="190" height="56" rx="28" fill="#1F1B3D" stroke="#2DD4BF" stroke-opacity="0.6"/><text x="907" y="468" text-anchor="middle" fill="#5EEAD4">USDC</text>
+<rect x="1018" y="430" width="300" height="56" rx="28" fill="#1F1B3D" stroke="#3B82F6" stroke-opacity="0.6"/><text x="1168" y="468" text-anchor="middle" fill="#93C5FD">Solana + Base</text>
+</g>
+</svg>
