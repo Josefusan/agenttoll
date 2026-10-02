@@ -1,0 +1,20 @@
+[package]
+name = "agenttoll-core-wasm"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "wasm-bindgen facade over agenttoll-core for the Cloudflare Worker edition (workers/agenttoll-edge)"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+agenttoll-core = { version = "0.1.0", path = "../agenttoll-core" }
+http = "1.5.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+wasm-bindgen = "0.2"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-Os"]
