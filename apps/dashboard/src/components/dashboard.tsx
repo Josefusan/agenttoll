@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLiveStats } from "@/hooks/use-live-stats";
 import { agentLabel, atomicToUsd, compactInt } from "@/lib/format";
 import { medianPriceAtomic, timeline } from "@/lib/merge";
-import { settlementStatus } from "@/lib/types";
+import { isSimulated, settlementStatus } from "@/lib/types";
 import { Breakdown } from "./breakdown";
 import { Badge, Card } from "./card";
 import { CashOut } from "./cash-out";
@@ -28,13 +28,9 @@ export function Dashboard({ payoutsUrl, gatewayUrl }: { payoutsUrl: string; gate
     for (const e of stats?.recent ?? []) counts[settlementStatus(e)] += 1;
     return counts;
   }, [stats]);
-  const simulated = useMemo(() => {
-    if (!stats) return { count: 0, atomic: 0 };
-    return stats.recent.reduce(
-      (acc, e) => (e.simulated ? { count: acc.count + 1, atomic: acc.atomic + e.amount_atomic } : acc),
-      { count: 0, atomic: 0 },
-    );
-  }, [stats]);
+  // Count of simulated rows in view only; money subtractions come from totals, never from `recent`.
+  const simulatedInView = useMemo(() => (stats ? stats.recent.filter(isSimulated).length : 0), [stats]);
+  const simulatedAtomic = stats?.totals.simulated_atomic ?? 0;
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
@@ -57,7 +53,13 @@ export function Dashboard({ payoutsUrl, gatewayUrl }: { payoutsUrl: string; gate
       {stats && stats.totals.payments > 0 && (
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Kpi label="Revenue from agents" value={atomicToUsd(stats.totals.revenue_atomic)} hero hint="USDC, all networks, all time" />
+            <Kpi
+              label="Revenue from agents"
+              value={atomicToUsd(stats.totals.revenue_atomic)}
+              hero
+              caveat={simulatedAtomic > 0 ? `Includes ${atomicToUsd(simulatedAtomic)} simulated` : undefined}
+              hint="USDC, all networks, all time"
+            />
             <Kpi label="Paid requests" value={compactInt(stats.totals.payments)} hint="Each one a 402 that got paid" />
             <Kpi label="Unique agents" value={compactInt(stats.totals.unique_agents)} hint="By detected agent name" />
             <Kpi
@@ -102,9 +104,9 @@ export function Dashboard({ payoutsUrl, gatewayUrl }: { payoutsUrl: string; gate
               title="Live settlements"
               subtitle="Newest first. Links open the transaction on the explorer."
               action={
-                simulated.count > 0 ? (
-                  <Badge tone="warn" title="These went through the local simulated facilitator and have no on-chain transaction.">
-                    {compactInt(simulated.count)} simulated
+                simulatedInView > 0 ? (
+                  <Badge tone="warn" title="Rows in this list that went through the local simulated facilitator. No on-chain transaction exists for them.">
+                    {compactInt(simulatedInView)} of {compactInt(stats.recent.length)} simulated
                   </Badge>
                 ) : undefined
               }
@@ -116,7 +118,7 @@ export function Dashboard({ payoutsUrl, gatewayUrl }: { payoutsUrl: string; gate
                 <UnbilledPanel rows={stats.unbilled} total={stats.totals.unbilled_agent_requests} medianPriceAtomic={median} />
               </Card>
               <Card title="Cash out">
-                <CashOut revenueAtomic={stats.totals.revenue_atomic} simulatedAtomic={simulated.atomic} payoutsUrl={payoutsUrl} />
+                <CashOut totals={stats.totals} payoutsUrl={payoutsUrl} />
               </Card>
             </div>
           </div>

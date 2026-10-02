@@ -25,9 +25,11 @@ export async function GET() {
       signal: AbortSignal.timeout(5_000),
     });
   } catch (err) {
+    // The admin URL stays server-side: only the failure kind reaches the browser.
+    const msg = err instanceof Error ? err.message : String(err);
     return fail(502, {
       error: "gateway_unreachable",
-      detail: `Could not reach ${cfg.url}: ${err instanceof Error ? err.message : String(err)}`,
+      detail: `Could not reach the gateway admin API: ${msg.split(cfg.url).join("<admin url>")}`,
     });
   }
 

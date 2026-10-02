@@ -1,6 +1,6 @@
 import { Badge } from "./card";
 import { absoluteTime, agentLabel, atomicToUsd, networkInfo, timeAgo, truncateMiddle } from "@/lib/format";
-import { eventKey, hasOnChainProof, settlementStatus, type RevenueEvent } from "@/lib/types";
+import { eventKey, hasOnChainProof, isSimulated, settlementStatus, type RevenueEvent } from "@/lib/types";
 
 export function LiveFeed({
   events,
@@ -45,13 +45,13 @@ function FeedRow({ e, fresh, now }: { e: RevenueEvent; fresh: boolean; now: numb
           {e.mcp_tool ? `mcp ${e.mcp_tool}` : e.route}
         </span>
         <Badge tone={net.family === "solana" ? "accent" : net.family === "base" ? "base" : "neutral"}>{net.label}</Badge>
-        {e.simulated && (
+        {isSimulated(e) && (
           <Badge tone="warn" title="Paid through the local simulated facilitator. No on-chain transaction exists.">
             Simulated
           </Badge>
         )}
         {status === "pending" && (
-          <Badge tone="neutral" title="Transaction broadcast, waiting for confirmation.">
+          <Badge tone="neutral" title="Broadcast, confirming. The explorer link shows the transaction as it lands.">
             Pending
           </Badge>
         )}
@@ -72,7 +72,7 @@ function FeedRow({ e, fresh, now }: { e: RevenueEvent; fresh: boolean; now: numb
             target="_blank"
             rel="noreferrer noopener"
             className="font-mono text-accent-ink hover:underline"
-            title={`Open ${e.tx_signature} in explorer`}
+            title={status === "pending" ? "Broadcast, confirming. Open in explorer." : `Open ${e.tx_signature} in explorer`}
           >
             {truncateMiddle(e.tx_signature, 4, 4)} ↗
           </a>

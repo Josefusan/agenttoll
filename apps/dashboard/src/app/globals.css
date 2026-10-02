@@ -96,12 +96,15 @@ body {
 @keyframes row-in {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-6px);
     background-color: var(--accent-soft);
   }
-  40% {
+  12% {
     opacity: 1;
     transform: translateY(0);
+    background-color: var(--accent-soft);
+  }
+  45% {
     background-color: var(--accent-soft);
   }
   to {

@@ -1,5 +1,5 @@
 import { agentLabel } from "./format";
-import { eventKey, type RevenueEvent, type Stats } from "./types";
+import { eventKey, isSimulated, settlementStatus, type RevenueEvent, type Stats, type Totals } from "./types";
 
 const RECENT_CAP = 200;
 
@@ -12,17 +12,26 @@ export function mergeEvent(stats: Stats, ev: RevenueEvent): Stats {
   const agentSeen = stats.by_agent.some((a) => a.agent === agent);
 
   return {
-    totals: {
-      ...stats.totals,
-      revenue_atomic: stats.totals.revenue_atomic + ev.amount_atomic,
-      payments: stats.totals.payments + 1,
-      unique_agents: stats.totals.unique_agents + (agentSeen ? 0 : 1),
-    },
+    totals: mergeTotals(stats.totals, ev, agentSeen),
     by_route: upsert(stats.by_route, "route", ev.route, ev.amount_atomic),
     by_agent: upsert(stats.by_agent, "agent", agent, ev.amount_atomic),
     by_network: upsert(stats.by_network, "network", ev.network, ev.amount_atomic),
     unbilled: stats.unbilled,
     recent: [ev, ...stats.recent].slice(0, RECENT_CAP),
+  };
+}
+
+function mergeTotals(t: Totals, ev: RevenueEvent, agentSeen: boolean): Totals {
+  const simulated = isSimulated(ev);
+  const unconfirmed = !simulated && settlementStatus(ev) === "unconfirmed";
+  return {
+    ...t,
+    revenue_atomic: t.revenue_atomic + ev.amount_atomic,
+    payments: t.payments + 1,
+    unique_agents: t.unique_agents + (agentSeen ? 0 : 1),
+    // Only advance the subtractions the gateway reports; an absent field stays absent so spendable stays "unavailable".
+    ...(typeof t.simulated_atomic === "number" && simulated ? { simulated_atomic: t.simulated_atomic + ev.amount_atomic } : {}),
+    ...(typeof t.unconfirmed_atomic === "number" && unconfirmed ? { unconfirmed_atomic: t.unconfirmed_atomic + ev.amount_atomic } : {}),
   };
 }
 

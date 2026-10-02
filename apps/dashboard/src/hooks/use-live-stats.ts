@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { mergeEvent } from "@/lib/merge";
 import { eventKey, isRevenueEvent, isStats, type Stats, type StatsError } from "@/lib/types";
 
@@ -9,17 +9,18 @@ export type LoadState =
   | { kind: "ready"; stats: Stats }
   | { kind: "error"; error: StatsError };
 
-export type FeedState = "connecting" | "live" | "offline";
+export type FeedState = "connecting" | "live" | "reconnecting" | "offline";
 
 const RECONCILE_MS = 30_000;
 const FRESH_MS = 2_000;
+const BACKOFF_START_MS = 1_000;
+const BACKOFF_MAX_MS = 30_000;
 
 export function useLiveStats() {
   const [load, setLoad] = useState<LoadState>({ kind: "loading" });
   const [feed, setFeed] = useState<FeedState>("connecting");
   const [fresh, setFresh] = useState<Set<string>>(() => new Set());
   const [lastEventAt, setLastEventAt] = useState<number | null>(null);
-  const pending = useRef<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
     try {
@@ -54,11 +55,16 @@ export function useLiveStats() {
     };
   }, [refresh]);
 
+  // EventSource retries on its own while the server is up, but a closed socket
+  // (gateway restart, 502 from the proxy) ends it for good. Reopen with backoff,
+  // and re-fetch stats on each reopen so nothing missed during the gap is lost.
   useEffect(() => {
-    const es = new EventSource("/api/events");
-    es.onopen = () => setFeed("live");
-    es.onerror = () => setFeed(es.readyState === EventSource.CLOSED ? "offline" : "connecting");
-    es.addEventListener("revenue", (msg: MessageEvent<string>) => {
+    let es: EventSource | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let backoff = BACKOFF_START_MS;
+    let stopped = false;
+
+    const onRevenue = (msg: MessageEvent<string>) => {
       let parsed: unknown;
       try {
         parsed = JSON.parse(msg.data);
@@ -70,18 +76,45 @@ export function useLiveStats() {
       setLastEventAt(Date.now());
       setLoad((prev) => (prev.kind === "ready" ? { kind: "ready", stats: mergeEvent(prev.stats, parsed) } : prev));
       setFresh((prev) => new Set(prev).add(key));
-      pending.current.add(key);
       setTimeout(() => {
-        pending.current.delete(key);
         setFresh((prev) => {
           const next = new Set(prev);
           next.delete(key);
           return next;
         });
       }, FRESH_MS);
-    });
-    return () => es.close();
-  }, []);
+    };
+
+    const open = (first: boolean) => {
+      if (stopped) return;
+      es = new EventSource("/api/events");
+      es.onopen = () => {
+        backoff = BACKOFF_START_MS;
+        setFeed("live");
+        if (!first) void refresh();
+      };
+      es.onerror = () => {
+        if (!es) return;
+        if (es.readyState === EventSource.CLOSED) {
+          es.close();
+          es = null;
+          setFeed(backoff >= BACKOFF_MAX_MS ? "offline" : "reconnecting");
+          timer = setTimeout(() => open(false), backoff);
+          backoff = Math.min(BACKOFF_MAX_MS, backoff * 2);
+        } else {
+          setFeed("reconnecting");
+        }
+      };
+      es.addEventListener("revenue", onRevenue);
+    };
+
+    open(true);
+    return () => {
+      stopped = true;
+      if (timer) clearTimeout(timer);
+      es?.close();
+    };
+  }, [refresh]);
 
   return { load, feed, fresh, lastEventAt, refresh };
 }

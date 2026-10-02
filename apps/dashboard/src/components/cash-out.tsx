@@ -1,16 +1,33 @@
 import { atomicToUsd } from "@/lib/format";
+import { spendableAtomic, type Totals } from "@/lib/types";
 
-export function CashOut({ revenueAtomic, simulatedAtomic, payoutsUrl }: { revenueAtomic: number; simulatedAtomic: number; payoutsUrl: string }) {
-  const real = revenueAtomic - simulatedAtomic;
+export function CashOut({ totals, payoutsUrl }: { totals: Totals; payoutsUrl: string }) {
+  const spendable = spendableAtomic(totals);
+  const simulated = totals.simulated_atomic ?? 0;
+  const unconfirmed = totals.unconfirmed_atomic ?? 0;
   return (
     <div className="flex flex-col gap-3">
       <div>
         <div className="label">Spendable USDC</div>
-        <div className="num mt-1 text-2xl font-semibold tracking-tight">{atomicToUsd(real)}</div>
-        {simulatedAtomic > 0 && (
-          <p className="mt-1 text-xs text-ink-3">
-            Excludes {atomicToUsd(simulatedAtomic)} from simulated payments, which never touched a chain.
-          </p>
+        {spendable === null ? (
+          <>
+            <div className="mt-1 text-lg font-medium text-ink-2">Unavailable</div>
+            <p className="mt-1 text-xs text-ink-3 leading-snug">
+              This gateway is too old to report simulated and unconfirmed totals, so the spendable amount cannot be shown. Upgrade the
+              gateway.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="num mt-1 text-2xl font-semibold tracking-tight">{atomicToUsd(spendable)}</div>
+            {(simulated > 0 || unconfirmed > 0) && (
+              <p className="mt-1 text-xs text-ink-3 leading-snug">
+                {atomicToUsd(totals.revenue_atomic)} total
+                {simulated > 0 && <> minus {atomicToUsd(simulated)} simulated (never touched a chain)</>}
+                {unconfirmed > 0 && <> minus {atomicToUsd(unconfirmed)} unconfirmed (settle timed out)</>}.
+              </p>
+            )}
+          </>
         )}
       </div>
       <p className="text-sm text-ink-2 leading-snug">

@@ -26,8 +26,10 @@ function FeedPill({ feed, lastEventAt, now }: { feed: FeedState; lastEventAt: nu
         : "Live, waiting for settlements"
       : feed === "connecting"
         ? "Connecting to gateway"
-        : "Feed offline";
-  const dot = feed === "live" ? "bg-good live-dot" : feed === "connecting" ? "bg-warn" : "bg-danger";
+        : feed === "reconnecting"
+          ? "Feed dropped, reconnecting"
+          : "Feed offline, retrying";
+  const dot = feed === "live" ? "bg-good live-dot" : feed === "offline" ? "bg-danger" : "bg-warn";
   return (
     <div
       role="status"
@@ -36,7 +38,9 @@ function FeedPill({ feed, lastEventAt, now }: { feed: FeedState; lastEventAt: nu
     >
       <span className={`h-2 w-2 rounded-full ${dot}`} aria-hidden />
       <span className="hidden sm:inline">{text}</span>
-      <span className="sm:hidden">{feed === "live" ? "Live" : feed === "connecting" ? "Connecting" : "Offline"}</span>
+      <span className="sm:hidden">
+        {feed === "live" ? "Live" : feed === "connecting" ? "Connecting" : feed === "reconnecting" ? "Reconnecting" : "Offline"}
+      </span>
     </div>
   );
 }

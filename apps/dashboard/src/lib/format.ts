@@ -34,7 +34,7 @@ export function networkInfo(network: string): NetworkInfo {
       short: "Solana",
       family: "solana",
       testnet: true,
-      explorer: (s) => `https://explorer.solana.com/tx/${s}?cluster=devnet`,
+      explorer: (s) => `https://explorer.solana.com/tx/${encodeURIComponent(s)}?cluster=devnet`,
     };
   }
   if (network.startsWith("solana:5eykt")) {
@@ -43,7 +43,7 @@ export function networkInfo(network: string): NetworkInfo {
       short: "Solana",
       family: "solana",
       testnet: false,
-      explorer: (s) => `https://explorer.solana.com/tx/${s}`,
+      explorer: (s) => `https://explorer.solana.com/tx/${encodeURIComponent(s)}`,
     };
   }
   if (network === "eip155:84532") {
@@ -52,7 +52,7 @@ export function networkInfo(network: string): NetworkInfo {
       short: "Base",
       family: "base",
       testnet: true,
-      explorer: (h) => `https://sepolia.basescan.org/tx/${h}`,
+      explorer: (h) => `https://sepolia.basescan.org/tx/${encodeURIComponent(h)}`,
     };
   }
   if (network === "eip155:8453") {
@@ -61,7 +61,7 @@ export function networkInfo(network: string): NetworkInfo {
       short: "Base",
       family: "base",
       testnet: false,
-      explorer: (h) => `https://basescan.org/tx/${h}`,
+      explorer: (h) => `https://basescan.org/tx/${encodeURIComponent(h)}`,
     };
   }
   if (network.startsWith("solana:")) {

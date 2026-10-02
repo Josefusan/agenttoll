@@ -26,9 +26,17 @@ export function settlementStatus(e: RevenueEvent): SettlementStatus {
   return "settled";
 }
 
-/** No explorer link for simulated or unconfirmed payments: there is nothing on chain to show. */
+export function isSimulated(e: RevenueEvent): boolean {
+  return e.simulated === true || e.tx_signature.startsWith("SIMULATED-");
+}
+
+/**
+ * Explorer links only for payments that exist on chain: not simulated (flag or
+ * SIMULATED- signature), not unconfirmed (flag or unconfirmed: signature).
+ * Pending rows keep their link: the tx is broadcast and the explorer will show it.
+ */
 export function hasOnChainProof(e: RevenueEvent): boolean {
-  return !e.simulated && settlementStatus(e) !== "unconfirmed";
+  return !isSimulated(e) && settlementStatus(e) !== "unconfirmed";
 }
 
 export type Totals = {
@@ -36,7 +44,20 @@ export type Totals = {
   payments: number;
   unique_agents: number;
   unbilled_agent_requests: number;
+  /** Sum of all simulated payments, any status. Absent on gateways older than the D4 admin API. */
+  simulated_atomic?: number;
+  /** Sum of non-simulated payments with status "unconfirmed". Absent on older gateways. */
+  unconfirmed_atomic?: number;
 };
+
+/**
+ * USDC that actually landed in payTo accounts: revenue minus simulated minus unconfirmed.
+ * null when the gateway does not report the two subtractions; never guess from `recent`.
+ */
+export function spendableAtomic(t: Totals): number | null {
+  if (typeof t.simulated_atomic !== "number" || typeof t.unconfirmed_atomic !== "number") return null;
+  return Math.max(0, t.revenue_atomic - t.simulated_atomic - t.unconfirmed_atomic);
+}
 
 export type RouteRow = { route: string; revenue_atomic: number; payments: number };
 export type AgentRow = { agent: string; revenue_atomic: number; payments: number };

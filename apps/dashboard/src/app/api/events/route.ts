@@ -35,13 +35,14 @@ export async function GET(request: Request) {
       signal: controller.signal,
     });
   } catch (err) {
-    return new Response(sseError("gateway_unreachable", err instanceof Error ? err.message : String(err)), {
+    return new Response(sseError("gateway_unreachable", scrub(err, cfg.url)), {
       status: 502,
       headers: SSE_HEADERS,
     });
   }
 
   if (!upstream.ok || !upstream.body) {
+    await upstream.body?.cancel();
     return new Response(sseError("gateway_error", `Gateway answered ${upstream.status}`), {
       status: 502,
       headers: SSE_HEADERS,
@@ -49,6 +50,12 @@ export async function GET(request: Request) {
   }
 
   return new Response(upstream.body, { status: 200, headers: SSE_HEADERS });
+}
+
+/** Error text for the browser: never includes the admin URL. */
+function scrub(err: unknown, adminUrl: string): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.split(adminUrl).join("<admin url>");
 }
 
 function sseError(code: string, detail: string): string {

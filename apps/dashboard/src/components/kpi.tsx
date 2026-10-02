@@ -6,11 +6,13 @@ type KpiProps = {
   label: string;
   value: string;
   hint?: string;
+  /** Second line under the number, for caveats like "includes $X simulated". */
+  caveat?: string;
   hero?: boolean;
   muted?: boolean;
 };
 
-export function Kpi({ label, value, hint, hero = false, muted = false }: KpiProps) {
+export function Kpi({ label, value, hint, caveat, hero = false, muted = false }: KpiProps) {
   // Re-key the number when the value changes so the CSS flash animation restarts.
   const [seen, setSeen] = useState({ value, key: 0 });
   if (seen.value !== value) setSeen({ value, key: seen.key + 1 });
@@ -27,7 +29,8 @@ export function Kpi({ label, value, hint, hero = false, muted = false }: KpiProp
       >
         {value}
       </div>
-      {hint && <p className="mt-2 text-xs text-ink-3 leading-snug">{hint}</p>}
+      {caveat && <p className="mt-2 text-xs text-warn leading-snug">{caveat}</p>}
+      {hint && <p className={`text-xs text-ink-3 leading-snug ${caveat ? "mt-0.5" : "mt-2"}`}>{hint}</p>}
     </div>
   );
 }
