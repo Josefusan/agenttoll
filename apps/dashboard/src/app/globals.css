@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+
+  --bg: #0a0e13;
+  --bg-raised: #0f151c;
+  --surface: #121a23;
+  --surface-2: #182230;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.13);
+
+  --ink: #e9eef3;
+  --ink-2: #9fadbb;
+  --ink-3: #66768a;
+
+  --accent: #22a6ad;
+  --accent-ink: #5fd3d9;
+  --accent-soft: rgba(34, 166, 173, 0.14);
+  --accent-line: rgba(34, 166, 173, 0.45);
+
+  --base: #6f78e8;
+  --base-soft: rgba(111, 120, 232, 0.16);
+  --other: #8a97a6;
+
+  --warn: #e0a84a;
+  --warn-soft: rgba(224, 168, 74, 0.14);
+  --good: #4cc38a;
+  --danger: #e66767;
+
+  --radius: 14px;
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 50px -30px rgba(0, 0, 0, 0.8);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-raised: var(--bg-raised);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
+  --color-base: var(--base);
+  --color-base-soft: var(--base-soft);
+  --color-other: var(--other);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-good: var(--good);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --radius-card: var(--radius);
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(34, 166, 173, 0.09), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(111, 120, 232, 0.06), transparent 60%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+.card {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg-raised) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+/* Live feed row entrance: slide in plus a teal wash that fades. */
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    background-color: var(--accent-soft);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(0);
+    background-color: var(--accent-soft);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.row-enter {
+  animation: row-in 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes number-flash {
+  from {
+    filter: brightness(1.9);
+  }
+  to {
+    filter: brightness(1);
+  }
+}
+
+.num-flash {
+  animation: number-flash 1.2s ease-out both;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 195, 138, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(76, 195, 138, 0);
+  }
+}
+
+.live-dot {
+  animation: pulse-dot 2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row-enter,
+  .num-flash,
+  .live-dot {
+    animation: none;
+  }
+  .row-enter {
+    background-color: var(--accent-soft);
+  }
+  * {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Recharts: recessive grid, no focus rectangle on the svg wrapper. */
+.recharts-wrapper:focus,
+.recharts-surface:focus {
+  outline: none;
+}
