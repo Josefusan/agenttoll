@@ -1,4 +1,4 @@
-# AgentToll config. Copy to agenttoll.yaml. See ARCHITECTURE.md §1.4 and docs/KNOWLEDGE_BASE.md.
+# AgentToll config. Copy to agenttoll.yaml. Prices are quoted decimal strings ("0.002"), never bare numbers. See ARCHITECTURE.md §1.4 and docs/KNOWLEDGE_BASE.md.
 origin: http://localhost:4000          # demo origin; your site or API in production
 listen: 0.0.0.0:8402
 admin_listen: 127.0.0.1:8403           # dashboard reads /admin/stats and /admin/events (SSE)
@@ -6,15 +6,15 @@ detection: agents-only                 # agents-only | all-requests | off
 
 networks:
   solana:
-    network: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"   # devnet (KB-SOL-01, VERIFY)
-    asset: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU" # devnet USDC (KB-SOL-01, VERIFY)
+    network: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"   # devnet (KB-SOL-01)
+    asset: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU" # devnet USDC (KB-SOL-01)
     pay_to: "${AGENTTOLL_SOLANA_PAYTO}"
-    facilitator: "https://facilitator.payai.network"     # KB-X402-04, VERIFY
+    facilitator: "https://facilitator.payai.network"     # KB-X402-04
   base:
     network: "eip155:84532"                               # Base Sepolia (KB-BASE-01)
-    asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e"   # Base Sepolia USDC (VERIFY)
+    asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e"   # Base Sepolia USDC (KB-BASE-01)
     pay_to: "${AGENTTOLL_BASE_PAYTO}"
-    facilitator: "https://x402.org/facilitator"          # testnet (VERIFY)
+    facilitator: "https://x402.org/facilitator"          # testnet (KB-X402-04)
 
 routes:                                # first match wins
   - match: "GET /api/quote"
