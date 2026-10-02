@@ -11,4 +11,5 @@ node_modules/
 dist/
 *.keypair.json
 agenttoll.yaml
+.demo/
 id.json

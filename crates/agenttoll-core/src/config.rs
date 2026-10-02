@@ -40,6 +40,26 @@ pub struct Config {
     pub mcp: Option<McpConfig>,
     #[serde(default)]
     pub ledger: LedgerConfig,
+    #[serde(default)]
+    pub timeouts: Timeouts,
+}
+
+/// Facilitator call budgets. `/verify` is read-only and fast; `/settle` waits for the chain.
+/// Both stay well inside a Solana blockhash lifetime (~60-90 s, KB-X402-07).
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct Timeouts {
+    pub verify_ms: u64,
+    pub settle_ms: u64,
+}
+
+impl Default for Timeouts {
+    fn default() -> Self {
+        Self {
+            verify_ms: 5_000,
+            settle_ms: 20_000,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
@@ -93,6 +113,21 @@ pub struct McpConfig {
     /// Rewrite `tools/list` responses to show each tool's price (paid-mcp-tools skill).
     #[serde(default)]
     pub advertise_prices: bool,
+    /// How an unpaid `tools/call` is challenged (KB-X402-05).
+    #[serde(default)]
+    pub challenge: McpChallenge,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum McpChallenge {
+    /// JSON-RPC tool result with `isError: true` and PaymentRequired in
+    /// `structuredContent`, which MCP clients understand. Batches fall back to HTTP 402.
+    #[default]
+    McpNative,
+    /// HTTP 402 with `PAYMENT-REQUIRED`, for HTTP-level x402 clients.
+    #[serde(rename = "http-402")]
+    Http402,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]

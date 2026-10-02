@@ -8,10 +8,6 @@ use serde_json::{Value, json};
 
 use crate::x402::{PaymentRequirements, X402_VERSION};
 
-/// `/verify` is read-only and fast; `/settle` waits for the chain.
-const VERIFY_TIMEOUT: Duration = Duration::from_secs(5);
-const SETTLE_TIMEOUT: Duration = Duration::from_secs(20);
-
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VerifyResponse {
@@ -98,6 +94,7 @@ pub async fn verify(
     facilitator: &str,
     payload: &Value,
     requirements: &PaymentRequirements,
+    timeout: Duration,
 ) -> Result<VerifyResponse, FacilitatorError> {
     call(
         client,
@@ -105,7 +102,7 @@ pub async fn verify(
         "verify",
         payload,
         requirements,
-        VERIFY_TIMEOUT,
+        timeout,
     )
     .await
     .map(|(v, _)| v)
@@ -118,6 +115,7 @@ pub async fn settle(
     facilitator: &str,
     payload: &Value,
     requirements: &PaymentRequirements,
+    timeout: Duration,
 ) -> Result<(SettleResponse, Value), FacilitatorError> {
     call(
         client,
@@ -125,7 +123,7 @@ pub async fn settle(
         "settle",
         payload,
         requirements,
-        SETTLE_TIMEOUT,
+        timeout,
     )
     .await
 }
