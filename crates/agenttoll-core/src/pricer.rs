@@ -59,17 +59,18 @@ impl Pricer {
             })
             .collect::<Result<_, ConfigError>>()?;
         let mcp = config.mcp.as_ref().map(|m| McpPrices {
-            endpoint: normalize(&m.endpoint),
+            endpoint: normalize(&m.endpoint).to_ascii_lowercase(),
             default: m.default_tool_price_usd,
             tools: m.tools.clone(),
         });
         Ok(Pricer { routes, mcp })
     }
 
-    /// True when `path` is the configured MCP endpoint (or below it).
+    /// True when `path` is the configured MCP endpoint (or below it). Case-insensitive like
+    /// route globs, or `POST /MCP` would reach a case-insensitive origin unpriced.
     pub fn is_mcp_endpoint(&self, path: &str) -> bool {
         let Some(mcp) = &self.mcp else { return false };
-        let path = normalize(path);
+        let path = normalize(path).to_ascii_lowercase();
         path == mcp.endpoint || path.starts_with(&format!("{}/", mcp.endpoint))
     }
 
@@ -194,6 +195,8 @@ mod tests {
         assert!(p.is_mcp_endpoint("/mcp"));
         assert!(p.is_mcp_endpoint("/mcp/"));
         assert!(p.is_mcp_endpoint("/mcp/session"));
+        assert!(p.is_mcp_endpoint("/MCP"));
+        assert!(p.is_mcp_endpoint("/Mcp/session"));
         assert!(!p.is_mcp_endpoint("/mcpx"));
         assert!(!p.is_mcp_endpoint("/api/mcp"));
     }

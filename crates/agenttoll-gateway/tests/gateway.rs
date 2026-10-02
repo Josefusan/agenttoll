@@ -313,6 +313,20 @@ async fn mcp_tools_priced_per_call_discovery_free() {
         .await;
     assert_eq!(free_tool.status(), 200);
 
+    for path in ["/MCP", "/Mcp/"] {
+        let res = h
+            .http
+            .post(format!("{}{path}", h.gateway))
+            .header("content-type", "application/json")
+            .body(
+                r#"{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"search_docs"}}"#,
+            )
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(res.status(), 402, "{path} must be priced like /mcp");
+    }
+
     let paid = h
         .mcp(r#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_docs"}}"#)
         .await;

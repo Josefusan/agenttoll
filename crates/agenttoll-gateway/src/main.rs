@@ -28,6 +28,11 @@ async fn main() -> anyhow::Result<()> {
         .map_err(|e| anyhow::anyhow!("reading {}: {e}", args.config.display()))?;
     let config = Config::parse(&text, |name| std::env::var(name).ok())?;
     let listen = config.listen;
+    if config.public_url.is_none() {
+        tracing::warn!(
+            "public_url is unset: 402 quotes will build resource.url from the client's Host header"
+        );
+    }
     let gateway = Gateway::new(config).await?;
     for n in gateway.networks() {
         tracing::info!(network = %n.config.network, pay_to = %n.config.pay_to, extra = %serde_json::Value::Object(n.extra.clone()), "quoting");

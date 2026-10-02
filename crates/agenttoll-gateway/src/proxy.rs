@@ -70,13 +70,14 @@ pub fn origin_request_headers(
         h.insert("x-forwarded-proto", HeaderValue::from_static("http"));
     }
     if let Some(ip) = peer {
-        let chain = match incoming
-            .get("x-forwarded-for")
-            .and_then(|v| v.to_str().ok())
-        {
-            Some(prior) => format!("{prior}, {ip}"),
-            None => ip.to_string(),
-        };
+        let mut chain: Vec<String> = incoming
+            .get_all("x-forwarded-for")
+            .iter()
+            .filter_map(|v| v.to_str().ok())
+            .map(str::to_owned)
+            .collect();
+        chain.push(ip.to_string());
+        let chain = chain.join(", ");
         if let Ok(v) = HeaderValue::from_str(&chain) {
             h.insert("x-forwarded-for", v);
         }
