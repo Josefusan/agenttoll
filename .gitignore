@@ -10,4 +10,5 @@ node_modules/
 .wrangler/
 dist/
 *.keypair.json
+agenttoll.yaml
 id.json

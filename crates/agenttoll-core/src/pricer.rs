@@ -3,7 +3,7 @@
 
 use std::collections::BTreeMap;
 
-use globset::{Glob, GlobMatcher};
+use globset::{GlobBuilder, GlobMatcher};
 use http::Method;
 
 use crate::config::{Config, ConfigError};
@@ -124,7 +124,10 @@ fn parse_pattern(pattern: &str) -> Result<(Option<Method>, GlobMatcher), ConfigE
     if !path.starts_with('/') {
         return Err(invalid("path must start with /"));
     }
-    let glob = Glob::new(path).map_err(|e| invalid(&e.to_string()))?;
+    let glob = GlobBuilder::new(path)
+        .case_insensitive(true)
+        .build()
+        .map_err(|e| invalid(&e.to_string()))?;
     Ok((method, glob.compile_matcher()))
 }
 
@@ -177,6 +180,9 @@ mod tests {
             "/api/quote/",
             "/blog/../api/quote",
             "/x/%2e%2e/api/quote",
+            "/API/Quote",
+            "/api/quote;x=1",
+            "/api/quote?x=1",
         ] {
             assert_eq!(amount(p.price_route(&Method::GET, path)), 2000, "{path}");
         }

@@ -1,13 +1,17 @@
 //! Canonical request paths for pricing and detection. Origins often decode `%XX`, collapse
 //! `//`, resolve `..` and ignore a trailing `/`; if the pricer did not do the same, an agent
 //! could request `/api/%71uote` and fall through a priced route into a free catch-all.
+//! Matching is also case-insensitive (see `pricer`), because Express and IIS route that way.
 
-/// Returns the canonical form of a request path (query string must already be removed):
-/// percent-decoded, duplicate slashes collapsed, `.`/`..` resolved, no trailing slash.
+/// Returns the canonical form of a request path: query dropped, percent-decoded,
+/// `;matrix` parameters dropped per segment (Java servlet containers ignore them), `\` read
+/// as `/`, duplicate slashes collapsed, `.`/`..` resolved, no trailing slash.
 pub fn normalize(raw: &str) -> String {
-    let decoded = percent_decode(raw);
+    let without_query = raw.split_once('?').map_or(raw, |(p, _)| p);
+    let decoded = percent_decode(without_query).replace('\\', "/");
     let mut segments: Vec<&str> = Vec::new();
     for seg in decoded.split('/') {
+        let seg = seg.split_once(';').map_or(seg, |(s, _)| s);
         match seg {
             "" | "." => {}
             ".." => {
@@ -68,6 +72,11 @@ mod tests {
             ("/trailing%", "/trailing%"),
             ("/trailing%4", "/trailing%4"),
             ("/caf%C3%A9", "/café"),
+            ("/api/quote?x=1", "/api/quote"),
+            ("/api/quote;jsessionid=1", "/api/quote"),
+            ("/api;v=2/quote", "/api/quote"),
+            ("/api\\quote", "/api/quote"),
+            ("/api/%3Bx", "/api"),
         ];
         for (input, want) in cases {
             assert_eq!(normalize(input), want, "{input:?}");

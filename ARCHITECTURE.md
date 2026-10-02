@@ -66,7 +66,7 @@ Ordered, first match wins. Output is a `Verdict` with a `reason` that is logged 
 2. Path matches `mcp.endpoint` → **agent** (MCP clients are agents by definition).
 3. Valid **Web Bot Auth** HTTP Message Signature (`Signature`, `Signature-Input`, `Signature-Agent`) → **agent**, named by key directory.
 4. User-Agent in the verified-bot list (GPTBot, ClaudeBot, Claude-User, PerplexityBot, OAI-SearchBot, Google-Extended, CCBot, Bytespider, Amazonbot, etc.) → **agent**.
-5. Heuristics: no `Accept-Language`, `Accept: */*` or `application/json` on an HTML route, missing `sec-fetch-*` headers, headless UA tokens → **agent** with confidence < 0.8 (only charged when `detection: all-requests` or `strict`).
+5. Heuristics: no `Accept-Language`, `Accept: */*` or `application/json` on an HTML route, missing `sec-fetch-*` headers, headless UA tokens → **agent** with confidence < 0.8 (never charged in `agents-only`; charged only under `detection: all-requests`).
 6. Otherwise → **human**.
 
 Modes: `agents-only` (default), `all-requests` (pure API monetization), `off` (pass-through, logging only).
