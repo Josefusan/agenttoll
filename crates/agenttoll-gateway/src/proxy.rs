@@ -86,19 +86,23 @@ pub fn origin_request_headers(
 }
 
 /// Forwards the request to `config.origin` and streams the response back unchanged
-/// (status, cookies, redirects, compression), minus hop-by-hop headers.
+/// (status, cookies, redirects, compression), minus hop-by-hop headers. `gateway_headers`
+/// (e.g. `x-agenttoll-paid`) are added after hygiene, so only the gateway can set them.
 pub async fn forward(
     client: &reqwest::Client,
     config: &Config,
     parts: Parts,
     body: Body,
     peer: Option<IpAddr>,
+    gateway_headers: HeaderMap,
 ) -> Response {
     let path_and_query = parts.uri.path_and_query().map_or("/", |pq| pq.as_str());
     let url = format!("{}{path_and_query}", config.origin.trim_end_matches('/'));
+    let mut outgoing = origin_request_headers(&parts.headers, config, peer);
+    outgoing.extend(gateway_headers);
     let request = client
         .request(parts.method.clone(), url)
-        .headers(origin_request_headers(&parts.headers, config, peer))
+        .headers(outgoing)
         .body(reqwest::Body::wrap_stream(body.into_data_stream()));
 
     let upstream = match request.send().await {

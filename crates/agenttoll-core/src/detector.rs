@@ -67,6 +67,8 @@ const AI_AGENTS: &[&str] = &[
     "CCBot",
     "Bytespider",
     "Amazonbot",
+    // AgentToll's own demo buyer declares itself.
+    "AgentToll-Buyer",
 ];
 
 /// Search indexers. Checked after AI agents so `Applebot-Extended` is not caught by `Applebot`.
@@ -109,21 +111,6 @@ pub fn classify(req: &RequestView<'_>, ctx: &Context<'_>) -> Verdict {
         reason,
     };
 
-    // 1. Trying to pay: only agents do that. KB-X402-01 (v2), plus the v1 header.
-    if req.headers.contains_key(headers::PAYMENT_SIGNATURE)
-        || req.headers.contains_key(headers::X_PAYMENT)
-    {
-        return agent(None, 1.0, "payment-header".into());
-    }
-    // 2. MCP clients are agents by definition.
-    if ctx.is_mcp_endpoint {
-        return agent(None, 1.0, "mcp-endpoint".into());
-    }
-    // 3. Cryptographically verified bot (Web Bot Auth, verified by the gateway).
-    if let Some(signer) = ctx.web_bot_auth {
-        return agent(Some(signer), 0.99, format!("web-bot-auth:{signer}"));
-    }
-
     let ua = req
         .headers
         .get(http::header::USER_AGENT)
@@ -136,9 +123,26 @@ pub fn classify(req: &RequestView<'_>, ctx: &Context<'_>) -> Verdict {
             .copied()
             .find(|t| ua_lower.contains(&t.to_ascii_lowercase()))
     };
+    // A self-declared AI agent name, kept on payment and MCP verdicts for the ledger.
+    let declared = find(AI_AGENTS);
+
+    // 1. Trying to pay: only agents do that. KB-X402-01 (v2), plus the v1 header.
+    if req.headers.contains_key(headers::PAYMENT_SIGNATURE)
+        || req.headers.contains_key(headers::X_PAYMENT)
+    {
+        return agent(declared, 1.0, "payment-header".into());
+    }
+    // 2. MCP clients are agents by definition.
+    if ctx.is_mcp_endpoint {
+        return agent(declared, 1.0, "mcp-endpoint".into());
+    }
+    // 3. Cryptographically verified bot (Web Bot Auth, verified by the gateway).
+    if let Some(signer) = ctx.web_bot_auth {
+        return agent(Some(signer), 0.99, format!("web-bot-auth:{signer}"));
+    }
 
     // 4. Self-declared AI agents, then search bots.
-    if let Some(name) = find(AI_AGENTS) {
+    if let Some(name) = declared {
         return agent(Some(name), 0.95, format!("ua:{name}"));
     }
     if let Some(name) = find(SEARCH_BOTS) {
@@ -524,6 +528,14 @@ mod tests {
                 with(browser(CHROME), "payment-signature", "e30="),
                 Agent,
                 None,
+                "payment-header",
+                true,
+            ),
+            case(
+                "paying claudebot keeps its name",
+                with(ua("ClaudeBot/1.0"), "payment-signature", "e30="),
+                Agent,
+                Some("ClaudeBot"),
                 "payment-header",
                 true,
             ),
