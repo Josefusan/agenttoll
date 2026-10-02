@@ -24,13 +24,22 @@ struct AdminState {
     token: String,
 }
 
-pub fn router(ledger: Ledger, token: String) -> Router {
+/// Shortest admin token accepted.
+pub const MIN_TOKEN_LEN: usize = 24;
+
+/// Fails for a token shorter than [`MIN_TOKEN_LEN`]: an empty token would match an empty
+/// `Authorization` header.
+pub fn router(ledger: Ledger, token: String) -> anyhow::Result<Router> {
+    anyhow::ensure!(
+        token.len() >= MIN_TOKEN_LEN,
+        "admin token must be at least {MIN_TOKEN_LEN} characters"
+    );
     let state = AdminState { ledger, token };
-    Router::new()
+    Ok(Router::new()
         .route("/admin/stats", get(stats))
         .route("/admin/events", get(events))
         .route_layer(middleware::from_fn_with_state(state.clone(), require_token))
-        .with_state(state)
+        .with_state(state))
 }
 
 #[derive(Deserialize)]
@@ -38,8 +47,8 @@ struct TokenQuery {
     token: Option<String>,
 }
 
-/// `Authorization: Bearer <token>`, or `?token=` because browsers' EventSource cannot set
-/// headers.
+/// `Authorization: Bearer <token>`. `/admin/events` also takes `?token=` because browsers'
+/// EventSource cannot set headers; nowhere else, so tokens stay out of access logs.
 async fn require_token(
     State(state): State<AdminState>,
     Query(query): Query<TokenQuery>,
@@ -51,7 +60,10 @@ async fn require_token(
         .get(header::AUTHORIZATION)
         .and_then(|v| v.to_str().ok())
         .and_then(|v| v.strip_prefix("Bearer "));
-    let presented = bearer.or(query.token.as_deref()).unwrap_or("");
+    let from_query = (req.uri().path() == "/admin/events")
+        .then_some(query.token.as_deref())
+        .flatten();
+    let presented = bearer.or(from_query).unwrap_or("");
     if !constant_time_eq(presented.as_bytes(), state.token.as_bytes()) {
         return (StatusCode::UNAUTHORIZED, "admin token required").into_response();
     }

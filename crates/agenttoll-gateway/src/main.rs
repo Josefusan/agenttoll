@@ -5,9 +5,6 @@ use agenttoll_core::config::Config;
 use agenttoll_gateway::{Gateway, admin, router};
 use clap::Parser;
 
-/// Shortest admin token accepted; anything shorter leaves the admin API off.
-const MIN_ADMIN_TOKEN_LEN: usize = 24;
-
 /// AgentToll gateway: charge AI agents per request, keep humans free.
 #[derive(Parser)]
 #[command(version)]
@@ -43,9 +40,9 @@ async fn main() -> anyhow::Result<()> {
     }
 
     match std::env::var("AGENTTOLL_ADMIN_TOKEN") {
-        Ok(token) if token.len() >= MIN_ADMIN_TOKEN_LEN => {
+        Ok(token) if token.len() >= admin::MIN_TOKEN_LEN => {
             let listener = tokio::net::TcpListener::bind(admin_listen).await?;
-            let app = admin::router(gateway.ledger().clone(), token);
+            let app = admin::router(gateway.ledger().clone(), token)?;
             tracing::info!(%admin_listen, "admin API up");
             tokio::spawn(async move {
                 if let Err(e) = axum::serve(listener, app).await {
@@ -54,7 +51,8 @@ async fn main() -> anyhow::Result<()> {
             });
         }
         Ok(_) => tracing::warn!(
-            "AGENTTOLL_ADMIN_TOKEN is shorter than {MIN_ADMIN_TOKEN_LEN} characters: admin API off"
+            "AGENTTOLL_ADMIN_TOKEN is shorter than {} characters: admin API off",
+            admin::MIN_TOKEN_LEN
         ),
         Err(_) => tracing::warn!("AGENTTOLL_ADMIN_TOKEN is unset: admin API (dashboard) off"),
     }

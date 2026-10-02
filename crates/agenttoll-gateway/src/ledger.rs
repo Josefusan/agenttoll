@@ -92,6 +92,10 @@ pub struct Totals {
     pub payments: u64,
     pub unique_agents: u64,
     pub unbilled_agent_requests: u64,
+    /// Part of `revenue_atomic` settled by the simulated facilitator (never on chain).
+    pub simulated_atomic: u64,
+    /// Part of `revenue_atomic` whose settlement is unknown (`status: unconfirmed`, not simulated).
+    pub unconfirmed_atomic: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -146,14 +150,20 @@ CREATE TABLE IF NOT EXISTS request_log (
   agent_name TEXT,
   reason     TEXT NOT NULL,
   status     INTEGER NOT NULL
-);";
+);
+CREATE INDEX IF NOT EXISTS request_log_ts ON request_log (ts);";
 
 const RECENT_LIMIT: usize = 50;
+/// Unbilled-request rows older than this are pruned.
+const REQUEST_LOG_RETENTION_MS: i64 = 30 * 24 * 3600 * 1000;
+/// Prune once every this many inserts.
+const PRUNE_EVERY: u64 = 1000;
 
 #[derive(Clone)]
 pub struct Ledger {
     conn: Arc<Mutex<Connection>>,
     events: broadcast::Sender<RevenueEvent>,
+    log_inserts: Arc<std::sync::atomic::AtomicU64>,
 }
 
 fn to_i64(n: u64) -> i64 {
@@ -180,6 +190,7 @@ impl Ledger {
         Ok(Ledger {
             conn: Arc::new(Mutex::new(conn)),
             events,
+            log_inserts: Arc::default(),
         })
     }
 
@@ -231,13 +242,23 @@ impl Ledger {
     }
 
     /// Logs an agent request that was not charged, for the "not billing yet" report.
+    /// Rows older than 30 days are pruned every thousand inserts, so a bot flood cannot grow
+    /// the table without bound.
     pub async fn log_unbilled(&self, req: UnbilledRequest) -> anyhow::Result<()> {
+        let n = self
+            .log_inserts
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let prune_before =
+            (n % PRUNE_EVERY == PRUNE_EVERY - 1).then_some(req.ts - REQUEST_LOG_RETENTION_MS);
         self.blocking(move |conn| {
             conn.execute(
                 "INSERT INTO request_log (ts, route, agent_name, reason, status) VALUES (?1, ?2, ?3, ?4, ?5)",
                 params![req.ts, req.route, req.agent_name, req.reason, req.status],
-            )
-            .map(|_| ())
+            )?;
+            if let Some(cutoff) = prune_before {
+                conn.execute("DELETE FROM request_log WHERE ts < ?1", params![cutoff])?;
+            }
+            Ok(())
         })
         .await
     }
@@ -262,6 +283,17 @@ impl Ledger {
             let unique_agents: i64 =
                 conn.query_row("SELECT COUNT(DISTINCT agent_name) FROM revenue_events", [], |r| r.get(0))?;
             let unbilled_total: i64 = conn.query_row("SELECT COUNT(*) FROM request_log", [], |r| r.get(0))?;
+            let (simulated, unconfirmed): (i64, i64) = conn.query_row(
+                &format!(
+                    "SELECT
+                       COALESCE(SUM(CASE WHEN tx_signature LIKE '{SIMULATED_PREFIX}%' THEN amount_atomic END), 0),
+                       COALESCE(SUM(CASE WHEN status = 'unconfirmed' AND tx_signature NOT LIKE '{SIMULATED_PREFIX}%'
+                                         THEN amount_atomic END), 0)
+                     FROM revenue_events"
+                ),
+                [],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )?;
 
             let group = |column: &str| -> rusqlite::Result<Vec<(String, u64, u64)>> {
                 let sql = format!(
@@ -301,6 +333,8 @@ impl Ledger {
                     payments: to_u64(payments),
                     unique_agents: to_u64(unique_agents),
                     unbilled_agent_requests: to_u64(unbilled_total),
+                    simulated_atomic: to_u64(simulated),
+                    unconfirmed_atomic: to_u64(unconfirmed),
                 },
                 by_route,
                 by_agent,
@@ -425,7 +459,9 @@ mod tests {
                 revenue_atomic: 9000,
                 payments: 3,
                 unique_agents: 2,
-                unbilled_agent_requests: 3
+                unbilled_agent_requests: 3,
+                simulated_atomic: 5000,
+                unconfirmed_atomic: 0,
             }
         );
         assert_eq!(

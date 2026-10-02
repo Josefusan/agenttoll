@@ -2,14 +2,15 @@
 
 The gateway serves the founder dashboard from a second listener, `admin_listen` (default
 `127.0.0.1:8403`). It is off unless `AGENTTOLL_ADMIN_TOKEN` is set to at least 24 characters.
-Every request needs `Authorization: Bearer <token>`; `/admin/events` also accepts `?token=`
-because browser `EventSource` cannot set headers. Keep the token server-side (the dashboard's
+Every request needs `Authorization: Bearer <token>`; only `/admin/events` also accepts
+`?token=`, because browser `EventSource` cannot set headers. Keep the token server-side (the dashboard's
 Next.js route handlers proxy it).
 
 ## `GET /admin/stats`
 
 ```json
-{ "totals": { "revenue_atomic": 6000, "payments": 3, "unique_agents": 2, "unbilled_agent_requests": 41 },
+{ "totals": { "revenue_atomic": 6000, "payments": 3, "unique_agents": 2, "unbilled_agent_requests": 41,
+              "simulated_atomic": 2000, "unconfirmed_atomic": 0 },
   "by_route":   [{ "route": "GET /api/quote", "revenue_atomic": 4000, "payments": 2 }],
   "by_agent":   [{ "agent": "ClaudeBot", "revenue_atomic": 4000, "payments": 2 }],
   "by_network": [{ "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", "revenue_atomic": 6000, "payments": 3 }],
@@ -17,6 +18,9 @@ Next.js route handlers proxy it).
   "recent":     [RevenueEvent] }
 ```
 
+`revenue_atomic` counts every recorded payment. `simulated_atomic` is the part settled by the
+simulated facilitator and `unconfirmed_atomic` the non-simulated part whose settlement is
+unknown, so on-chain revenue = `revenue_atomic - simulated_atomic - unconfirmed_atomic`.
 Groups are the top 20 by revenue (or requests); `recent` is the newest 50 payments.
 `unbilled` counts agent and bot requests that were not charged (free routes, heuristic
 verdicts, search bots). Human requests are never logged.

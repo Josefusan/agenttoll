@@ -157,7 +157,7 @@ async fn handle(State(gw): State<Arc<Gateway>>, req: Request) -> Response {
     );
 
     if let Some(tag) = charge {
-        return charge_request(&gw, parts, body, peer, tag, &verdict, is_mcp, mcp_body).await;
+        return charge_request(&gw, parts, body, peer, tag, &verdict, mcp_body).await;
     }
 
     let advertise = mcp_body.as_deref().is_some_and(is_tools_list)
@@ -180,7 +180,6 @@ async fn handle(State(gw): State<Arc<Gateway>>, req: Request) -> Response {
     res
 }
 
-#[allow(clippy::too_many_arguments)]
 async fn charge_request(
     gw: &Gateway,
     parts: axum::http::request::Parts,
@@ -188,9 +187,9 @@ async fn charge_request(
     peer: Option<std::net::IpAddr>,
     tag: &PriceTag,
     verdict: &Verdict,
-    is_mcp: bool,
     mcp_body: Option<Bytes>,
 ) -> Response {
+    let mcp_call_ids = mcp_body.as_deref().map(pay::tool_call_ids);
     let paid = |parts, body, payload, transport| PaidRequest {
         parts,
         body,
@@ -199,10 +198,11 @@ async fn charge_request(
         verdict,
         payload,
         transport,
-        is_mcp,
+        mcp_call_ids: mcp_call_ids.clone(),
     };
 
-    // HTTP transport: PAYMENT-SIGNATURE header (KB-X402-01).
+    // HTTP transport: PAYMENT-SIGNATURE header (KB-X402-01). A second, MCP-native payment
+    // in the body is removed so the origin never sees payment material.
     if let Some(value) = parts.headers.get(headers::PAYMENT_SIGNATURE) {
         let Some(payload) = value.to_str().ok().and_then(pay::decode_http_payment) else {
             return (
@@ -210,6 +210,14 @@ async fn charge_request(
                 "PAYMENT-SIGNATURE is not base64-encoded JSON",
             )
                 .into_response();
+        };
+        let (parts, body) = match mcp_body.as_deref().and_then(pay::extract_mcp_payment) {
+            Some((_, _, stripped)) => {
+                let mut parts = parts;
+                parts.headers.remove(header::CONTENT_LENGTH);
+                (parts, Body::from(stripped))
+            }
+            None => (parts, body),
         };
         return pay::handle_paid(gw, paid(parts, body, payload, Transport::Http)).await;
     }
@@ -266,7 +274,7 @@ pub(crate) fn challenge(
     verdict: &Verdict,
     error: &str,
 ) -> Response {
-    let required = x402::payment_required(&gw.networks, tag, resource_url(gw, parts), error);
+    let required = x402::payment_required(&gw.networks, tag, resource_url(gw, parts, tag), error);
     let mut res = (StatusCode::PAYMENT_REQUIRED, Json(&required)).into_response();
     challenge_headers(&mut res, &required, verdict);
     res
@@ -282,7 +290,7 @@ pub(crate) fn mcp_challenge(
     error: &str,
     id: Value,
 ) -> Response {
-    let required = x402::payment_required(&gw.networks, tag, resource_url(gw, parts), error);
+    let required = x402::payment_required(&gw.networks, tag, resource_url(gw, parts, tag), error);
     let text = serde_json::to_string(&required).expect("x402 types always serialize");
     let body = json!({
         "jsonrpc": "2.0",
@@ -305,7 +313,21 @@ fn challenge_headers(res: &mut Response, required: &x402::PaymentRequired, verdi
     }
 }
 
-pub(crate) fn resource_url(gw: &Gateway, parts: &axum::http::request::Parts) -> String {
+/// The URL a quote is for. MCP tools share one endpoint, so the tool goes in the fragment:
+/// a payment echoing `resource` is then bound to that tool, not just to `/mcp`.
+pub(crate) fn resource_url(
+    gw: &Gateway,
+    parts: &axum::http::request::Parts,
+    tag: &PriceTag,
+) -> String {
+    let base = base_resource_url(gw, parts);
+    match tag.resource.starts_with("mcp:") {
+        true => format!("{base}#{}", tag.resource),
+        false => base,
+    }
+}
+
+fn base_resource_url(gw: &Gateway, parts: &axum::http::request::Parts) -> String {
     let path_and_query = parts.uri.path_and_query().map_or("/", |pq| pq.as_str());
     match &gw.config.public_url {
         Some(base) => format!("{}{path_and_query}", base.trim_end_matches('/')),

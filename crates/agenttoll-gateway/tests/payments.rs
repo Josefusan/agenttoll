@@ -124,7 +124,7 @@ async fn start() -> Harness {
             "/mcp",
             post(move |Json(body): Json<Value>| {
                 let seen = seen.clone();
-                async move { Json(mcp_origin(body, &seen)) }
+                async move { mcp_origin_response(body, &seen) }
             }),
         );
     let origin = serve(origin).await;
@@ -161,6 +161,10 @@ mcp:
   tools:
     search_docs: "0.005"
     broken_tool: "0.005"
+    sse_ok: "0.005"
+    sse_broken: "0.005"
+    gzip_ok: "0.005"
+    gzip_broken: "0.005"
 ledger:
   url: "sqlite::memory:"
 timeouts:
@@ -594,7 +598,7 @@ async fn admin_api_requires_its_token_and_streams_payments() {
     let token = "test-admin-token-0123456789";
     let admin = format!(
         "http://{}",
-        serve(admin::router(h.gateway.ledger().clone(), token.into())).await
+        serve(admin::router(h.gateway.ledger().clone(), token.into()).unwrap()).await
     );
 
     let denied = h
@@ -647,4 +651,176 @@ async fn admin_api_requires_its_token_and_streams_payments() {
     assert_eq!(stats["totals"]["revenue_atomic"], 2000);
     assert_eq!(stats["by_agent"][0]["agent"], "ClaudeBot");
     assert_eq!(stats["recent"][0]["simulated"], false);
+}
+
+/// Wraps [`mcp_origin`] in the transports real MCP servers use: `sse_*` tools answer as an
+/// SSE stream with a progress notification first; `gzip_*` tools answer gzip-compressed.
+fn mcp_origin_response(body: Value, seen: &Mutex<Option<Value>>) -> axum::response::Response {
+    use axum::response::IntoResponse;
+    let tool = body
+        .pointer("/params/name")
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_string();
+    let mut message = mcp_origin(body, seen);
+    if tool.ends_with("_broken") {
+        message["result"] =
+            json!({ "isError": true, "content": [{ "type": "text", "text": "tool crashed" }] });
+    }
+    if tool.starts_with("sse_") {
+        let note = json!({ "jsonrpc": "2.0", "method": "notifications/message", "params": { "level": "info", "data": "working" } });
+        let text = format!("event: message\ndata: {note}\n\nevent: message\ndata: {message}\n\n");
+        return ([("content-type", "text/event-stream")], text).into_response();
+    }
+    if tool.starts_with("gzip_") {
+        use std::io::Write;
+        let mut enc = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::default());
+        enc.write_all(message.to_string().as_bytes()).unwrap();
+        return (
+            [
+                ("content-type", "application/json"),
+                ("content-encoding", "gzip"),
+            ],
+            enc.finish().unwrap(),
+        )
+            .into_response();
+    }
+    Json(message).into_response()
+}
+
+#[tokio::test]
+async fn sse_tool_error_after_a_notification_is_not_settled() {
+    let h = start().await;
+    let res = h.pay_tool("sse_broken").await;
+    assert_eq!(res.status(), 200);
+    assert_eq!(
+        h.fac.settle_calls.load(Ordering::SeqCst),
+        0,
+        "a crashed tool is never charged"
+    );
+    assert!(h.gateway.ledger().all().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn sse_tool_success_after_a_notification_is_settled() {
+    let h = start().await;
+    let res = h.pay_tool("sse_ok").await;
+    assert_eq!(res.status(), 200);
+    assert!(res.headers().get("payment-response").is_some());
+    assert_eq!(h.fac.settle_calls.load(Ordering::SeqCst), 1);
+}
+
+#[tokio::test]
+async fn compressed_tool_response_is_never_settled() {
+    let h = start().await;
+    // Even a successful-looking compressed answer cannot be judged, so it is not charged.
+    for tool in ["gzip_broken", "gzip_ok"] {
+        let res = h.pay_tool(tool).await;
+        assert_eq!(res.status(), 200, "{tool}");
+    }
+    assert_eq!(h.fac.settle_calls.load(Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn paid_mcp_forwards_ask_for_uncompressed_responses() {
+    let h = start().await;
+    let call = json!({ "jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": { "name": "search_docs" } });
+    let challenge: Value = h.mcp(call.clone()).await.json().await.unwrap();
+    let required = &challenge["result"]["structuredContent"];
+    let mut paid = call;
+    paid["params"]["_meta"] = json!({ "x402/payment": {
+        "x402Version": 2, "resource": required["resource"], "accepted": required["accepts"][0],
+        "payload": { "transaction": signed_tx() } } });
+    let res = h
+        .http
+        .post(format!("{}/mcp", h.url))
+        .header("accept-encoding", "gzip")
+        .json(&paid)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(res.status(), 200);
+    assert_eq!(h.fac.settle_calls.load(Ordering::SeqCst), 1);
+}
+
+#[tokio::test]
+async fn an_mcp_payment_is_bound_to_its_tool() {
+    let h = start().await;
+    // Quote search_docs, then present that payment on broken_tool (same price).
+    let call = json!({ "jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": { "name": "search_docs" } });
+    let challenge: Value = h.mcp(call).await.json().await.unwrap();
+    let required = &challenge["result"]["structuredContent"];
+    assert!(
+        required["resource"]["url"]
+            .as_str()
+            .unwrap()
+            .ends_with("/mcp#mcp:search_docs"),
+        "{required}"
+    );
+    let other = json!({ "jsonrpc": "2.0", "id": 10, "method": "tools/call", "params": { "name": "broken_tool", "_meta": { "x402/payment": {
+        "x402Version": 2, "resource": required["resource"], "accepted": required["accepts"][0],
+        "payload": { "transaction": signed_tx() } } } } });
+    let res: Value = h.mcp(other).await.json().await.unwrap();
+    assert_eq!(res["result"]["isError"], true);
+    assert_eq!(
+        res["result"]["structuredContent"]["error"],
+        "payment was made for a different resource"
+    );
+    assert_eq!(h.fac.verify_calls.load(Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn header_payment_on_mcp_never_leaks_a_body_payment_to_the_origin() {
+    let h = start().await;
+    let call = json!({ "jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": { "name": "search_docs" } });
+    let challenge: Value = h.mcp(call.clone()).await.json().await.unwrap();
+    let required = &challenge["result"]["structuredContent"];
+    let payment = json!({ "x402Version": 2, "resource": required["resource"], "accepted": required["accepts"][0],
+        "payload": { "transaction": signed_tx() } });
+    let mut body = call;
+    body["params"]["_meta"] = json!({ "x402/payment": payment.clone() });
+    let res = h
+        .http
+        .post(format!("{}/mcp", h.url))
+        .header("payment-signature", encode_header(&payment))
+        .json(&body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(res.status(), 200);
+    let seen = h.mcp_seen.lock().unwrap().clone().unwrap();
+    assert!(seen["params"].get("_meta").is_none(), "{seen}");
+}
+
+#[tokio::test]
+async fn admin_query_token_only_works_for_events_and_short_tokens_are_refused() {
+    let h = start().await;
+    assert!(admin::router(h.gateway.ledger().clone(), String::new()).is_err());
+    assert!(admin::router(h.gateway.ledger().clone(), "short".into()).is_err());
+    let token = "test-admin-token-0123456789";
+    let admin = format!(
+        "http://{}",
+        serve(admin::router(h.gateway.ledger().clone(), token.into()).unwrap()).await
+    );
+    let via_query = h
+        .http
+        .get(format!("{admin}/admin/stats?token={token}"))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(via_query.status(), 401);
+}
+
+#[tokio::test]
+async fn stats_separate_simulated_and_unconfirmed_money() {
+    let h = start().await;
+    let payment = h.pay_for("/api/quote", SOLANA_DEVNET, |_| {}).await;
+    assert_eq!(h.get("/api/quote", Some(&payment)).await.status(), 200);
+    h.fac.slow_settle.store(true, Ordering::SeqCst);
+    let payment = h.pay_for("/api/other", SOLANA_DEVNET, |_| {}).await;
+    assert_eq!(h.get("/api/other", Some(&payment)).await.status(), 200);
+    let t = h.gateway.ledger().stats().await.unwrap().totals;
+    assert_eq!(t.revenue_atomic, 4000);
+    assert_eq!(t.unconfirmed_atomic, 2000);
+    assert_eq!(t.simulated_atomic, 0);
 }

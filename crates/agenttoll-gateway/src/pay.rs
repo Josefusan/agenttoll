@@ -84,8 +84,9 @@ pub struct PaidRequest<'a> {
     /// The decoded PaymentPayload.
     pub payload: Value,
     pub transport: Transport,
-    /// The request is an MCP call, so JSON-RPC level failures count as failures.
-    pub is_mcp: bool,
+    /// For MCP calls, the ids of the paid `tools/call`s; each must get a successful result
+    /// before the payment settles. `None` for plain HTTP routes.
+    pub mcp_call_ids: Option<Vec<Value>>,
 }
 
 /// Decodes a `PAYMENT-SIGNATURE` header into a PaymentPayload.
@@ -120,7 +121,7 @@ pub async fn handle_paid(gw: &Gateway, req: PaidRequest<'_>) -> Response {
         verdict,
         payload,
         transport,
-        is_mcp,
+        mcp_call_ids,
     } = req;
     let refuse = |error: &str| match &transport {
         Transport::Http => challenge(gw, &parts, tag, verdict, error),
@@ -165,7 +166,7 @@ pub async fn handle_paid(gw: &Gateway, req: PaidRequest<'_>) -> Response {
     }
     // A payment names the resource it was quoted for; it cannot be spent on another one.
     if let Some(url) = payload.pointer("/resource/url").and_then(Value::as_str)
-        && url != crate::resource_url(gw, &parts)
+        && url != crate::resource_url(gw, &parts, tag)
     {
         return refuse("payment was made for a different resource");
     }
@@ -212,10 +213,15 @@ pub async fn handle_paid(gw: &Gateway, req: PaidRequest<'_>) -> Response {
             gateway_headers.insert(name, v);
         }
     }
+    // Paid MCP responses are inspected before settling, so ask for them uncompressed.
+    let mut forward_parts = parts.clone();
+    if mcp_call_ids.is_some() {
+        forward_parts.headers.remove(header::ACCEPT_ENCODING);
+    }
     let origin = crate::proxy::forward(
         &gw.client,
         &gw.config,
-        parts.clone(),
+        forward_parts,
         body,
         peer,
         gateway_headers,
@@ -236,7 +242,10 @@ pub async fn handle_paid(gw: &Gateway, req: PaidRequest<'_>) -> Response {
         .get(header::CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .unwrap_or("");
-    let failed = !origin_status.is_success() || (is_mcp && mcp_failed(content_type, &content));
+    let failed = !origin_status.is_success()
+        || mcp_call_ids
+            .as_deref()
+            .is_some_and(|ids| !mcp_succeeded(&origin_parts.headers, &content, ids));
     if failed {
         // Not settled, so the payment was not consumed: let the agent retry it.
         gw.replay.release(&replay_key);
@@ -344,27 +353,79 @@ fn short_hash(key: &str) -> String {
     format!("{:016x}", h.finish())
 }
 
-/// True when an MCP origin answered with a JSON-RPC error or a failed tool result. Reads a
-/// plain JSON body, or the first `data:` event of an SSE body.
-fn mcp_failed(content_type: &str, content: &[u8]) -> bool {
-    let message: Option<Value> = if content_type.starts_with("text/event-stream") {
-        std::str::from_utf8(content)
-            .ok()
-            .and_then(|s| s.lines().find_map(|l| l.strip_prefix("data:")))
-            .and_then(|d| serde_json::from_str(d.trim()).ok())
+/// True only when an MCP origin answered every paid call in the request with a successful
+/// result: a response with the call's `id`, no `error`, and no `result.isError`. Reads a JSON
+/// body, or every event of an SSE body (servers may send notifications before the result).
+/// Anything it cannot read (compressed, truncated, not JSON-RPC) counts as a failure: when
+/// in doubt the buyer is not charged.
+fn mcp_succeeded(headers: &HeaderMap, content: &[u8], call_ids: &[Value]) -> bool {
+    if call_ids.is_empty() || headers.contains_key(header::CONTENT_ENCODING) {
+        return false;
+    }
+    let Ok(text) = std::str::from_utf8(content) else {
+        return false;
+    };
+    let is_sse = headers
+        .get(header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .is_some_and(|t| t.starts_with("text/event-stream"));
+    let messages = if is_sse {
+        sse_messages(text)
     } else {
-        serde_json::from_slice(content).ok()
+        match serde_json::from_str::<Value>(text) {
+            Ok(Value::Array(items)) => items,
+            Ok(message) => vec![message],
+            Err(_) => return false,
+        }
     };
-    let Some(message) = message else {
-        return false; // not JSON-RPC (plain HTTP success); HTTP status already checked
-    };
-    let messages = match message {
-        Value::Array(items) => items,
-        other => vec![other],
-    };
-    messages.iter().any(|m| {
-        m.get("error").is_some() || m.pointer("/result/isError") == Some(&Value::Bool(true))
+    call_ids.iter().all(|id| {
+        messages.iter().any(|m| {
+            !id.is_null()
+                && m.get("id") == Some(id)
+                && m.get("error").is_none()
+                && m.get("result").is_some()
+                && m.pointer("/result/isError") != Some(&Value::Bool(true))
+        })
     })
+}
+
+/// JSON-RPC messages carried by an SSE body: one per event, multi-line `data:` joined.
+fn sse_messages(text: &str) -> Vec<Value> {
+    let mut out = Vec::new();
+    let mut data = String::new();
+    for line in text.lines().chain(std::iter::once("")) {
+        if line.is_empty() {
+            if !data.is_empty() {
+                match serde_json::from_str::<Value>(&data) {
+                    Ok(Value::Array(items)) => out.extend(items),
+                    Ok(message) => out.push(message),
+                    Err(_) => {}
+                }
+                data.clear();
+            }
+        } else if let Some(d) = line.strip_prefix("data:") {
+            if !data.is_empty() {
+                data.push('\n');
+            }
+            data.push_str(d.strip_prefix(' ').unwrap_or(d));
+        }
+    }
+    out
+}
+
+/// The ids of every `tools/call` in an MCP body (`null` for a call without one, which can
+/// never be matched to a response and so is never settled).
+pub fn tool_call_ids(body: &[u8]) -> Vec<Value> {
+    let messages = match serde_json::from_slice::<Value>(body) {
+        Ok(Value::Array(items)) => items,
+        Ok(message) => vec![message],
+        Err(_) => return Vec::new(),
+    };
+    messages
+        .iter()
+        .filter(|m| m.get("method").and_then(Value::as_str) == Some("tools/call"))
+        .map(|m| m.get("id").cloned().unwrap_or(Value::Null))
+        .collect()
 }
 
 /// Inserts the settlement response at `result._meta["x402/payment-response"]`.
@@ -416,25 +477,106 @@ mod tests {
         assert!(extract_mcp_payment(b"[1,2]").is_none());
     }
 
+    fn json_headers(content_type: &str) -> HeaderMap {
+        let mut h = HeaderMap::new();
+        h.insert(
+            header::CONTENT_TYPE,
+            HeaderValue::from_str(content_type).unwrap(),
+        );
+        h
+    }
+
     #[test]
-    fn detects_mcp_failures() {
-        assert!(mcp_failed(
-            "application/json",
-            br#"{"jsonrpc":"2.0","id":1,"error":{"code":-1,"message":"x"}}"#
+    fn mcp_success_requires_a_good_result_for_every_call() {
+        let json = json_headers("application/json");
+        let id = [json!(1)];
+        assert!(mcp_succeeded(
+            &json,
+            br#"{"jsonrpc":"2.0","id":1,"result":{"content":[]}}"#,
+            &id
         ));
-        assert!(mcp_failed(
-            "application/json",
-            br#"{"jsonrpc":"2.0","id":1,"result":{"isError":true,"content":[]}}"#
+        assert!(!mcp_succeeded(
+            &json,
+            br#"{"jsonrpc":"2.0","id":1,"error":{"code":-1,"message":"x"}}"#,
+            &id
         ));
-        assert!(mcp_failed(
-            "text/event-stream",
-            b"event: message\ndata: {\"jsonrpc\":\"2.0\",\"id\":1,\"error\":{}}\n\n"
+        assert!(!mcp_succeeded(
+            &json,
+            br#"{"jsonrpc":"2.0","id":1,"result":{"isError":true,"content":[]}}"#,
+            &id
         ));
-        assert!(!mcp_failed(
-            "application/json",
-            br#"{"jsonrpc":"2.0","id":1,"result":{"isError":false,"content":[]}}"#
+        assert!(
+            !mcp_succeeded(
+                &json,
+                br#"{"jsonrpc":"2.0","id":2,"result":{"content":[]}}"#,
+                &id
+            ),
+            "wrong id"
+        );
+        assert!(
+            !mcp_succeeded(&json, b"not json", &id),
+            "unreadable counts as failure"
+        );
+        assert!(
+            !mcp_succeeded(&json, br#"{"jsonrpc":"2.0","id":1,"result":{}}"#, &[]),
+            "no calls"
+        );
+        assert!(!mcp_succeeded(
+            &json,
+            br#"{"jsonrpc":"2.0","id":null,"result":{}}"#,
+            &[Value::Null]
         ));
-        assert!(!mcp_failed("text/plain", b"ok"));
+
+        let batch = [json!(1), json!(2)];
+        let one_failed = br#"[{"jsonrpc":"2.0","id":1,"result":{}},{"jsonrpc":"2.0","id":2,"result":{"isError":true}}]"#;
+        assert!(!mcp_succeeded(&json, one_failed, &batch));
+        let both_ok =
+            br#"[{"jsonrpc":"2.0","id":1,"result":{}},{"jsonrpc":"2.0","id":2,"result":{}}]"#;
+        assert!(mcp_succeeded(&json, both_ok, &batch));
+
+        let mut gz = json_headers("application/json");
+        gz.insert(header::CONTENT_ENCODING, HeaderValue::from_static("gzip"));
+        assert!(
+            !mcp_succeeded(&gz, br#"{"jsonrpc":"2.0","id":1,"result":{}}"#, &id),
+            "encoded body cannot be judged"
+        );
+    }
+
+    #[test]
+    fn mcp_success_reads_every_sse_event() {
+        let sse = json_headers("text/event-stream");
+        let id = [json!(9)];
+        let note = "event: message\ndata: {\"jsonrpc\":\"2.0\",\"method\":\"notifications/message\",\"params\":{}}\n\n";
+        let failed = format!(
+            "{note}event: message\ndata: {{\"jsonrpc\":\"2.0\",\"id\":9,\"result\":{{\"isError\":true}}}}\n\n"
+        );
+        let ok = format!(
+            "{note}data: {{\"jsonrpc\":\"2.0\",\n\ndata: \"id\":9}}\n\ndata: {{\"jsonrpc\":\"2.0\",\"id\":9,\ndata: \"result\":{{\"content\":[]}}}}\n\n"
+        );
+        assert!(
+            !mcp_succeeded(&sse, failed.as_bytes(), &id),
+            "error after a notification"
+        );
+        assert!(
+            mcp_succeeded(&sse, ok.as_bytes(), &id),
+            "multi-line data joined"
+        );
+        assert!(
+            !mcp_succeeded(&sse, note.as_bytes(), &id),
+            "no result at all"
+        );
+    }
+
+    #[test]
+    fn collects_tool_call_ids() {
+        assert_eq!(
+            tool_call_ids(
+                br#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"a"}}"#
+            ),
+            vec![json!(3)]
+        );
+        let batch = br#"[{"jsonrpc":"2.0","id":1,"method":"ping"},{"jsonrpc":"2.0","method":"tools/call","params":{"name":"a"}}]"#;
+        assert_eq!(tool_call_ids(batch), vec![Value::Null]);
     }
 
     #[test]
