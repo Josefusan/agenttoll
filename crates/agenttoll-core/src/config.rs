@@ -17,6 +17,15 @@ pub struct Config {
     pub origin: String,
     pub listen: SocketAddr,
     pub admin_listen: SocketAddr,
+    /// Public base URL quoted as `resource.url` in 402 challenges, e.g. `https://acme.dev`.
+    /// Defaults to `http://<Host header>`.
+    #[serde(default)]
+    pub public_url: Option<String>,
+    /// Forward the client's `Host` header to the origin. Off by default: hosted origins
+    /// (Vercel, Netlify) route by Host, so the origin's own host is sent and the client's
+    /// goes in `X-Forwarded-Host`.
+    #[serde(default)]
+    pub preserve_host: bool,
     #[serde(default)]
     pub detection: DetectionMode,
     /// Charge search crawlers (Googlebot, bingbot) like AI agents. Off by default so
@@ -56,6 +65,10 @@ pub struct NetworkConfig {
     pub pay_to: String,
     /// Facilitator base URL exposing `/verify` and `/settle` (KB-X402-04).
     pub facilitator: String,
+    /// Solana fee payer quoted in `extra.feePayer` (KB-X402-07). When unset, the gateway
+    /// reads it from the facilitator's `GET /supported` at startup.
+    #[serde(default)]
+    pub fee_payer: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -156,6 +169,13 @@ impl Config {
                     "networks.{name}.facilitator must be an http(s) URL"
                 ));
             }
+        }
+        if let Some(url) = &self.public_url
+            && !(url.starts_with("http://") || url.starts_with("https://"))
+        {
+            return invalid(format!(
+                "public_url {url:?} must start with http:// or https://"
+            ));
         }
         if let Some(mcp) = &self.mcp
             && !mcp.endpoint.starts_with('/')

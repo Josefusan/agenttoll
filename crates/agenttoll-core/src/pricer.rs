@@ -3,7 +3,7 @@
 
 use std::collections::BTreeMap;
 
-use globset::{Glob, GlobMatcher};
+use globset::{GlobBuilder, GlobMatcher};
 use http::Method;
 
 use crate::config::{Config, ConfigError};
@@ -59,17 +59,18 @@ impl Pricer {
             })
             .collect::<Result<_, ConfigError>>()?;
         let mcp = config.mcp.as_ref().map(|m| McpPrices {
-            endpoint: normalize(&m.endpoint),
+            endpoint: normalize(&m.endpoint).to_ascii_lowercase(),
             default: m.default_tool_price_usd,
             tools: m.tools.clone(),
         });
         Ok(Pricer { routes, mcp })
     }
 
-    /// True when `path` is the configured MCP endpoint (or below it).
+    /// True when `path` is the configured MCP endpoint (or below it). Case-insensitive like
+    /// route globs, or `POST /MCP` would reach a case-insensitive origin unpriced.
     pub fn is_mcp_endpoint(&self, path: &str) -> bool {
         let Some(mcp) = &self.mcp else { return false };
-        let path = normalize(path);
+        let path = normalize(path).to_ascii_lowercase();
         path == mcp.endpoint || path.starts_with(&format!("{}/", mcp.endpoint))
     }
 
@@ -124,7 +125,10 @@ fn parse_pattern(pattern: &str) -> Result<(Option<Method>, GlobMatcher), ConfigE
     if !path.starts_with('/') {
         return Err(invalid("path must start with /"));
     }
-    let glob = Glob::new(path).map_err(|e| invalid(&e.to_string()))?;
+    let glob = GlobBuilder::new(path)
+        .case_insensitive(true)
+        .build()
+        .map_err(|e| invalid(&e.to_string()))?;
     Ok((method, glob.compile_matcher()))
 }
 
@@ -177,6 +181,9 @@ mod tests {
             "/api/quote/",
             "/blog/../api/quote",
             "/x/%2e%2e/api/quote",
+            "/API/Quote",
+            "/api/quote;x=1",
+            "/api/quote?x=1",
         ] {
             assert_eq!(amount(p.price_route(&Method::GET, path)), 2000, "{path}");
         }
@@ -188,6 +195,8 @@ mod tests {
         assert!(p.is_mcp_endpoint("/mcp"));
         assert!(p.is_mcp_endpoint("/mcp/"));
         assert!(p.is_mcp_endpoint("/mcp/session"));
+        assert!(p.is_mcp_endpoint("/MCP"));
+        assert!(p.is_mcp_endpoint("/Mcp/session"));
         assert!(!p.is_mcp_endpoint("/mcpx"));
         assert!(!p.is_mcp_endpoint("/api/mcp"));
     }

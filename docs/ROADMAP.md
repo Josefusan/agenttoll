@@ -6,7 +6,7 @@ Each day ends with a runnable demo of everything built so far. Status column is 
 |---|---|---|---|---|---|
 | D0 | Fri Oct 2 | Repo, docs, skills, agent org, Colosseum details | Joseph + Claude | Project details marked Complete on Colosseum | done |
 | D1 | Sat Oct 3 | Cargo workspace; `agenttoll-core` (config, detector, pricer) with unit tests; demo origin | proxy-engineer | `cargo test` green; 20+ detector cases incl. browsers and bots | done (29 tests, 36 detector cases) |
-| D2 | Sun Oct 4 | Gateway pass-through + 402 challenge on Solana devnet; `PAYMENT-REQUIRED` encoding | proxy + payments | `curl -A ClaudeBot` gets 402 with valid base64 PaymentRequired; browser UA gets 200 | |
+| D2 | Sun Oct 4 | Gateway pass-through + 402 challenge on Solana devnet; `PAYMENT-REQUIRED` encoding | proxy + payments | `curl -A ClaudeBot` gets 402 with valid base64 PaymentRequired; browser UA gets 200 | done (live vs PayAI devnet /supported; critic FAIL → /MCP case fix → re-review) |
 | D3 | Mon Oct 5 | Verify → forward → settle; ledger; buyer CLI pays devnet USDC | payments + demo | `agenttoll-buyer` prints data + tx sig; row in `revenue_events`; explorer link resolves | |
 | D4 | Tue Oct 6 | Admin API + SSE; dashboard v1 (totals, by route, by agent, live feed). **Submission opens 04:00 PDT** | dashboard | Event shows on dashboard < 1 s after settle | |
 | D5 | Wed Oct 7 | MCP per-tool pricing; `pay-mcp` server (`pay_and_fetch` with caps); Claude pays on camera | proxy + demo | Claude Desktop/Code: ask a question, tool pays $0.002, answer uses the data | |
