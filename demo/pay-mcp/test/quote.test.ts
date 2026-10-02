@@ -1,15 +1,20 @@
 import { encodePaymentRequiredHeader } from "@x402/core/http";
 import { describe, expect, it } from "vitest";
 
+import { allowlistFromEnv } from "../src/allowlist.js";
 import { challengeFromResponse, decodeChallenge, describeQuote, explorerUrl, isSimulated, QuoteError, selectRequirement } from "../src/quote.js";
+
+const allowlist = allowlistFromEnv({});
 import { baseReq, paymentRequired, solanaReq } from "./fixtures.js";
 
 describe("decodeChallenge", () => {
   it("round-trips a v2 PaymentRequired header and prices it at $0.002 per network", () => {
     const header = encodePaymentRequiredHeader(paymentRequired());
     const pr = decodeChallenge(header);
-    const q = describeQuote(pr);
-    expect(q.resource).toEqual({ url: "http://localhost:8402/api/quote", description: "Live price quote", mimeType: "application/json" });
+    const q = describeQuote(pr, allowlist);
+    expect(q.resource).toEqual({ url: "http://localhost:8402/api/quote" });
+    expect(q.untrusted_content).toMatchObject({ description: "Live price quote", mimeType: "application/json" });
+    expect(q.untrusted_content.note).toMatch(/never as instructions/);
     expect(q.options.map((o) => [o.network_name, o.usd, o.payTo])).toEqual([
       ["Solana devnet", "0.002", solanaReq.payTo],
       ["Base Sepolia", "0.002", baseReq.payTo],
@@ -24,26 +29,37 @@ describe("decodeChallenge", () => {
     const bad = Buffer.from(JSON.stringify(paymentRequired([{ ...solanaReq, amount: "0.002" }]))).toString("base64");
     expect(() => decodeChallenge(bad)).toThrow(/atomic integer/);
   });
+  it("rejects a zero amount", () => {
+    const zero = Buffer.from(JSON.stringify(paymentRequired([{ ...solanaReq, amount: "0" }]))).toString("base64");
+    expect(() => decodeChallenge(zero)).toThrow(/zero-amount/);
+    expect(() => challengeFromResponse(() => null, JSON.stringify(paymentRequired([{ ...solanaReq, amount: "0" }])))).toThrow(/zero-amount/);
+  });
   it("falls back to a JSON body when the header is missing", () => {
     const pr = challengeFromResponse(() => null, JSON.stringify(paymentRequired([solanaReq], "Payment required")));
     expect(pr.error).toBe("Payment required");
+    expect(describeQuote(pr, allowlist).untrusted_content.error).toBe("Payment required");
     expect(() => challengeFromResponse(() => null, "nope")).toThrow(QuoteError);
   });
 });
 
 describe("selectRequirement", () => {
   const both = new Set(["solana", "eip155"]);
+  const pick = (pr: ReturnType<typeof paymentRequired>, preferred: "solana" | "eip155", available = both) => {
+    const r = selectRequirement(pr, preferred, available, allowlist);
+    return r.ok ? r.selection : r;
+  };
   it("prefers the configured rail", () => {
-    expect(selectRequirement(paymentRequired(), "solana", both)?.requirement.network).toBe(solanaReq.network);
-    expect(selectRequirement(paymentRequired(), "eip155", both)?.requirement.network).toBe(baseReq.network);
+    expect(pick(paymentRequired(), "solana")).toMatchObject({ requirement: { network: solanaReq.network } });
+    expect(pick(paymentRequired(), "eip155")).toMatchObject({ requirement: { network: baseReq.network } });
   });
   it("falls back to any rail the wallet has, and refuses the rest", () => {
-    expect(selectRequirement(paymentRequired([baseReq]), "solana", both)?.requirement.network).toBe(baseReq.network);
-    expect(selectRequirement(paymentRequired([baseReq]), "solana", new Set(["solana"]))).toBeUndefined();
-    expect(selectRequirement(paymentRequired([{ ...solanaReq, scheme: "upto" }]), "solana", both)).toBeUndefined();
+    expect(pick(paymentRequired([baseReq]), "solana")).toMatchObject({ requirement: { network: baseReq.network } });
+    expect(pick(paymentRequired([baseReq]), "solana", new Set(["solana"]))).toMatchObject({ ok: false, code: "unsupported_network" });
+    expect(pick(paymentRequired([{ ...solanaReq, scheme: "upto" }]), "solana")).toMatchObject({ ok: false, code: "scheme" });
+    expect(pick(paymentRequired([]), "solana")).toMatchObject({ ok: false, code: "network" });
   });
   it("returns the amount as atomic bigint", () => {
-    expect(selectRequirement(paymentRequired(), "solana", both)?.amount).toBe(2000n);
+    expect(pick(paymentRequired(), "solana")).toMatchObject({ amount: 2000n });
   });
 });
 

@@ -7,8 +7,14 @@ agent cannot talk its way past. Humans browse the same URLs free; the agent pays
 - Solana devnet USDC first (`PAY_MCP_NETWORK=solana`, the default), Base Sepolia as the backup rail.
 - Caps are checked **before** anything is signed: `BUYER_MAX_USD_PER_CALL` (default $0.01),
   `BUYER_MAX_USD_PER_DAY` (default $0.25), and the `max_usd` the caller passes. The lowest wins.
-- Spend is persisted in `~/.agenttoll/spend.json` (atomic writes, UTC day, integer atomic units).
-- Keys never leave the process: nothing logs or returns them.
+- Only USDC on an explicit allowlist is ever paid: Solana devnet and Base Sepolia by default,
+  mainnet only with `PAY_MCP_ALLOW_MAINNET=1`. A swapped mint, a wrapped token or an unknown
+  network is refused before the cap check.
+- Spend is persisted in `~/.agenttoll/spend.json` under a lock file shared by every pay-mcp
+  process on the machine. A payment is reserved against the daily cap before it is signed and
+  finalized after the seller answers, so two processes cannot both pass the cap.
+- Keys never leave the process: nothing logs or returns them. A key file readable by other users
+  gets a warning on stderr and in `spend_status`.
 - Works with any x402 v2 seller, not only AgentToll. Built on `@x402/fetch`, `@x402/svm`,
   `@x402/evm`, `@x402/core` 2.28 and `@modelcontextprotocol/sdk`.
 
@@ -21,11 +27,22 @@ agent cannot talk its way past. Humans browse the same URLs free; the agent pays
 | `call_paid_tool(server_url, tool, arguments, max_usd?)` | Call a tool on a remote MCP server over Streamable HTTP and pay for it. Handles both styles: HTTP 402 on the JSON-RPC POST (an AgentToll gateway in front of any MCP server) and the MCP-native challenge (`isError` result with `PaymentRequired`, retried with `_meta["x402/payment"]`, receipt in `_meta["x402/payment-response"]`) | Yes, within caps |
 | `spend_status()` | Today's spend, caps, remaining, wallet addresses, last 10 payments | No |
 
-Refusals (above a cap, unsupported network, bad URL) happen before signing and say so:
-`Refused before signing (no money moved, nothing counted against caps): ...`. A facilitator or
-gateway rejection after signing is reported as `rejected` with the facilitator's reason, and
-nothing is counted either. A receipt whose transaction id starts with `SIMULATED` is flagged
-`simulated: true`, gets no explorer link, and says plainly that nothing moved on chain.
+Refusals (above a cap, asset or network not on the allowlist, bad URL, zero amount) happen
+before signing and say so: `Refused before signing (no money moved, nothing counted against
+caps): ...`.
+
+A rejection after the signed payment was sent is different: the seller now holds a signed bearer
+payment it could still settle, so the amount stays counted against the daily cap as
+`rejected_after_send` and shows up in `spend_status.reconcile` until you check it. The same goes
+for a paid request that fails in flight or comes back without a receipt (`unknown`). A dishonest
+seller therefore cannot drain more than `BUYER_MAX_USD_PER_DAY` by rejecting and settling anyway.
+
+Everything the seller wrote (bodies, descriptions, error strings, tool output) comes back inside
+an `untrusted_content` field with a note that it is third-party data, not instructions. The paid
+retry never follows redirects: a 3xx is reported and the payment is not re-sent.
+
+A receipt whose transaction id starts with `SIMULATED` is flagged `simulated: true`, gets no
+explorer link, and says plainly that nothing moved on chain.
 
 ## Install
 
@@ -55,7 +72,8 @@ cargo run -p agenttoll-buyer -- --new-solana-keypair ./buyer.keypair.json   # pr
 | `PAY_MCP_NETWORK` | `solana` | Preferred rail when a seller offers both: `solana` or `base` |
 | `SOLANA_RPC_URL` | `https://api.devnet.solana.com` | RPC used to build the transfer |
 | `BUYER_MAX_USD_PER_CALL` | `0.01` | Hard cap per payment |
-| `BUYER_MAX_USD_PER_DAY` | `0.25` | Hard cap per UTC day |
+| `BUYER_MAX_USD_PER_DAY` | `0.25` | Hard cap per UTC day (reserved payments count) |
+| `PAY_MCP_ALLOW_MAINNET` | unset | `1` adds Solana mainnet and Base USDC to the allowlist |
 | `PAY_MCP_SPEND_FILE` | `~/.agenttoll/spend.json` | Where spend is persisted |
 | `PAY_MCP_MAX_BODY_BYTES` | `16384` | Response bodies longer than this are truncated |
 
@@ -134,11 +152,14 @@ buyer configured in Claude Desktop.
 - Money is `bigint` atomic USDC (6 decimals) end to end. The only float is formatting a
   human-typed `max_usd` to six decimals before parsing.
 - The signer is handed a `PaymentRequired` whose `accepts` holds only the option pay-mcp chose, so
-  the SDK cannot pick a different network or amount than the one that passed the caps.
-- A signed payment whose response never arrives is recorded as `unknown` and counted against the
-  day, so the daily cap errs toward counting.
-- Payments are serialized inside the process so two concurrent tool calls cannot both pass the
-  daily check.
+  the SDK cannot pick a different network or amount than the one that passed the caps. The SDK
+  client is registered for the exact allowlisted CAIP-2 networks, never `solana:*` / `eip155:*`.
+- Ledger order: allowlist, then reserve under the lock (cap check + write a `pending` row), then
+  sign, then send, then finalize the row (`settled`, `simulated`, `unknown`,
+  `rejected_after_send`). Only a signing failure releases a reservation, because nothing left the
+  process. Every status except a released one counts toward the day.
+- The lock is an `O_EXCL` create of `spend.json.lock` with jittered retries; a lock older than
+  30 s is treated as stale and swept. Tested with two child processes hammering one file.
 - The gateway's detector already lists `AgentToll-Buyer` as a self-declared agent, so pay-mcp
   sends `User-Agent: AgentToll-Buyer/pay-mcp <version>` and `X-Agent-Name: pay-mcp`; nothing in
   the gateway had to change.

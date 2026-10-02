@@ -4,7 +4,7 @@
 
 import type { PaymentRequired, SettleResponse } from "@x402/core/types";
 
-import { isPaymentRequired } from "./quote.js";
+import { isPaymentRequired, QuoteError, validatePaymentRequired } from "./quote.js";
 
 export const PAYMENT_META_KEY = "x402/payment";
 export const RECEIPT_META_KEY = "x402/payment-response";
@@ -24,14 +24,15 @@ function asToolResult(v: unknown): ToolResultLike | null {
 export function paymentRequiredFromToolResult(result: unknown): PaymentRequired | null {
   const r = asToolResult(result);
   if (!r || r.isError !== true) return null;
-  if (isPaymentRequired(r.structuredContent)) return r.structuredContent;
+  if (isPaymentRequired(r.structuredContent)) return validatePaymentRequired(r.structuredContent);
   if (Array.isArray(r.content)) {
     const first = r.content[0] as { type?: unknown; text?: unknown } | undefined;
     if (first && first.type === "text" && typeof first.text === "string") {
       try {
         const parsed: unknown = JSON.parse(first.text);
-        if (isPaymentRequired(parsed)) return parsed;
-      } catch {
+        if (isPaymentRequired(parsed)) return validatePaymentRequired(parsed);
+      } catch (err) {
+        if (err instanceof QuoteError) throw err;
         // not JSON: an ordinary tool error
       }
     }
