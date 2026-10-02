@@ -29,6 +29,13 @@ rules:
 | KB-DEMO-01 | Prior art: Claude paying an x402 paywall |
 | KB-HACK-01 | Colosseum Crypto World's Fair facts |
 | KB-AMT-01 | Amount math |
+| KB-PAY-01 | Bridge (Stripe) liquidation addresses |
+| KB-PAY-02 | Stripe financial account, stablecoin balance |
+| KB-PAY-03 | Coinbase Business |
+| KB-PAY-04 | Squads Altitude and Coinflow |
+| KB-PAY-05 | Kast, Circle Mint, Mercury |
+| KB-PAY-06 | Buyer-side wallet funding |
+| KB-PAY-07 | Payout destination pattern (design note) |
 
 ---
 
@@ -172,3 +179,55 @@ rules:
 - USDC has 6 decimals on Solana and Base. `atomic = round(usd * 1_000_000)`.
 - $0.002 (0.2 cents) = `2000`. $0.001 = `1000`. $0.05 = `50000`.
 - Store atomic integers; format USD only in the UI.
+
+### KB-PAY-01: Bridge (Stripe) liquidation addresses
+- A liquidation address is "a permanent payment route which ties a blockchain address to either a fiat or blockchain address"; when USDC arrives, Bridge "drains" it to the configured destination. Real-time rails (wire, SEPA, blockchains) send instantly; batch rails (ACH) are queued and processed daily.
+- API: `POST /v0/customers/{customer_id}/liquidation_addresses`. `chain` enum includes `solana`, `base`, `ethereum`, `polygon`, `tempo`, `evm` (any supported EVM chain, beta 2026-09-15). `currency` includes `usdc`, `usdt`, `pyusd`, `eurc`. `destination_payment_rail` includes `ach`, `ach_same_day`, `ach_push`, `wire`, `sepa`, `spei`, `pix`, `faster_payments`, `swift`, plus chains. `custom_developer_fee_percent` is optional; blank means 0.0; developer fees pay out monthly on the 5th in USD.
+- Supported stablecoins on Solana include USDC, USDT, PYUSD, EURC; on Base USDC, EURC (payment-routes page).
+- Customers "represent end users of your platform" and must reach `kyc_status: approved` and accept Bridge's ToS. Business customers go through KYB. Developer onboarding terms for a solo founder: UNVERIFIED.
+- Sandbox: `https://api.sandbox.bridge.xyz`, keys prefixed `sk-test`, `POST /v0/customers/{id}/simulate_kyc_approval`, fake liquidation addresses and transfers. "There is no real money movement in Sandbox", "There is no testnet support in Sandbox", "Sandbox wallets don't interact with the blockchain and use fake addresses."
+- Bridge's own fee is not on the pages checked. Third-party coverage reports 0.25% orchestration / 0.50% virtual accounts: UNVERIFIED. Per-drain minimums exist ("Transaction Minimums" referenced) but values not captured: UNVERIFIED and critical for $0.002 payments.
+- AgentToll relevance: first candidate for a native "payout destination" after the hackathon. Not demoable on devnet.
+- checked: 2026-10-02. Sources: https://apidocs.bridge.xyz/get-started/guides/move-money/offramp_liquidation, https://apidocs.bridge.xyz/api-reference/liquidation-addresses/create-a-liquidation-address, https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes, https://apidocs.bridge.xyz/platform/orchestration/fees-and-mins/devfees, https://apidocs.bridge.xyz/platform/customers/overview, https://apidocs.bridge.xyz/get-started/introduction/quick-start/setting-up-sandbox, https://apidocs.bridge.xyz/changelog/changelog
+
+### KB-PAY-02: Stripe financial account, stablecoin balance
+- A Stripe financial account can hold a USDC (or OUSD) stablecoin balance alongside USD, EUR, GBP. "Bridge custodies USDC and OUSD." No monthly fees or minimums for a financial account.
+- Add funds from a crypto wallet: "You generate a deposit address for one blockchain network, then send funds to it." Supported networks for USDC: Arbitrum, Avalanche C-Chain, Base, Ethereum, Optimism, Polygon, Solana, Stellar; Tempo uses USDC.e. The same networks apply to funding and payouts.
+- Payout from a stablecoin balance to a bank account: USD via ACH or wire; EUR via SEPA; MXN via SPEI; others in private preview. Stripe converts at payout time. Stablecoin payouts are public preview in the US, private preview elsewhere.
+- Availability: USDC on financial accounts is GA for US legal entities (also for US entities with international representatives, and international entities in eligible countries, as USDC-only). Stablecoin balances are public preview in the US.
+- Fiat transfers to your own linked bank in the same currency are free, 1 to 2 business days. Stablecoin payout fees: not stated on pages checked, UNVERIFIED. Whether the crypto deposit address is permanent/reusable and API-exposed: UNVERIFIED. Test mode for stablecoin balances: UNVERIFIED.
+- checked: 2026-10-02. Sources: https://docs.stripe.com/treasury/store-funds, https://docs.stripe.com/treasury/add-funds, https://docs.stripe.com/treasury/transfer-send, https://docs.stripe.com/treasury/stablecoins, https://docs.stripe.com/treasury
+
+### KB-PAY-03: Coinbase Business
+- Launch coverage (2025-10-16, Yahoo Finance): Coinbase Business offers global USDC payouts, payment links, 4.1% APY on USDC, no network fees on Base, QuickBooks/Xero/CoinTracker integrations, a Payment Links API "upcoming"; "in alpha for early U.S. customers"; Coinbase Commerce to merge into it with fiat cash-out.
+- Search summaries of Coinbase help pages (direct fetch returned 403): eligibility limited to US and Singapore C-corps and LLCs with KYB; USDC balances can be cashed out to a linked business bank account by ACH or wire; Coinbase credits USDC received on Solana and Base (and Ethereum, Arbitrum, Avalanche, Polygon, Optimism). Treat all of these as UNVERIFIED until read on coinbase.com.
+- Not demoable on devnet. Custodial.
+- checked: 2026-10-02. Sources: https://finance.yahoo.com/news/coinbase-launches-global-usdc-payouts-173521425.html, https://help.coinbase.com/en/coinbase/other-topics/business/business-overview (403), https://help.coinbase.com/en/coinbase/trading-and-funding/sending-or-receiving-cryptocurrency/assets-on-multiple-networks (403), https://help.coinbase.com/en/transitioning-from-coinbase-commerce-to-coinbase-business (403)
+
+### KB-PAY-04: Squads Altitude and Coinflow
+- Altitude (altitude.xyz, by Squads): "a self-custodial digital asset account" with "USD and EUR accounts, payments, FX, cards, and bill pay from 150+ countries." "Squads does not take custody of customer funds. Stablecoin balances are held in self-custodial wallets controlled by the customer through cryptographic keys." Bank connectivity (ACH, SEPA, Wire, SWIFT) via third-party partners. "Zero onramp and offramp fees." Requires identity verification, KYB, sanctions screening; eligible businesses in supported jurisdictions. Accepted chains/stablecoins and API: not stated, UNVERIFIED.
+- Squads raised $18M led by Solana Ventures to scale Altitude (The Block, 2026-04-29).
+- Coinflow is Squads' listed on/off-ramp partner (docs.squads.so). Coinflow payouts convert USDC to fiat over ACH, same-day ACH, SEPA, RTP, Pix and others; off-ramps listed for Solana, Ethereum, Polygon, Near; KYC handled inside its withdraw component; a testnet USDC faucet exists in its API reference. Merchant onboarding and fees: UNVERIFIED.
+- AgentToll relevance: Altitude is the most on-brand `pay_to` destination for a Solana-track story if the account is a founder-controlled Solana address (UNVERIFIED). Coinflow is a building block for a future sweep-and-cash-out job.
+- checked: 2026-10-02. Sources: https://altitude.xyz/, https://www.theblock.co/post/399386/solana-ventures-squads-funding-stablecoin-altitude, https://docs.squads.so/main/getting-started/on-and-off-ramp/sphere, https://docs.coinflow.cash/guides/payouts/implementation-methods/coinflow-withdraw-component, https://docs.coinflow.cash/api-reference/api-reference/faucet
+
+### KB-PAY-05: Kast, Circle Mint, Mercury
+- Kast: consumer stablecoin account. "Your USD account number and ACH details activate the moment you're verified"; EU IBAN. "KAST supports USDT, USDC, PYUSD and RLUSD ... across chains including Ethereum, Solana, Polygon, Arbitrum and TRON." Base not listed. Fee page returned 403; third parties report 0% stablecoin deposit fee and a business tier "launching in 2026": UNVERIFIED.
+- Circle Mint: "for institutional customers minting USDC, EURC, and cirBTC"; "not available to individuals"; redeem USDC to a bank wire. Supported chains include Solana (`SOL`) and Base (`BASE`). Not a fit for an indie founder.
+- Mercury: US business banking, fiat only, does not hold digital assets (third-party reviews; Mercury's own page not checked, UNVERIFIED). Useful as the bank account behind Bridge, Stripe or Coinbase payouts.
+- checked: 2026-10-02. Sources: https://www.kast.xyz/en/global-accounts, https://concierge.kast.xyz/hc/en-us/articles/9850062738703-What-Are-the-Fees-and-Conditions-for-KAST-Cards-and-Accounts (403), https://www.circle.com/circle-mint, https://developers.circle.com/circle-mint/references/supported-chains-and-currencies, https://fitsmallbusiness.com/best-crypto-friendly-business-banks/
+
+### KB-PAY-06: Buyer-side wallet funding
+- Coinbase Payments MCP ("Agentic Wallet MCP"): `npx @coinbase/payments-mcp`. "Combines wallets, onramps, and payments via x402 into a single solution for agentic commerce." Tools: check balance, get wallet address, open wallet UI, discover x402 services, make automatic payments. "Payments are supported on Base, Polygon, and Solana." Funding: "Use Coinbase Onramp to add USDC." User-set spending limits (max per call, max per session). Testnet support not mentioned.
+- Coinbase Onramp: "Converts fiat currency into crypto and sends to any wallet address." Payment methods: debit cards, credit cards (non-US), Apple Pay, Google Pay, ACH (US). Solana and Base listed. Sandbox with test card 4242... reported by search; the sandbox page returned 404 for us: UNVERIFIED.
+- CDP agentic wallets (search summary of docs.cdp.coinbase.com changelog): client-side x402 spend controls (per-payment caps, rolling limits, network/asset/payee allowlists), `account.signX402Payment()`. UNVERIFIED pending a direct read.
+- Devnet: Circle faucet (KB-SOL-01) funds the AgentToll demo buyer. PayAI channels (KB-SOL-03) are mainnet only.
+- AgentToll relevance: Coinbase's own agent wallet already pays x402 on Solana, so any AgentToll gateway is payable by it without AgentToll-specific work; our `pay-mcp` exists for the devnet demo and for spend caps in Claude.
+- checked: 2026-10-02. Sources: https://docs.cdp.coinbase.com/payments-mcp/welcome, https://docs.cdp.coinbase.com/agentic-wallet/mcp/welcome, https://docs.cdp.coinbase.com/onramp/introduction/welcome, https://docs.cdp.coinbase.com/get-started/changelog
+
+### KB-PAY-07: Payout destination pattern (design note)
+- Every bank-touching option in KB-PAY-01..05 requires KYC or KYB and runs on mainnet only. Bridge's sandbox has no testnet and fake addresses. Therefore no bank integration can appear in a devnet demo.
+- x402 settles one on-chain transfer per request (KB-X402-07). Off-ramps have per-transaction minimums and exchanges may ignore dust, so $0.002 deposits are the wrong input for a bank rail.
+- Pattern: `pay_to` = an address the founder controls (self-custody wallet or self-custodial business account); a founder-run sweeper moves the balance to an off-ramp address (Bridge liquidation address, Stripe deposit address, exchange deposit) on a threshold. AgentToll never holds funds. `pay_to` may also be set directly to an off-ramp address once its minimums are confirmed.
+- Decision 2026-10-02: no live neobank integration during the hackathon; document the pattern (docs/PAYOUTS.md), add a read-only "Cash out" panel to the dashboard if time allows, put native payout destinations on the roadmap.
+- Source: docs/PAYOUTS.md (this repo), KB-PAY-01..06.
