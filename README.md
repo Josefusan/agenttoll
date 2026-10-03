@@ -4,6 +4,12 @@
 
 **Charge AI agents per request. Keep humans free.**
 
+<p align="center"><img src="docs/assets/live-feed.gif" alt="AgentToll revenue dashboard: the Live settlements feed receiving USDC payments from the buyer CLI, each row tagged Solana devnet and Simulated" width="100%"></p>
+
+<p align="center"><img src="docs/assets/dashboard-1440.png" alt="AgentToll revenue dashboard: revenue from agents, paid requests, unbilled agent requests, revenue over time, by route, by agent, live settlements and the agent traffic you are not billing yet" width="100%"></p>
+
+Both captures come from the real local stack (`bash scripts/demo-local.sh`). The payments shown are simulated settlements through the local test facilitator: no funds moved and nothing went on chain. More captures and how they were made: [docs/assets/README.md](docs/assets/README.md).
+
 AgentToll is an open-source paywall proxy. Put it in front of a site, an API or an MCP server, set a price per route or per MCP tool, and AI agents pay per call in USDC over [x402](https://github.com/x402-foundation/x402). Humans keep browsing for free. There are no API keys, signups or invoices. Payments settle on Solana (Base as a second rail) straight into the founder's own wallet: AgentToll never holds funds.
 
 > Agents already use your product. Now you can bill them.
