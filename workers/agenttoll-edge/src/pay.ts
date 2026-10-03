@@ -21,10 +21,13 @@ import { challenge, jsonrpcError, mcpChallenge, text, type Gateway, type Incomin
 import type { RevenueEvent, SettleStatus } from './ledger';
 import { attachMcpReceipt, mcpFailedExplicitly, mcpSucceeded } from './mcp';
 import { forward } from './proxy';
-import { X402_VERSION, encodeHeader, headers as x402Headers, parseRequirements, requirements, type PriceTag, type QuoteNetwork } from './x402';
+import { encodeHeader, headers as x402Headers, isX402V2, parseRequirements, requirements, type PriceTag, type QuoteNetwork } from './x402';
 
 /** Paid responses are buffered so content is withheld if settlement fails. */
 export const PAID_RESPONSE_LIMIT = 16 * 1024 * 1024;
+/** Budget for the origin to answer a paid request, like the Rust client's 30 s read timeout;
+ * a stalled origin must not hold the replay claim forever. Buffered paid requests only. */
+export const ORIGIN_TIMEOUT_MS = 30_000;
 /** Ledger prefix for a payment whose settlement outcome is unknown. */
 export const UNCONFIRMED_PREFIX = 'unconfirmed:';
 export const SIMULATED_PREFIX = 'SIMULATED-';
@@ -104,7 +107,7 @@ export async function handlePaid(gw: Gateway, req: PaidRequest): Promise<Respons
     transport.kind === 'http' ? text(400, error) : jsonrpcError(200, transport.id, -32602, error);
 
   // 1. Shape. Malformed is a client error (400 on HTTP, -32602 on MCP).
-  if (!isRecord(payload) || payload.x402Version !== X402_VERSION) {
+  if (!isRecord(payload) || !isX402V2(payload)) {
     return refuse('only x402Version 2 payments are accepted');
   }
   const accepted = parseRequirements(payload.accepted);
@@ -157,7 +160,7 @@ export async function handlePaid(gw: Gateway, req: PaidRequest): Promise<Respons
     inc.request,
     inc.rawPathAndQuery,
     body,
-    { origin: gw.origin, preserveHost: gw.preserveHost, peer: inc.peer, proto: inc.proto, dropHeaders },
+    { origin: gw.origin, preserveHost: gw.preserveHost, peer: inc.peer, proto: inc.proto, dropHeaders, timeoutMs: ORIGIN_TIMEOUT_MS },
     gatewayHeaders,
   );
   const content = await readLimited(origin.body, PAID_RESPONSE_LIMIT);
@@ -166,7 +169,15 @@ export async function handlePaid(gw: Gateway, req: PaidRequest): Promise<Respons
     return text(502, 'origin response too large or interrupted; payment not settled');
   }
   const contentType = origin.headers.get('content-type') ?? '';
-  const passThrough = () => new Response(content, { status: origin.status, statusText: origin.statusText, headers: origin.headers });
+  // The buffered bytes are what workerd handed us: already decoded, so `Content-Encoding`
+  // would mislabel them, and `Content-Length` is recomputed from the buffer.
+  const release = (body: Uint8Array) => {
+    const headers = new Headers(origin.headers);
+    headers.delete('content-encoding');
+    headers.delete('content-length');
+    return new Response(body, { status: origin.status, statusText: origin.statusText, headers });
+  };
+  const passThrough = () => release(content);
   if (!(origin.status >= 200 && origin.status < 300)) {
     // Not settled, so the payment was not consumed: let the agent retry it.
     gw.replay.release(replayKey);
@@ -231,8 +242,7 @@ export async function handlePaid(gw: Gateway, req: PaidRequest): Promise<Respons
     transport.kind === 'mcp' && receipt !== undefined && contentType.startsWith('application/json')
       ? (attachMcpReceipt(content, receipt) ?? content)
       : content;
-  const headers = new Headers(origin.headers);
-  if (receipt !== undefined) headers.set(x402Headers.PAYMENT_RESPONSE, encodeHeader(receipt));
-  headers.delete('content-length'); // recomputed from the buffered body
-  return new Response(released, { status: origin.status, statusText: origin.statusText, headers });
+  const res = release(released);
+  if (receipt !== undefined) res.headers.set(x402Headers.PAYMENT_RESPONSE, encodeHeader(receipt));
+  return res;
 }

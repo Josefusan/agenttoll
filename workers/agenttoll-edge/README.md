@@ -95,7 +95,29 @@ gzip and plain tool results) are equal. Everything started is killed in `afterAl
   `request_log` for the "not billing yet" report; the Worker only logs them to the console.
 - **Compressed origin bodies.** workerd decodes `Content-Encoding` transparently but keeps the
   header, so a compressed paid MCP result is never settled and is withheld with a 502 (same
-  decision as Rust, which cannot read it at all).
+  decision as Rust, which cannot read it at all) — superseded: see "Compressed MCP results".
+- **Compressed MCP results (intentional difference).** workerd adds its own `Accept-Encoding`
+  to every subrequest and transparently decodes the answer, keeping the `Content-Encoding`
+  header, so a compressing origin (Express `compression()`, nginx gzip) always answers
+  compressed and the Worker always judges decoded bytes: a compressed success settles and is
+  served, a compressed explicit failure is returned unpaid. Rust strips `Accept-Encoding`, never
+  sees readable compressed bytes, and withholds (502) anything with `Content-Encoding`. Both
+  editions never serve unverifiable content unpaid. Released paid responses drop
+  `Content-Encoding` and `Content-Length` so the decoded bytes are labelled correctly.
+  workerd also gzips any response to a client that accepts gzip (the tests send
+  `Accept-Encoding: identity` to read the Worker's own headers).
+- **Timeouts.** `/verify` and `/settle` deadlines cover the request and the body read (a
+  facilitator that sends headers then stalls is a timeout: verify → 502 and the payment is
+  released, settle → content served and `unconfirmed`). Paid origin requests have a 30 s total
+  budget (Rust: 30 s read-inactivity); free traffic streams without a limit.
+- **`GET /.agenttoll/ledger` is never for production.** It exists only while
+  `AGENTTOLL_DEBUG=1` (tests and local debugging) and is unauthenticated; never set that var on
+  a deployed Worker.
+- **Migrations vs the lazy schema.** `migrations/0001` + `0002` are the source of truth for a
+  deployed D1 (`wrangler d1 migrations apply` before the first request). The Worker also
+  creates 0001's table and adds 0002's column lazily, checking `PRAGMA table_info` first so it
+  never hits a duplicate column; a database upgraded lazily before `0002` was applied needs
+  that migration marked applied, since SQLite has no conditional `ALTER TABLE`.
 - **`unconfirmed:<hash>`** uses SHA-256 (first 16 hex) where Rust uses `DefaultHasher`; the id
   only needs to be stable within one edition.
 - Not used: Hono and `@x402/hono`. The handler is one `fetch`, and `@x402/hono` prices from

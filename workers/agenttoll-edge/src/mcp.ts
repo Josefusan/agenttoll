@@ -2,18 +2,21 @@
 // of a single `tools/call`, and a tool result with `isError: true` is a failure even on HTTP
 // 200. Mirrors the MCP helpers of crates/agenttoll-gateway/src/{lib,pay}.rs one for one.
 
+import { parsePaymentJson } from './x402';
+
 export const MCP_PAYMENT_META = 'x402/payment';
 export const MCP_RESPONSE_META = 'x402/payment-response';
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 
-const utf8 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: false });
+const utf8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: false });
 const encoder = new TextEncoder();
 
+/** Request bodies are parsed with the payment reviver so `x402Version` keeps its wire text. */
 function parseJson(bytes: Uint8Array): unknown | undefined {
   try {
-    return JSON.parse(utf8.decode(bytes));
+    return parsePaymentJson(utf8.decode(bytes));
   } catch {
     return undefined;
   }
@@ -65,7 +68,7 @@ export function toolCallIds(body: Uint8Array): unknown[] {
   // such a batch is never settled.
   const ids = messages
     .filter((m): m is Record<string, unknown> => isRecord(m) && 'method' in m && 'id' in m)
-    .map((m) => JSON.stringify(m.id));
+    .map((m) => idKey(m.id));
   if (new Set(ids).size !== ids.length) return [null];
   return messages
     .filter((m): m is Record<string, unknown> => isRecord(m) && m.method === 'tools/call')
@@ -115,12 +118,23 @@ export function mcpFailedExplicitly(headers: Headers, content: Uint8Array, callI
 }
 
 /**
- * JSON-RPC messages in an origin response, or `undefined` if the body cannot be judged
- * (compressed, not UTF-8, not JSON). workerd decodes `Content-Encoding` transparently but
- * keeps the header, and like the Rust gateway any encoded answer counts as unreadable.
+ * Identity of a JSON-RPC id under the same rule `responseTo` uses: numbers by value (`9` and
+ * `9.0` are one id; JSON numbers are f64 here as in the Rust gateway), everything else by
+ * JSON text.
+ */
+function idKey(id: unknown): string {
+  return typeof id === 'number' ? `n:${id}` : `j:${JSON.stringify(id)}`;
+}
+
+/**
+ * JSON-RPC messages in an origin response, or `undefined` if the body cannot be judged (not
+ * UTF-8, not JSON). Intentional difference from the Rust gateway: workerd adds its own
+ * `Accept-Encoding` to every subrequest and transparently decodes the answer (keeping the
+ * `Content-Encoding` header), so the bytes judged here are always the decoded ones; Rust
+ * never sees compressed bytes it could read and refuses any `Content-Encoding`. Both editions
+ * never serve unverifiable content unpaid.
  */
 function mcpMessages(headers: Headers, content: Uint8Array): Record<string, unknown>[] | undefined {
-  if (headers.has('content-encoding')) return undefined;
   let text: string;
   try {
     text = utf8.decode(content);
@@ -134,7 +148,8 @@ function mcpMessages(headers: Headers, content: Uint8Array): Record<string, unkn
 
 /**
  * A response (not a request or notification) answering request `id`. Numeric ids compare by
- * value, because servers in other languages may echo `9.0` as `9`.
+ * value, because servers in other languages may echo `9.0` as `9`. Object ids compare by
+ * JSON text, so a reordered object id does not match (the safe side: not settled).
  */
 function responseTo(message: Record<string, unknown>, id: unknown): boolean {
   if (id === null || 'method' in message || !('id' in message)) return false;

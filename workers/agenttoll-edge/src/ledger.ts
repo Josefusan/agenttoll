@@ -25,8 +25,8 @@ export interface RevenueEvent {
   status: SettleStatus;
 }
 
-/** Same table as migrations/0001 + 0002, applied lazily so `wrangler dev --local` and the
- * tests work on an empty database. */
+/** The statement of migrations/0001, applied lazily so `wrangler dev --local` and the tests
+ * work on an empty database. */
 export const SCHEMA = `CREATE TABLE IF NOT EXISTS revenue_events (
   id            INTEGER PRIMARY KEY,
   ts            INTEGER NOT NULL,
@@ -41,11 +41,10 @@ export const SCHEMA = `CREATE TABLE IF NOT EXISTS revenue_events (
   tx_signature  TEXT NOT NULL,
   origin_status INTEGER NOT NULL,
   latency_ms    INTEGER NOT NULL,
-  status        TEXT NOT NULL DEFAULT 'settled',
   UNIQUE (network, tx_signature)
 )`;
 
-/** migrations/0002: a table created before the status column existed gains it here. */
+/** The statement of migrations/0002, run only when the column is missing. */
 const ADD_STATUS = `ALTER TABLE revenue_events ADD COLUMN status TEXT NOT NULL DEFAULT 'settled'`;
 
 export class Ledger {
@@ -53,17 +52,19 @@ export class Ledger {
 
   constructor(private readonly db: D1Database | undefined) {}
 
+  /** Idempotent: 0001's table if missing, 0002's column if missing (checked, never a
+   * duplicate-column error). A failure is not cached; the next request retries. */
   private ensureSchema(): Promise<void> {
     const db = this.db;
     if (!db) return Promise.resolve();
     this.ready ??= (async () => {
       await db.prepare(SCHEMA).run();
-      try {
-        await db.prepare(ADD_STATUS).run();
-      } catch {
-        // the column is already there (fresh table or migration 0002 applied)
-      }
-    })();
+      const { results } = await db.prepare('PRAGMA table_info(revenue_events)').all<{ name: string }>();
+      if (!results.some((c) => c.name === 'status')) await db.prepare(ADD_STATUS).run();
+    })().catch((e: unknown) => {
+      this.ready = undefined;
+      throw e;
+    });
     return this.ready;
   }
 

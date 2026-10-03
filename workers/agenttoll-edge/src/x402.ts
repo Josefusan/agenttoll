@@ -142,12 +142,38 @@ export function encodeHeader(value: unknown): string {
   return base64Encode(utf8.encode(JSON.stringify(value)));
 }
 
+/** Wire text of each object's `x402Version`, recorded while parsing (JSON.parse source
+ * access, V8 11.4+; where a runtime lacks it the parsed value alone is checked). */
+const versionSource = new WeakMap<object, string>();
+
+function paymentReviver(this: unknown, key: string, value: unknown, context?: { source?: string }): unknown {
+  if (key === 'x402Version' && typeof this === 'object' && this !== null && typeof context?.source === 'string') {
+    versionSource.set(this, context.source);
+  }
+  return value;
+}
+
+/** `JSON.parse` for payment material: remembers how `x402Version` was spelled on the wire. */
+export function parsePaymentJson(text: string): unknown {
+  return JSON.parse(text, paymentReviver as unknown as (this: unknown, key: string, value: unknown) => unknown);
+}
+
+/**
+ * True only when `x402Version` is exactly the integer 2 on the wire, like the Rust gateway's
+ * `Value::as_u64() == Some(2)`: `2.0` and `2e0` are refused even though they parse to 2.
+ */
+export function isX402V2(payload: Record<string, unknown>): boolean {
+  if (payload.x402Version !== X402_VERSION) return false;
+  const source = versionSource.get(payload);
+  return source === undefined || source === String(X402_VERSION);
+}
+
 /** Inverse of {@link encodeHeader}; `undefined` for anything that is not base64 JSON. */
 export function decodeHeader(header: string): unknown | undefined {
   const bytes = base64Decode(header.trim());
   if (!bytes) return undefined;
   try {
-    return JSON.parse(utf8Decoder.decode(bytes));
+    return parsePaymentJson(utf8Decoder.decode(bytes));
   } catch {
     return undefined;
   }

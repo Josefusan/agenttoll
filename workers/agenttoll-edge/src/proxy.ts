@@ -44,6 +44,9 @@ export interface ForwardOptions {
   /** Client headers not to forward, e.g. `content-length` once a body was rewritten, or
    * `accept-encoding` when the response must be readable before settling. */
   dropHeaders?: string[];
+  /** Deadline for the origin's headers and body. Set for buffered paid requests only; free
+   * traffic streams without a limit (long SSE sessions). */
+  timeoutMs?: number;
 }
 
 let warnedPreserveHost = false;
@@ -102,6 +105,7 @@ export async function forward(
       headers: outgoing,
       body: method === 'GET' || method === 'HEAD' ? null : body,
       redirect: 'manual',
+      signal: opts.timeoutMs === undefined ? undefined : AbortSignal.timeout(opts.timeoutMs),
     });
   } catch (e) {
     console.warn('origin unreachable', String(e));

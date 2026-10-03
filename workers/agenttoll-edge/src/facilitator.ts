@@ -37,14 +37,12 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 
 const optionalString = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
 
-async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...init, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
+/** Fetches and reads the whole body under one deadline: headers that arrive in time but a
+ * body that never ends still fail at `timeoutMs`. */
+async function fetchText(url: string, init: RequestInit, timeoutMs: number): Promise<{ res: Response; text: string }> {
+  const signal = AbortSignal.timeout(timeoutMs);
+  const res = await fetch(url, { ...init, signal });
+  return { res, text: await res.text() };
 }
 
 /**
@@ -61,8 +59,9 @@ async function call(
 ): Promise<Record<string, unknown>> {
   const url = `${facilitator.replace(/\/+$/, '')}/${op}`;
   let res: Response;
+  let text: string;
   try {
-    res = await fetchWithTimeout(
+    ({ res, text } = await fetchText(
       url,
       {
         method: 'POST',
@@ -74,11 +73,10 @@ async function call(
         }),
       },
       timeoutMs,
-    );
+    ));
   } catch (e) {
     throw new FacilitatorError(`facilitator request failed: ${String(e)}`);
   }
-  const text = await res.text();
   let raw: unknown;
   try {
     raw = JSON.parse(text);
@@ -144,9 +142,9 @@ export async function feePayer(facilitator: string, network: string): Promise<st
   const url = `${facilitator.replace(/\/+$/, '')}/supported`;
   let body: unknown;
   try {
-    const res = await fetchWithTimeout(url, { method: 'GET' }, SUPPORTED_TIMEOUT_MS);
+    const { res, text } = await fetchText(url, { method: 'GET' }, SUPPORTED_TIMEOUT_MS);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    body = await res.json();
+    body = JSON.parse(text);
   } catch (e) {
     throw new FacilitatorError(`GET ${url}: ${String(e)}`);
   }

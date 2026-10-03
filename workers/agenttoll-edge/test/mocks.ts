@@ -48,8 +48,16 @@ function sendJson(res: http.ServerResponse, status: number, value: unknown): voi
   res.end(JSON.stringify(value));
 }
 
+export interface OriginState {
+  /** Like Express `compression()` / nginx gzip: compress JSON when the request allows gzip. */
+  compressWhenAllowed: boolean;
+  /** `Accept-Encoding` the /mcp endpoint last received. */
+  lastAcceptEncoding: string | undefined;
+}
+
 export interface MockOrigin {
   url: string;
+  state: OriginState;
   hits: () => number;
   /** Last JSON-RPC body the /mcp endpoint received. */
   mcpSeen: () => Record<string, unknown> | undefined;
@@ -61,9 +69,9 @@ type Json = Record<string, unknown>;
 /**
  * Minimal MCP origin, the same one the Rust e2e tests use: answers tools/list and tools/call;
  * `broken_tool` / `*_broken` fail with `isError`, `sse_*` answer over SSE after a notification,
- * `gzip_*` answer gzip-compressed.
+ * `gzip_*` answer gzip-compressed, `wrong_id` answers another id.
  */
-function mcpOrigin(body: Json, res: http.ServerResponse): void {
+function mcpOrigin(body: Json, req: http.IncomingMessage, res: http.ServerResponse, state: OriginState): void {
   const id = body.id ?? null;
   const method = body.method;
   const params = body.params as Json | undefined;
@@ -91,7 +99,8 @@ function mcpOrigin(body: Json, res: http.ServerResponse): void {
     res.end(`event: message\ndata: ${note}\n\nevent: message\ndata: ${message}\n\n`);
     return;
   }
-  if (tool.startsWith('gzip_')) {
+  const allowsGzip = (req.headers['accept-encoding'] ?? '').includes('gzip');
+  if (tool.startsWith('gzip_') || (state.compressWhenAllowed && allowsGzip)) {
     res.writeHead(200, { 'content-type': 'application/json', 'content-encoding': 'gzip' });
     res.end(zlib.gzipSync(Buffer.from(message, 'utf8')));
     return;
@@ -104,6 +113,7 @@ function mcpOrigin(body: Json, res: http.ServerResponse): void {
 export async function startOrigin(): Promise<MockOrigin> {
   let hits = 0;
   let mcpSeen: Json | undefined;
+  const state: OriginState = { compressWhenAllowed: false, lastAcceptEncoding: undefined };
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url ?? '/', 'http://origin');
     const p = url.pathname;
@@ -121,6 +131,7 @@ export async function startOrigin(): Promise<MockOrigin> {
     if (req.method === 'GET' && p.startsWith('/blog/')) return res.end('post');
     if (p === '/mcp' || p.toLowerCase().startsWith('/mcp')) {
       if (req.method === 'POST') {
+        state.lastAcceptEncoding = req.headers['accept-encoding'];
         const body = await readBody(req);
         let parsed: unknown;
         try {
@@ -135,7 +146,7 @@ export async function startOrigin(): Promise<MockOrigin> {
           return res.end(body);
         }
         mcpSeen = parsed as Json;
-        return mcpOrigin(parsed as Json, res);
+        return mcpOrigin(parsed as Json, req, res, state);
       }
       return res.end('sse');
     }
@@ -143,7 +154,7 @@ export async function startOrigin(): Promise<MockOrigin> {
     res.end('not found');
   });
   const url = await listen(server);
-  return { url, hits: () => hits, mcpSeen: () => mcpSeen, close: () => closeServer(server) };
+  return { url, state, hits: () => hits, mcpSeen: () => mcpSeen, close: () => closeServer(server) };
 }
 
 export interface FacilitatorState {
@@ -153,6 +164,9 @@ export interface FacilitatorState {
   slowSettle: boolean;
   /** Answer /settle with `settlement_pending` and a transaction id (KB-X402-06). */
   pendingSettle: boolean;
+  /** Send 200 + the start of a JSON body on /settle (or /verify), then never finish. */
+  stallSettle: boolean;
+  stallVerify: boolean;
   verifyCalls: number;
   settleCalls: number;
   lastSettle: Record<string, unknown> | undefined;
@@ -171,6 +185,8 @@ export async function startFacilitator(): Promise<MockFacilitator> {
     failSettle: false,
     slowSettle: false,
     pendingSettle: false,
+    stallSettle: false,
+    stallVerify: false,
     verifyCalls: 0,
     settleCalls: 0,
     lastSettle: undefined,
@@ -188,8 +204,14 @@ export async function startFacilitator(): Promise<MockFacilitator> {
     }
     const body = JSON.parse(await readBody(req)) as Record<string, unknown>;
     if (body.x402Version !== 2) return sendJson(res, 400, { error: 'x402Version must be 2' });
+    const stall = () => {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.write('{"success":');
+      // never ends; closeAllConnections() tears it down in close()
+    };
     if (req.method === 'POST' && req.url === '/verify') {
       state.verifyCalls += 1;
+      if (state.stallVerify) return stall();
       if (state.rejectVerify) {
         // Facilitators may reject with a 4xx that still carries a well-formed body.
         return sendJson(res, 400, { isValid: false, invalidReason: 'insufficient_funds' });
@@ -200,6 +222,7 @@ export async function startFacilitator(): Promise<MockFacilitator> {
       state.settleCalls += 1;
       state.lastSettle = body;
       const network = (body.paymentRequirements as Record<string, unknown>).network;
+      if (state.stallSettle) return stall();
       if (state.slowSettle) await new Promise((r) => setTimeout(r, 2_000));
       if (state.failSettle) {
         return sendJson(res, 200, { success: false, transaction: '', network, errorReason: 'transaction_failed' });
@@ -280,7 +303,7 @@ ${challenge}  tools:
 ledger:
   url: "sqlite::memory:"
 timeouts:
-  verify_ms: 5000
+  verify_ms: 500
   settle_ms: 500
 `;
 }
@@ -334,6 +357,13 @@ export function encodeHeader(value: unknown): string {
 }
 
 export const challenge = (res: Response) => decodeHeader(res, 'payment-required');
+
+/** A payment header whose `x402Version` is spelled `2.0` on the wire (parses to 2). */
+export function payFor20(payment: string): string {
+  const text = Buffer.from(payment, 'base64').toString('utf8');
+  if (!text.startsWith('{"x402Version":2,')) throw new Error(`unexpected payment text: ${text.slice(0, 40)}`);
+  return Buffer.from(text.replace('{"x402Version":2,', '{"x402Version":2.0,'), 'utf8').toString('base64');
+}
 
 /** A fresh signed-transaction stand-in, so each payment is distinct for the replay guard. */
 export const signedTx = () => Buffer.from(`partially-signed-${crypto.randomUUID()}`).toString('base64');

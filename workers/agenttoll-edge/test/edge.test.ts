@@ -15,6 +15,7 @@ import {
   mcp,
   mcpQuote,
   payFor,
+  payFor20,
   payTool,
   signedTx,
   startFacilitator,
@@ -78,6 +79,9 @@ beforeEach(async () => {
   fac.state.failSettle = false;
   fac.state.slowSettle = false;
   fac.state.pendingSettle = false;
+  fac.state.stallSettle = false;
+  fac.state.stallVerify = false;
+  origin.state.compressWhenAllowed = false;
   base = {
     verify: fac.state.verifyCalls,
     hits: origin.hits(),
@@ -439,15 +443,70 @@ describe('MCP-native transport (D4, KB-X402-05)', () => {
     expect(fac.state.settleCalls - base.settle).toBe(1);
   });
 
-  test('a compressed tool response is never settled and never served unpaid', async () => {
-    // A compressed success cannot be verified: withheld, not settled, not served.
-    const res = await payTool(W, 'gzip_ok');
+  test('compressed tool responses are judged on the decoded bytes', async () => {
+    // Intentional difference from Rust (which withholds anything with Content-Encoding):
+    // workerd decodes the body before the Worker sees it, so a compressed success is verified,
+    // settled and served without a misleading Content-Encoding header.
+    // workerd itself gzips any response to a client that accepts gzip; ask for identity to see
+    // the headers the Worker set.
+    const ok = await payTool(W, 'gzip_ok', { 'accept-encoding': 'identity' });
+    expect(ok.status).toBe(200);
+    expect(ok.headers.get('content-encoding')).toBeNull();
+    expect(ok.headers.get('payment-response')).not.toBeNull();
+    expect(await ok.text()).toContain('gzip_ok ok');
+    expect(fac.state.settleCalls - base.settle).toBe(1);
+    // A compressed explicit failure is returned unpaid.
+    const broken = await payTool(W, 'gzip_broken');
+    expect(broken.status).toBe(200);
+    expect(((await broken.json()) as { result: { isError: boolean } }).result.isError).toBe(true);
+    expect(fac.state.settleCalls - base.settle).toBe(1);
+  });
+
+  test('a compressing origin (gzip whenever allowed) is settled and served', async () => {
+    origin.state.compressWhenAllowed = true;
+    // The client asks for identity (so the Worker's own headers are visible), yet workerd adds
+    // its own Accept-Encoding to the subrequest, so the origin still compresses.
+    const res = await payTool(W, 'search_docs', { 'accept-encoding': 'identity' });
+    expect(res.status).toBe(200);
+    expect(origin.state.lastAcceptEncoding ?? '', 'origin saw workerd Accept-Encoding').toContain('gzip');
+    expect(res.headers.get('content-encoding')).toBeNull();
+    const body = (await res.json()) as { result: Record<string, unknown> };
+    expect((body.result.content as { text: string }[])[0]!.text).toBe('search_docs ok');
+    expect(body.result._meta).toBeDefined();
+    expect(fac.state.settleCalls - base.settle).toBe(1);
+  });
+
+  test('a stalled /settle (headers sent, body never ends) is a timeout: served, unconfirmed', async () => {
+    fac.state.stallSettle = true;
+    const payment = await payFor(W, '/api/quote', SOLANA_DEVNET);
+    const res = await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': payment });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('payment-response')).toBeNull();
+    expect(await res.text()).toContain('142');
+    const [row] = await newRows(1);
+    expect(row!.status).toBe('unconfirmed');
+    fac.state.stallSettle = false;
+    expect((await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': payment })).status, 'claim kept').toBe(402);
+  });
+
+  test('a stalled /verify is a 502 and the payment is released', async () => {
+    fac.state.stallVerify = true;
+    const payment = await payFor(W, '/api/quote', SOLANA_DEVNET);
+    const res = await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': payment });
     expect(res.status).toBe(502);
-    expect(await res.text()).not.toContain('ok');
-    // A compressed failure cannot be proven a failure either: also withheld.
-    expect((await payTool(W, 'gzip_broken')).status).toBe(502);
-    expect(fac.state.settleCalls - base.settle).toBe(0);
-    expect((await ledgerRows()).length).toBe(base.rows);
+    expect(await res.text()).toBe('payment facilitator unavailable');
+    expect(calls()).toEqual([1, 0, 0]);
+    fac.state.stallVerify = false;
+    expect((await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': payment })).status, 'released').toBe(200);
+    expect(calls()).toEqual([2, 1, 1]);
+  });
+
+  test('x402Version must be the integer 2 on the wire', async () => {
+    const payment = payFor20(await payFor(W, '/api/quote', SOLANA_DEVNET));
+    const res = await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': payment });
+    expect(res.status).toBe(402);
+    expect(challenge(res).error).toBe('only x402Version 2 payments are accepted');
+    expect(calls()).toEqual([0, 0, 0]);
   });
 
   test('a float id echoed as an integer is settled, not leaked', async () => {

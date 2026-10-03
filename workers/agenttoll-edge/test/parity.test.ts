@@ -22,6 +22,7 @@ import {
   mcp,
   mcpQuote,
   payFor,
+  payFor20,
   payTool,
   signedTx,
   startFacilitator,
@@ -277,13 +278,11 @@ describe.skipIf(!haveCargo)('Rust gateway vs Worker parity', () => {
     ['worker', () => W],
   ] as const;
 
-  test('settle decisions agree for SSE, compressed, wrong-id and plain MCP results', async () => {
+  test('settle decisions agree for SSE, wrong-id and plain MCP results', async () => {
     // tool -> [HTTP status, /settle calls]. Unverifiable 2xx results are withheld (502).
     const expected: Record<string, [number, number]> = {
       sse_broken: [200, 0],
       sse_ok: [200, 1],
-      gzip_ok: [502, 0],
-      gzip_broken: [502, 0],
       wrong_id: [502, 0],
       search_docs: [200, 1],
       broken_tool: [200, 0],
@@ -298,6 +297,57 @@ describe.skipIf(!haveCargo)('Rust gateway vs Worker parity', () => {
         if (status === 502) expect(await res.text(), `${name} ${tool} leaked`).not.toContain(' ok');
       }
     }
+  });
+
+  test('explicitly compressed results: documented difference, never served unpaid', async () => {
+    // Rust strips Accept-Encoding and cannot judge a body that still arrives compressed, so it
+    // withholds it (502, not settled). workerd decodes the body before the Worker sees it, so
+    // the Worker judges the decoded bytes: a success settles, an explicit failure is returned
+    // unpaid. Neither edition ever serves content it could not verify without settling.
+    const expected: Record<string, Record<string, [number, number]>> = {
+      gzip_ok: { rust: [502, 0], worker: [200, 1] },
+      gzip_broken: { rust: [502, 0], worker: [200, 0] },
+    };
+    for (const [tool, byEdition] of Object.entries(expected)) {
+      for (const [name, base] of editions) {
+        const [status, settles] = byEdition[name]!;
+        const before = fac.state.settleCalls;
+        const res = await payTool(base(), tool);
+        expect(res.status, `${name} ${tool}`).toBe(status);
+        expect(fac.state.settleCalls - before, `${name} ${tool} settle count`).toBe(settles);
+        const body = await res.text();
+        if (status === 502) expect(body, `${name} ${tool} leaked`).not.toContain(' ok');
+        if (status === 200 && settles === 0) expect(body).toContain('"isError":true');
+      }
+    }
+  });
+
+  test('a compressing origin is settled and served on both', async () => {
+    // The origin gzips whenever the request allows it. Rust strips Accept-Encoding and gets
+    // identity; workerd adds its own Accept-Encoding, gets gzip and decodes it. Same outcome.
+    origin.state.compressWhenAllowed = true;
+    try {
+      for (const [name, base] of editions) {
+        const before = fac.state.settleCalls;
+        const res = await payTool(base(), 'search_docs');
+        expect(res.status, name).toBe(200);
+        expect(fac.state.settleCalls - before, `${name} settle count`).toBe(1);
+        expect(await res.text(), name).toContain('search_docs ok');
+      }
+    } finally {
+      origin.state.compressWhenAllowed = false;
+    }
+  });
+
+  test('x402Version 2.0 is refused identically', async () => {
+    const before = fac.state.verifyCalls;
+    for (const [name, base] of editions) {
+      const payment = payFor20(await payFor(base(), '/api/quote', SOLANA_DEVNET));
+      const res = await get(base(), '/api/quote', CLAUDEBOT, { 'payment-signature': payment });
+      expect(res.status, name).toBe(402);
+      expect(challenge(res).error, name).toBe('only x402Version 2 payments are accepted');
+    }
+    expect(fac.state.verifyCalls).toBe(before);
   });
 
   test('float ids settle and duplicate-id batches never do, on both', async () => {
