@@ -7,16 +7,18 @@ It proves "runs anywhere, including the edge": for the same config it returns by
 
 ## One source of truth
 
-Detection, pricing, path canonicalization, MCP body inspection and config parsing are not
-ported: `crates/agenttoll-core` (pure Rust, no IO) is compiled to WASM through the thin
+Detection, pricing, path canonicalization, MCP body inspection, config parsing, the discovery
+document, `tools/list` price advertising and the canonical replay key are not ported:
+`crates/agenttoll-core` (pure Rust, no IO) is compiled to WASM through the thin
 `crates/agenttoll-core-wasm` facade (wasm-bindgen) and called from TypeScript. Only the IO
 shell is TypeScript, mirroring the gateway file for file:
 
 | Worker file | Rust counterpart |
 |---|---|
-| `src/gateway.ts` | `agenttoll-gateway/src/lib.rs` (state, challenge, resource URL) |
+| `src/gateway.ts` | `agenttoll-gateway/src/lib.rs` (state, HTTP 402 and MCP-native challenges, resource URL, discovery) |
+| `src/mcp.ts` | the MCP helpers of `lib.rs` + `pay.rs` (payment in `_meta`, call ids, SSE/JSON success check, receipt) |
 | `src/x402.ts` | `agenttoll-gateway/src/x402.rs` (wire types, header encoding) |
-| `src/pay.ts` | `agenttoll-gateway/src/pay.rs` (verify → forward → settle) |
+| `src/pay.ts` | `agenttoll-gateway/src/pay.rs` (verify → forward → settle, both transports, unconfirmed/pending) |
 | `src/facilitator.ts` | `agenttoll-gateway/src/{facilitator,supported}.rs` |
 | `src/proxy.ts` | `agenttoll-gateway/src/proxy.rs` (header hygiene, streaming) |
 | `src/replay.ts` | `ReplayGuard` in `pay.rs` |
@@ -55,10 +57,23 @@ cargo test -p agenttoll-core-wasm   # the facade's native unit tests
 ClaudeBot 402 with a decodable header and the same JSON body, fee payer read from the
 facilitator's `/supported`, path tricks priced, MCP per tool and per batch, malformed MCP 400
 and oversized 413, tampered quote refused before `/verify`, origin 500 never settled and
-retryable, settle failure withholds content, replay refused, D1 row written.
+retryable, settle failure withholds content, replay refused, D1 row written. D4 semantics:
+settle timeout serves the content and records `status = unconfirmed` (`tx_signature`
+`unconfirmed:<hash>`, payment stays claimed), `settlement_pending` records `pending`, a payment
+is bound to its `resource.url` (MCP quotes carry `#mcp:<tool>`), a re-encoded header is still a
+replay (key = canonical JSON of the signed `payload`), MCP-native challenge on a single
+`tools/call` (HTTP 200 tool result with `isError`, `structuredContent`, `PAYMENT-REQUIRED`;
+`mcp.challenge: http-402` keeps the 402), payment in `params._meta["x402/payment"]` stripped
+before the origin and receipted in `result._meta["x402/payment-response"]`, no settlement for a
+JSON-RPC error, `isError`, an SSE error after a notification or a compressed body,
+`Accept-Encoding` dropped on paid MCP forwards, `tools/list` price advertising and
+`GET /.well-known/agenttoll.json`.
 `test/parity.test.ts` runs the Rust gateway and the Worker on one config and one mock
-facilitator and asserts the decoded and the raw `PAYMENT-REQUIRED` JSON, bodies, verdict
-headers and refusal reasons are equal (host masked). Everything started is killed in `afterAll`.
+facilitator and asserts the decoded and the raw `PAYMENT-REQUIRED` JSON, 402 bodies, the
+MCP-native challenge body (byte-identical, host masked), the discovery JSON, the advertised
+`tools/list`, verdict headers, refusal reasons (tampered quote, other resource, other tool,
+re-encoded replay) and settle decisions (facilitator `/settle` counts for SSE error/success,
+gzip and plain tool results) are equal. Everything started is killed in `afterAll`.
 
 ## Gaps vs the Rust gateway
 
@@ -74,5 +89,12 @@ headers and refusal reasons are equal (host masked). Everything started is kille
   only when `AGENTTOLL_DEBUG=1`.
 - **Fee payer is resolved lazily** on the first priced request (per isolate) instead of at
   startup; if `/supported` fails the request gets 502 and the next one retries.
+- **No unbilled-traffic log.** The Rust gateway writes uncharged agent requests to
+  `request_log` for the "not billing yet" report; the Worker only logs them to the console.
+- **Compressed origin bodies.** workerd decodes `Content-Encoding` transparently but keeps the
+  header, so a compressed paid MCP result is still never settled (same decision as Rust); the
+  decoded content is re-encoded on the way out by the runtime.
+- **`unconfirmed:<hash>`** uses SHA-256 (first 16 hex) where Rust uses `DefaultHasher`; the id
+  only needs to be stable within one edition.
 - Not used: Hono and `@x402/hono`. The handler is one `fetch`, and `@x402/hono` prices from
   the route, not the request body, so it cannot price MCP `tools/call` (DECISIONS.md).

@@ -13,10 +13,14 @@ import {
   encodeHeader,
   get,
   mcp,
+  mcpQuote,
   payFor,
+  payTool,
+  signedTx,
   startFacilitator,
   startOrigin,
   startWorker,
+  toolCall,
   type MockFacilitator,
   type MockOrigin,
   type Worker,
@@ -41,14 +45,27 @@ async function ledgerRows(): Promise<Record<string, unknown>[]> {
   return (await res.json()) as Record<string, unknown>[];
 }
 
+/** The ledger write is deferred with waitUntil; poll briefly for `n` new rows. */
+async function newRows(n: number): Promise<Record<string, unknown>[]> {
+  let rows = await ledgerRows();
+  for (let i = 0; i < 40 && rows.length < base.rows + n; i++) {
+    await new Promise((r) => setTimeout(r, 50));
+    rows = await ledgerRows();
+  }
+  expect(rows.length).toBe(base.rows + n);
+  return rows.slice(base.rows);
+}
+
+const vars = () => ({
+  AGENTTOLL_ORIGIN: origin.url,
+  AGENTTOLL_FACILITATOR: fac.url,
+  AGENTTOLL_LISTEN: '127.0.0.1:0',
+  AGENTTOLL_ADMIN_LISTEN: '127.0.0.1:0',
+});
+
 beforeAll(async () => {
   [origin, fac] = await Promise.all([startOrigin(), startFacilitator()]);
-  worker = await startWorker(configYaml({ pinFeePayer: false }), {
-    AGENTTOLL_ORIGIN: origin.url,
-    AGENTTOLL_FACILITATOR: fac.url,
-    AGENTTOLL_LISTEN: '127.0.0.1:0',
-    AGENTTOLL_ADMIN_LISTEN: '127.0.0.1:0',
-  });
+  worker = await startWorker(configYaml({ pinFeePayer: false }), vars());
   W = worker.url;
 });
 
@@ -59,6 +76,8 @@ afterAll(async () => {
 beforeEach(async () => {
   fac.state.rejectVerify = false;
   fac.state.failSettle = false;
+  fac.state.slowSettle = false;
+  fac.state.pendingSettle = false;
   base = {
     verify: fac.state.verifyCalls,
     hits: origin.hits(),
@@ -159,23 +178,29 @@ describe('MCP per-tool pricing', () => {
   test('tools priced per call, discovery free', async () => {
     const list = await mcp(W, '{"jsonrpc":"2.0","id":1,"method":"tools/list"}');
     expect(list.status).toBe(200);
-    expect(await list.text()).toContain('tools/list'); // body replayed to origin intact
+    expect(origin.mcpSeen()?.method).toBe('tools/list'); // reached the origin
 
     const freeTool = await mcp(W, '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"ping_free"}}');
     expect(freeTool.status).toBe(200);
+    expect(freeTool.headers.get('payment-required')).toBeNull();
 
-    for (const path of ['/MCP', '/Mcp/']) {
+    // A single unpaid tools/call gets the MCP-native challenge (HTTP 200, isError tool result).
+    for (const path of ['/mcp', '/MCP', '/Mcp/']) {
       const res = await mcp(W, '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"search_docs"}}', path);
-      expect(res.status, `${path} must be priced like /mcp`).toBe(402);
+      expect(res.status, `${path} must be priced like /mcp`).toBe(200);
+      expect(res.headers.get('x-agenttoll-verdict')).toBe('mcp-endpoint');
+      const body = (await res.json()) as { id: number; result: Record<string, unknown> };
+      expect(body.id).toBe(4);
+      expect(body.result.isError).toBe(true);
+      const pr = challenge(res);
+      expect(body.result.structuredContent).toEqual(pr);
+      expect(JSON.parse((body.result.content as { text: string }[])[0]!.text)).toEqual(pr);
+      expect((pr.accepts as Record<string, unknown>[])[0]!.amount).toBe('5000');
+      expect((pr.resource as { description?: string }).description).toBe('mcp:search_docs');
+      expect(String(pr.error)).toContain('x402/payment');
     }
 
-    const paid = await mcp(W, '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_docs"}}');
-    expect(paid.status).toBe(402);
-    expect(paid.headers.get('x-agenttoll-verdict')).toBe('mcp-endpoint');
-    const pr = challenge(paid);
-    expect((pr.accepts as Record<string, unknown>[])[0]!.amount).toBe('5000');
-    expect((pr.resource as { description?: string }).description).toBe('mcp:search_docs');
-
+    // Batches cannot carry one tool result, so they get HTTP 402.
     const batch = await mcp(
       W,
       '[{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_docs"}},{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"generate_report"}}]',
@@ -226,20 +251,15 @@ describe('paid path (D3 money rules)', () => {
     expect(settled.amount).toBe('2000');
     expect((settled.extra as Record<string, unknown>).feePayer).toBe('FacilitatorFeePayer111');
 
-    // D1 ledger row (ARCHITECTURE.md §1.6). The write is deferred with waitUntil; poll briefly.
-    let rows = await ledgerRows();
-    for (let i = 0; i < 20 && rows.length === base.rows; i++) {
-      await new Promise((r) => setTimeout(r, 50));
-      rows = await ledgerRows();
-    }
-    expect(rows.length).toBe(base.rows + 1);
-    const row = rows.at(-1)!;
-    expect(row.amount_atomic).toBe(2000);
-    expect(row.network).toBe(SOLANA_DEVNET);
-    expect(row.tx_signature).toBe(receipt.transaction);
-    expect(row.agent_name).toBe('ClaudeBot');
-    expect(row.route).toBe('GET /api/quote');
-    expect(row.origin_status).toBe(200);
+    // D1 ledger row (ARCHITECTURE.md §1.6).
+    const [row] = await newRows(1);
+    expect(row!.amount_atomic).toBe(2000);
+    expect(row!.network).toBe(SOLANA_DEVNET);
+    expect(row!.tx_signature).toBe(receipt.transaction);
+    expect(row!.agent_name).toBe('ClaudeBot');
+    expect(row!.route).toBe('GET /api/quote');
+    expect(row!.origin_status).toBe(200);
+    expect(row!.status).toBe('settled');
   });
 
   test('Base Sepolia payment works too', async () => {
@@ -255,6 +275,7 @@ describe('paid path (D3 money rules)', () => {
     const payment = await payFor(W, '/api/fail', SOLANA_DEVNET);
     const res = await get(W, '/api/fail', CLAUDEBOT, { 'payment-signature': payment });
     expect(res.status, 'origin status passes through').toBe(500);
+    expect(await res.text()).toBe('origin down');
     expect(fac.state.settleCalls - base.settle).toBe(0);
     expect((await ledgerRows()).length).toBe(base.rows);
 
@@ -314,5 +335,202 @@ describe('paid path (D3 money rules)', () => {
     const noAccepted = encodeHeader({ x402Version: 2, payload: {} });
     expect((await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': noAccepted })).status).toBe(400);
     expect(calls()).toEqual([0, 0, 0]);
+  });
+});
+
+describe('settlement outcomes (D4)', () => {
+  test('settle timeout serves the content and records it unconfirmed', async () => {
+    fac.state.slowSettle = true;
+    const payment = await payFor(W, '/api/quote', SOLANA_DEVNET);
+    const res = await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': payment });
+    expect(res.status, 'buyer may have paid, so they are served').toBe(200);
+    expect(res.headers.get('payment-response'), 'no receipt we cannot vouch for').toBeNull();
+    expect(await res.text()).toContain('142');
+
+    const [row] = await newRows(1);
+    expect(row!.status).toBe('unconfirmed');
+    expect(String(row!.tx_signature).startsWith('unconfirmed:')).toBe(true);
+    expect(row!.amount_atomic).toBe(2000);
+
+    // The payment stays claimed: it may have been consumed.
+    fac.state.slowSettle = false;
+    const again = await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': payment });
+    expect(again.status).toBe(402);
+    expect(challenge(again).error).toBe('duplicate_settlement');
+  });
+
+  test('settlement_pending with a transaction is served and recorded pending', async () => {
+    fac.state.pendingSettle = true;
+    const payment = await payFor(W, '/api/quote', SOLANA_DEVNET);
+    const res = await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': payment });
+    expect(res.status).toBe(200);
+    const receipt = decodeHeader(res, 'payment-response');
+    expect(receipt.errorReason).toBe('settlement_pending');
+    const [row] = await newRows(1);
+    expect(row!.status).toBe('pending');
+    expect(String(row!.tx_signature)).toMatch(/^5igPending\d+$/);
+  });
+
+  test('a payment is bound to its resource', async () => {
+    const payment = await payFor(W, '/api/quote', SOLANA_DEVNET);
+    const res = await get(W, '/api/other', CLAUDEBOT, { 'payment-signature': payment }); // same price, different resource
+    expect(res.status).toBe(402);
+    expect(challenge(res).error).toBe('payment was made for a different resource');
+    expect(calls()).toEqual([0, 0, 0]);
+  });
+
+  test('re-encoding a payment does not dodge the replay guard', async () => {
+    const payment = await payFor(W, '/api/quote', SOLANA_DEVNET);
+    expect((await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': payment })).status).toBe(200);
+    const decoded = JSON.parse(Buffer.from(payment, 'base64').toString('utf8')) as Record<string, unknown>;
+    // Pretty-printed, keys reordered: same signed payload, different header bytes.
+    const reordered = { payload: decoded.payload, accepted: decoded.accepted, resource: decoded.resource, x402Version: 2 };
+    const pretty = Buffer.from(JSON.stringify(reordered, null, 2), 'utf8').toString('base64');
+    expect(pretty).not.toBe(payment);
+    const replay = await get(W, '/api/quote', CLAUDEBOT, { 'payment-signature': pretty });
+    expect(replay.status).toBe(402);
+    expect(challenge(replay).error).toBe('duplicate_settlement');
+    expect(calls()).toEqual([1, 1, 1]);
+  });
+});
+
+describe('MCP-native transport (D4, KB-X402-05)', () => {
+  test('MCP-native payment is settled and receipted in _meta', async () => {
+    const res = await payTool(W, 'search_docs');
+    expect(res.status).toBe(200);
+    expect(res.headers.get('payment-response')).not.toBeNull();
+    const body = (await res.json()) as { result: Record<string, unknown> };
+    expect((body.result.content as { text: string }[])[0]!.text).toBe('search_docs ok');
+    const receipt = (body.result._meta as Record<string, unknown>)['x402/payment-response'] as Record<string, unknown>;
+    expect(receipt.success).toBe(true);
+
+    // The origin never saw the payment.
+    const seen = origin.mcpSeen()!;
+    expect((seen.params as Record<string, unknown>)._meta).toBeUndefined();
+
+    expect((fac.state.lastSettle!.paymentRequirements as Record<string, unknown>).amount).toBe('5000');
+    expect(calls()).toEqual([1, 0, 1]);
+    const [row] = await newRows(1);
+    expect(row!.mcp_tool).toBe('search_docs');
+    expect(row!.route).toBe('mcp:search_docs');
+    expect(row!.status).toBe('settled');
+  });
+
+  test('a failed tool is never settled', async () => {
+    const res = await payTool(W, 'broken_tool');
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { result: Record<string, unknown> };
+    expect(body.result.isError).toBe(true);
+    expect(body.result._meta).toBeUndefined();
+    expect(calls()).toEqual([1, 0, 0]);
+    expect((await ledgerRows()).length).toBe(base.rows);
+  });
+
+  test('SSE: a tool error after a notification is not settled, a success is', async () => {
+    const failed = await payTool(W, 'sse_broken');
+    expect(failed.status).toBe(200);
+    expect(fac.state.settleCalls - base.settle, 'a crashed tool is never charged').toBe(0);
+
+    const ok = await payTool(W, 'sse_ok');
+    expect(ok.status).toBe(200);
+    expect(ok.headers.get('payment-response')).not.toBeNull();
+    expect(ok.headers.get('content-type')).toBe('text/event-stream');
+    expect(await ok.text()).toContain('sse_ok ok');
+    expect(fac.state.settleCalls - base.settle).toBe(1);
+  });
+
+  test('a compressed tool response is never settled', async () => {
+    // Even a successful-looking compressed answer cannot be judged, so it is not charged.
+    for (const tool of ['gzip_broken', 'gzip_ok']) {
+      const res = await payTool(W, tool);
+      expect(res.status, tool).toBe(200);
+    }
+    expect(fac.state.settleCalls - base.settle).toBe(0);
+    expect((await ledgerRows()).length).toBe(base.rows);
+  });
+
+  test('paid MCP forwards ask for uncompressed responses', async () => {
+    const res = await payTool(W, 'search_docs', { 'accept-encoding': 'gzip' });
+    expect(res.status).toBe(200);
+    expect(fac.state.settleCalls - base.settle).toBe(1);
+  });
+
+  test('an MCP payment is bound to its tool', async () => {
+    const { required, payment } = await mcpQuote(W, 'search_docs');
+    expect(String((required.resource as { url: string }).url)).toMatch(/\/mcp#mcp:search_docs$/);
+    // Present the search_docs payment on broken_tool (same price).
+    const other = toolCall('broken_tool', 10);
+    (other.params as Record<string, unknown>)._meta = { 'x402/payment': payment };
+    const res = await mcp(W, JSON.stringify(other));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { id: number; result: Record<string, unknown> };
+    expect(body.id).toBe(10);
+    expect(body.result.isError).toBe(true);
+    expect((body.result.structuredContent as Record<string, unknown>).error).toBe('payment was made for a different resource');
+    expect(calls()).toEqual([0, 0, 0]);
+  });
+
+  test('a header payment on /mcp never leaks a body payment to the origin', async () => {
+    const { payment } = await mcpQuote(W, 'search_docs');
+    const call = toolCall('search_docs');
+    (call.params as Record<string, unknown>)._meta = { 'x402/payment': payment };
+    const res = await mcp(W, JSON.stringify(call), '/mcp', { 'payment-signature': encodeHeader(payment) });
+    expect(res.status).toBe(200);
+    expect((origin.mcpSeen()!.params as Record<string, unknown>)._meta).toBeUndefined();
+    expect(calls()).toEqual([1, 0, 1]);
+  });
+
+  test('malformed MCP payments are JSON-RPC errors on HTTP 200', async () => {
+    const call = toolCall('search_docs', 11);
+    (call.params as Record<string, unknown>)._meta = { 'x402/payment': { x402Version: 2, payload: { transaction: signedTx() } } };
+    const res = await mcp(W, JSON.stringify(call));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { id: number; error: { code: number; message: string } };
+    expect(body.id).toBe(11);
+    expect(body.error.code).toBe(-32602);
+    expect(body.error.message).toBe('payment has no valid `accepted` requirements');
+    expect(calls()).toEqual([0, 0, 0]);
+  });
+
+  test('tools/list advertises prices', async () => {
+    const res = await mcp(W, '{"jsonrpc":"2.0","id":1,"method":"tools/list"}');
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { result: { tools: { name: string; description: string }[] } };
+    expect(body.result.tools[0]!.description).toBe('Search the docs. (Paid tool: $0.005 USDC per call via x402.)');
+    expect(body.result.tools[1]!.description).toBe('Free.');
+  });
+
+  test('discovery lists every price', async () => {
+    const res = await fetch(`${W}/.well-known/agenttoll.json`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('application/json');
+    const d = (await res.json()) as Record<string, any>;
+    expect(d.x402Version).toBe(2);
+    expect(d.detection).toBe('agents-only');
+    expect(d.routes[0].priceUsd).toBe('0.002');
+    expect(d.routes[0].description).toBe('Live price quote');
+    expect(d.mcp.tools.search_docs).toBe('0.005');
+    expect(d.mcp.paymentTransports).toEqual(['http-402', 'mcp-native']);
+    expect(d.networks).toHaveLength(2);
+    expect(d.networks.map((n: { network: string }) => n.network).sort()).toEqual([BASE_SEPOLIA, SOLANA_DEVNET].sort());
+  });
+});
+
+describe('mcp.challenge: http-402', () => {
+  let legacy: Worker;
+  beforeAll(async () => {
+    legacy = await startWorker(configYaml({ pinFeePayer: false, mcpChallenge: 'http-402' }), vars());
+  });
+  afterAll(async () => {
+    await legacy?.close();
+  });
+
+  test('an unpaid single tools/call gets HTTP 402', async () => {
+    const res = await mcp(legacy.url, JSON.stringify(toolCall('search_docs')));
+    expect(res.status).toBe(402);
+    const pr = challenge(res);
+    expect((pr.accepts as Record<string, unknown>[])[0]!.amount).toBe('5000');
+    expect(String((pr.resource as { url: string }).url)).toMatch(/\/mcp#mcp:search_docs$/);
+    expect(await res.json()).toEqual(pr);
   });
 });

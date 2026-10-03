@@ -5,6 +5,7 @@ import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
 import { createTestHarness } from 'wrangler';
 
 export const WORKER_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -50,12 +51,58 @@ function sendJson(res: http.ServerResponse, status: number, value: unknown): voi
 export interface MockOrigin {
   url: string;
   hits: () => number;
+  /** Last JSON-RPC body the /mcp endpoint received. */
+  mcpSeen: () => Record<string, unknown> | undefined;
   close: () => Promise<void>;
+}
+
+type Json = Record<string, unknown>;
+
+/**
+ * Minimal MCP origin, the same one the Rust e2e tests use: answers tools/list and tools/call;
+ * `broken_tool` / `*_broken` fail with `isError`, `sse_*` answer over SSE after a notification,
+ * `gzip_*` answer gzip-compressed.
+ */
+function mcpOrigin(body: Json, res: http.ServerResponse): void {
+  const id = body.id ?? null;
+  const method = body.method;
+  const params = body.params as Json | undefined;
+  const tool = typeof params?.name === 'string' ? params.name : '';
+  let result: unknown;
+  if (method === 'tools/list') {
+    result = {
+      tools: [
+        { name: 'search_docs', description: 'Search the docs.' },
+        { name: 'ping', description: 'Free.' },
+      ],
+    };
+  } else if (method === 'tools/call' && (tool === 'broken_tool' || tool.endsWith('_broken'))) {
+    result = { isError: true, content: [{ type: 'text', text: 'tool crashed' }] };
+  } else if (method === 'tools/call') {
+    result = { content: [{ type: 'text', text: `${tool} ok` }] };
+  } else {
+    result = {};
+  }
+  const message = JSON.stringify({ jsonrpc: '2.0', id, result });
+  if (tool.startsWith('sse_')) {
+    const note = JSON.stringify({ jsonrpc: '2.0', method: 'notifications/message', params: { level: 'info', data: 'working' } });
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    res.end(`event: message\ndata: ${note}\n\nevent: message\ndata: ${message}\n\n`);
+    return;
+  }
+  if (tool.startsWith('gzip_')) {
+    res.writeHead(200, { 'content-type': 'application/json', 'content-encoding': 'gzip' });
+    res.end(zlib.gzipSync(Buffer.from(message, 'utf8')));
+    return;
+  }
+  res.writeHead(200, { 'content-type': 'application/json' });
+  res.end(message);
 }
 
 /** The origin behind the paywall: the same routes the Rust e2e tests use. */
 export async function startOrigin(): Promise<MockOrigin> {
   let hits = 0;
+  let mcpSeen: Json | undefined;
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url ?? '/', 'http://origin');
     const p = url.pathname;
@@ -64,6 +111,7 @@ export async function startOrigin(): Promise<MockOrigin> {
       hits += 1;
       return sendJson(res, 200, { price: 142.0, headers: req.headers });
     }
+    if (req.method === 'GET' && p === '/api/other') return sendJson(res, 200, { other: true });
     if (req.method === 'GET' && p === '/echo') return sendJson(res, 200, req.headers);
     if (req.method === 'GET' && p === '/api/fail') {
       res.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
@@ -73,8 +121,20 @@ export async function startOrigin(): Promise<MockOrigin> {
     if (p === '/mcp' || p.toLowerCase().startsWith('/mcp')) {
       if (req.method === 'POST') {
         const body = await readBody(req);
-        res.writeHead(200, { 'content-type': req.headers['content-type'] ?? 'application/json' });
-        return res.end(body);
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(body);
+        } catch {
+          res.writeHead(400);
+          return res.end('bad json');
+        }
+        if (Array.isArray(parsed) || typeof parsed !== 'object' || parsed === null) {
+          // Batches are echoed; the tests only price them, never pay them.
+          res.writeHead(200, { 'content-type': 'application/json' });
+          return res.end(body);
+        }
+        mcpSeen = parsed as Json;
+        return mcpOrigin(parsed as Json, res);
       }
       return res.end('sse');
     }
@@ -82,12 +142,16 @@ export async function startOrigin(): Promise<MockOrigin> {
     res.end('not found');
   });
   const url = await listen(server);
-  return { url, hits: () => hits, close: () => closeServer(server) };
+  return { url, hits: () => hits, mcpSeen: () => mcpSeen, close: () => closeServer(server) };
 }
 
 export interface FacilitatorState {
   rejectVerify: boolean;
   failSettle: boolean;
+  /** Answer /settle after 2 s, longer than the settle budget in the test config (500 ms). */
+  slowSettle: boolean;
+  /** Answer /settle with `settlement_pending` and a transaction id (KB-X402-06). */
+  pendingSettle: boolean;
   verifyCalls: number;
   settleCalls: number;
   lastSettle: Record<string, unknown> | undefined;
@@ -104,6 +168,8 @@ export async function startFacilitator(): Promise<MockFacilitator> {
   const state: FacilitatorState = {
     rejectVerify: false,
     failSettle: false,
+    slowSettle: false,
+    pendingSettle: false,
     verifyCalls: 0,
     settleCalls: 0,
     lastSettle: undefined,
@@ -133,8 +199,17 @@ export async function startFacilitator(): Promise<MockFacilitator> {
       state.settleCalls += 1;
       state.lastSettle = body;
       const network = (body.paymentRequirements as Record<string, unknown>).network;
+      if (state.slowSettle) await new Promise((r) => setTimeout(r, 2_000));
       if (state.failSettle) {
         return sendJson(res, 200, { success: false, transaction: '', network, errorReason: 'transaction_failed' });
+      }
+      if (state.pendingSettle) {
+        return sendJson(res, 200, {
+          success: false,
+          transaction: `5igPending${state.settleCalls}`,
+          network,
+          errorReason: 'settlement_pending',
+        });
       }
       return sendJson(res, 200, {
         success: true,
@@ -151,12 +226,20 @@ export async function startFacilitator(): Promise<MockFacilitator> {
   return { url, state, close: () => closeServer(server) };
 }
 
+export interface ConfigOptions {
+  pinFeePayer: boolean;
+  /** `mcp.challenge`; the default (omitted) is `mcp-native`. */
+  mcpChallenge?: 'mcp-native' | 'http-402';
+}
+
 /**
  * The config under test. `${VAR}` placeholders are filled by each runtime (the Worker from
- * its vars, the Rust gateway from its process environment), so one text serves both.
+ * its vars, the Rust gateway from its process environment), so one text serves both. The
+ * settle budget is 500 ms so a slow facilitator can be simulated quickly.
  */
-export function configYaml(opts: { pinFeePayer: boolean }): string {
+export function configYaml(opts: ConfigOptions): string {
   const pin = opts.pinFeePayer ? '    fee_payer: PinnedFeePayer111\n' : '';
+  const challenge = opts.mcpChallenge ? `  challenge: ${opts.mcpChallenge}\n` : '';
   return `origin: "\${AGENTTOLL_ORIGIN}"
 listen: "\${AGENTTOLL_LISTEN}"
 admin_listen: "\${AGENTTOLL_ADMIN_LISTEN}"
@@ -183,11 +266,20 @@ routes:
     price_usd: "0"
 mcp:
   endpoint: /mcp
-  tools:
+  advertise_prices: true
+${challenge}  tools:
     search_docs: "0.005"
     generate_report: "0.05"
+    broken_tool: "0.005"
+    sse_ok: "0.005"
+    sse_broken: "0.005"
+    gzip_ok: "0.005"
+    gzip_broken: "0.005"
 ledger:
   url: "sqlite::memory:"
+timeouts:
+  verify_ms: 5000
+  settle_ms: 500
 `;
 }
 
@@ -221,10 +313,10 @@ export function get(base: string, path: string, ua: string, extra: Record<string
   return fetch(`${base}${path}`, { headers, redirect: 'manual' });
 }
 
-export function mcp(base: string, body: string, path = '/mcp'): Promise<Response> {
+export function mcp(base: string, body: string, path = '/mcp', extra: Record<string, string> = {}): Promise<Response> {
   return fetch(`${base}${path}`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...extra },
     body,
   });
 }
@@ -241,9 +333,12 @@ export function encodeHeader(value: unknown): string {
 
 export const challenge = (res: Response) => decodeHeader(res, 'payment-required');
 
+/** A fresh signed-transaction stand-in, so each payment is distinct for the replay guard. */
+export const signedTx = () => Buffer.from(`partially-signed-${crypto.randomUUID()}`).toString('base64');
+
 /**
  * Fetches the quote for `path` and builds a payment header answering it on `network`. The
- * payload carries a fresh nonce so each payment is distinct for the replay guard.
+ * payment echoes the quoted `resource`, like the Rust harness's `pay_for`.
  */
 export async function payFor(
   base: string,
@@ -260,7 +355,41 @@ export async function payFor(
   tamper(accepted);
   return encodeHeader({
     x402Version: 2,
+    resource: quote.resource,
     accepted,
-    payload: { transaction: Buffer.from(`partially-signed-${crypto.randomUUID()}`).toString('base64') },
+    payload: { transaction: signedTx() },
   });
+}
+
+export const toolCall = (tool: string, id: unknown = 9): Record<string, unknown> => ({
+  jsonrpc: '2.0',
+  id,
+  method: 'tools/call',
+  params: { name: tool, arguments: {} },
+});
+
+/**
+ * MCP-native flow (KB-X402-05): call the tool unpaid, read the challenge from the tool
+ * result's `structuredContent`, and build the PaymentPayload answering it on Solana devnet.
+ */
+export async function mcpQuote(base: string, tool: string): Promise<{ required: Record<string, unknown>; payment: Record<string, unknown> }> {
+  const res = await mcp(base, JSON.stringify(toolCall(tool)));
+  const body = (await res.json()) as { result: { isError?: boolean; structuredContent: Record<string, unknown> } };
+  if (res.status !== 200 || body.result?.isError !== true) {
+    throw new Error(`expected an MCP-native challenge, got ${res.status} ${JSON.stringify(body)}`);
+  }
+  const required = body.result.structuredContent;
+  const accepted = (required.accepts as Record<string, unknown>[]).find((a) => a.network === SOLANA_DEVNET);
+  return {
+    required,
+    payment: { x402Version: 2, resource: required.resource, accepted, payload: { transaction: signedTx() } },
+  };
+}
+
+/** Quotes `tool`, then retries it with the payment in `params._meta["x402/payment"]`. */
+export async function payTool(base: string, tool: string, extra: Record<string, string> = {}): Promise<Response> {
+  const { payment } = await mcpQuote(base, tool);
+  const call = toolCall(tool);
+  (call.params as Record<string, unknown>)._meta = { 'x402/payment': payment };
+  return mcp(base, JSON.stringify(call), '/mcp', extra);
 }
