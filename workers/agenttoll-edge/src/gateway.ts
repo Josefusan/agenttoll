@@ -1,6 +1,6 @@
 // Per-isolate gateway state: the WASM core (parsed config + pricer), quote networks with
 // their fee payers, the replay guard, the ledger. Mirrors `Gateway` in
-// crates/agenttoll-gateway/src/lib.rs.
+// crates/agenttoll-gateway/src/lib.rs, plus its challenge, discovery and resource-URL helpers.
 
 import wasmModule from './core/agenttoll_core_bg.wasm';
 import { Core, initSync } from './core/agenttoll_core.js';
@@ -14,9 +14,13 @@ import {
   paymentRequired,
   quoteNetwork,
   type NetworkConfig,
+  type PaymentRequired,
   type PriceTag,
   type QuoteNetwork,
 } from './x402';
+
+/** Machine-readable price list for agents planning spend. AgentToll's own format. */
+export const DISCOVERY_PATH = '/.well-known/agenttoll.json';
 
 export interface Env {
   /** Full YAML config text; overrides the bundled agenttoll.edge.yaml. */
@@ -32,6 +36,22 @@ export interface Verdict {
   agent: string | null;
   confidence: number;
   reason: string;
+}
+
+/** The `mcp` config section as `Core.mcp_json()` reports it. Prices are USD strings. */
+export interface McpConfig {
+  endpoint: string;
+  defaultToolPriceUsd: string;
+  tools: Record<string, string>;
+  advertisePrices: boolean;
+  /** How an unpaid single `tools/call` is challenged (KB-X402-05). */
+  challenge: 'mcp-native' | 'http-402';
+}
+
+/** Facilitator call budgets (`timeouts.verify_ms` / `timeouts.settle_ms`). */
+export interface Timeouts {
+  verifyMs: number;
+  settleMs: number;
 }
 
 /** The parts of a request every stage needs. `rawPathAndQuery` is taken from the request
@@ -50,6 +70,8 @@ export class Gateway {
   readonly origin: string;
   readonly preserveHost: boolean;
   readonly publicUrl: string | undefined;
+  readonly timeouts: Timeouts;
+  readonly mcp: McpConfig | undefined;
   private readonly networkConfigs: NetworkConfig[];
   private networks: Promise<QuoteNetwork[]> | undefined;
 
@@ -61,6 +83,9 @@ export class Gateway {
     this.origin = core.origin();
     this.preserveHost = core.preserve_host();
     this.publicUrl = core.public_url();
+    this.timeouts = JSON.parse(core.timeouts_json()) as Timeouts;
+    const mcp = core.mcp_json();
+    this.mcp = mcp === undefined ? undefined : (JSON.parse(mcp) as McpConfig);
     this.networkConfigs = JSON.parse(core.networks_json()) as NetworkConfig[];
   }
 
@@ -85,7 +110,16 @@ export class Gateway {
     return this.networks;
   }
 
-  resourceUrl(inc: Incoming): string {
+  /**
+   * The URL a quote is for. MCP tools share one endpoint, so the tool goes in the fragment:
+   * a payment echoing `resource` is then bound to that tool, not just to `/mcp`.
+   */
+  resourceUrl(inc: Incoming, tag: PriceTag): string {
+    const base = this.baseResourceUrl(inc);
+    return tag.resource.startsWith('mcp:') ? `${base}#${tag.resource}` : base;
+  }
+
+  private baseResourceUrl(inc: Incoming): string {
     if (this.publicUrl !== undefined) {
       return `${this.publicUrl.replace(/\/+$/, '')}${inc.rawPathAndQuery}`;
     }
@@ -137,6 +171,39 @@ export function json(status: number, value: unknown, extra: Record<string, strin
   });
 }
 
+/** A JSON-RPC error envelope; MCP transport errors ride on HTTP 200 like the Rust gateway's. */
+export function jsonrpcError(status: number, id: unknown, code: number, message: string): Response {
+  return json(status, { jsonrpc: '2.0', id, error: { code, message } });
+}
+
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
+/**
+ * Object keys sorted recursively, which is how the Rust gateway's `json!` bodies serialize
+ * (serde_json maps are BTreeMaps). Lets the MCP-native challenge match byte for byte.
+ */
+export function sortKeysDeep(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortKeysDeep);
+  if (isRecord(value)) {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((k) => [k, sortKeysDeep(value[k])]),
+    );
+  }
+  return value;
+}
+
+function challengeHeaders(required: PaymentRequired, verdict: Verdict): Record<string, string> {
+  const extra: Record<string, string> = {
+    [x402Headers.PAYMENT_REQUIRED]: encodeHeader(required),
+  };
+  // Header values must be visible ASCII; reasons always are, but never let one break a 402.
+  if (/^[\x20-\x7e]*$/.test(verdict.reason)) extra['x-agenttoll-verdict'] = verdict.reason;
+  return extra;
+}
+
 /** The 402: PAYMENT-REQUIRED header, the same JSON in the body, and the verdict. */
 export function challenge(
   gw: Gateway,
@@ -146,11 +213,41 @@ export function challenge(
   verdict: Verdict,
   error: string,
 ): Response {
-  const required = paymentRequired(networks, tag, gw.resourceUrl(inc), error);
-  const extra: Record<string, string> = {
-    [x402Headers.PAYMENT_REQUIRED]: encodeHeader(required),
+  const required = paymentRequired(networks, tag, gw.resourceUrl(inc, tag), error);
+  return json(402, required, challengeHeaders(required, verdict));
+}
+
+/**
+ * MCP-native challenge (KB-X402-05): a JSON-RPC tool result with `isError: true` carrying
+ * PaymentRequired in `structuredContent` and as JSON text in `content[0]`, on HTTP 200, with
+ * the same PAYMENT-REQUIRED header as the 402.
+ */
+export function mcpChallenge(
+  gw: Gateway,
+  networks: QuoteNetwork[],
+  inc: Incoming,
+  tag: PriceTag,
+  verdict: Verdict,
+  error: string,
+  id: unknown,
+): Response {
+  const required = paymentRequired(networks, tag, gw.resourceUrl(inc, tag), error);
+  const body = {
+    jsonrpc: '2.0',
+    id,
+    result: {
+      isError: true,
+      structuredContent: required,
+      content: [{ type: 'text', text: JSON.stringify(required) }],
+    },
   };
-  // Header values must be visible ASCII; reasons always are, but never let one break a 402.
-  if (/^[\x20-\x7e]*$/.test(verdict.reason)) extra['x-agenttoll-verdict'] = verdict.reason;
-  return json(402, required, extra);
+  return json(200, sortKeysDeep(body), challengeHeaders(required, verdict));
+}
+
+/** `GET /.well-known/agenttoll.json`: every price and payment option, built by the core. */
+export function discovery(gw: Gateway): Response {
+  return new Response(gw.core.discovery_json(), {
+    status: 200,
+    headers: { 'content-type': 'application/json' },
+  });
 }

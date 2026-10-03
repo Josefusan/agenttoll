@@ -41,6 +41,9 @@ export interface ForwardOptions {
   peer: string | null;
   /** Scheme the client used, for `X-Forwarded-Proto` when the client did not send one. */
   proto: string;
+  /** Client headers not to forward, e.g. `content-length` once a body was rewritten, or
+   * `accept-encoding` when the response must be readable before settling. */
+  dropHeaders?: string[];
 }
 
 let warnedPreserveHost = false;
@@ -57,6 +60,7 @@ export function originRequestHeaders(incoming: Headers, opts: ForwardOptions): H
   for (const name of [...h.keys()]) {
     if (name.startsWith('x-agenttoll-')) h.delete(name);
   }
+  for (const name of opts.dropHeaders ?? []) h.delete(name);
 
   const clientHost = incoming.get('host');
   // Workers derive Host from the URL; a client Host cannot be preserved at the edge.

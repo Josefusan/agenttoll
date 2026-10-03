@@ -4,9 +4,7 @@
 
 import { X402_VERSION, type PaymentRequirements } from './x402';
 
-/** /verify is read-only and fast; /settle waits for the chain. */
-const VERIFY_TIMEOUT_MS = 5_000;
-const SETTLE_TIMEOUT_MS = 20_000;
+/** /verify and /settle budgets come from the config (`timeouts.verify_ms`, `timeouts.settle_ms`). */
 const SUPPORTED_TIMEOUT_MS = 10_000;
 
 export class FacilitatorError extends Error {}
@@ -99,8 +97,9 @@ export async function verify(
   facilitator: string,
   payload: unknown,
   requirements: PaymentRequirements,
+  timeoutMs: number,
 ): Promise<VerifyResponse> {
-  const raw = await call(facilitator, 'verify', payload, requirements, VERIFY_TIMEOUT_MS);
+  const raw = await call(facilitator, 'verify', payload, requirements, timeoutMs);
   if (typeof raw.isValid !== 'boolean') {
     throw new FacilitatorError('facilitator /verify answer has no boolean isValid');
   }
@@ -119,8 +118,9 @@ export async function settle(
   facilitator: string,
   payload: unknown,
   requirements: PaymentRequirements,
+  timeoutMs: number,
 ): Promise<{ parsed: SettleResponse; raw: Record<string, unknown> }> {
-  const raw = await call(facilitator, 'settle', payload, requirements, SETTLE_TIMEOUT_MS);
+  const raw = await call(facilitator, 'settle', payload, requirements, timeoutMs);
   if (typeof raw.success !== 'boolean') {
     throw new FacilitatorError('facilitator /settle answer has no boolean success');
   }
