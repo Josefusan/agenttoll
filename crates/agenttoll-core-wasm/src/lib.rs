@@ -8,14 +8,14 @@
 
 use std::collections::BTreeMap;
 
-use agenttoll_core::config::{Config, DetectionMode};
+use agenttoll_core::config::{Config, DetectionMode, McpChallenge};
 use agenttoll_core::detector::{self, Context, Kind, RequestView, Verdict};
 use agenttoll_core::mcp;
 use agenttoll_core::path;
 use agenttoll_core::pricer::{PriceTag, Pricer};
 use http::{HeaderMap, HeaderName, HeaderValue, Method};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{Value, json};
 use wasm_bindgen::prelude::*;
 
 /// A parsed `agenttoll.yaml` plus its compiled pricer.
@@ -237,12 +237,133 @@ impl Core {
             self.config.charge_search_bots,
         ))
     }
+
+    /// Facilitator call budgets: JSON `{verifyMs, settleMs}` (`timeouts.*` in the config).
+    pub fn timeouts_json(&self) -> String {
+        let t = &self.config.timeouts;
+        to_json(&json!({ "verifyMs": t.verify_ms, "settleMs": t.settle_ms }))
+    }
+
+    /// The `mcp` section, or `undefined`: JSON `{endpoint, defaultToolPriceUsd, tools,
+    /// advertisePrices, challenge}` with prices as USD strings and `challenge` either
+    /// `mcp-native` or `http-402`.
+    pub fn mcp_json(&self) -> Option<String> {
+        self.config.mcp.as_ref().map(|m| {
+            let tools: serde_json::Map<String, Value> = m
+                .tools
+                .iter()
+                .map(|(name, price)| (name.clone(), json!(price.to_string())))
+                .collect();
+            to_json(&json!({
+                "endpoint": m.endpoint,
+                "defaultToolPriceUsd": m.default_tool_price_usd.to_string(),
+                "tools": tools,
+                "advertisePrices": m.advertise_prices,
+                "challenge": match m.challenge {
+                    McpChallenge::McpNative => "mcp-native",
+                    McpChallenge::Http402 => "http-402",
+                },
+            }))
+        })
+    }
+
+    /// Body of `GET /.well-known/agenttoll.json`, the same JSON the Rust gateway's
+    /// `discovery` builds (lib.rs): every price and payment option so an agent can budget.
+    pub fn discovery_json(&self) -> String {
+        let networks: Vec<Value> = self
+            .config
+            .networks
+            .values()
+            .map(|n| json!({ "network": n.network, "scheme": "exact", "asset": n.asset, "payTo": n.pay_to }))
+            .collect();
+        let routes: Vec<Value> = self
+            .config
+            .routes
+            .iter()
+            .map(|r| json!({ "match": r.pattern, "priceUsd": r.price_usd.to_string(), "description": r.description }))
+            .collect();
+        let mcp = self.config.mcp.as_ref().map(|m| {
+            let tools: serde_json::Map<String, Value> = m
+                .tools
+                .iter()
+                .map(|(name, price)| (name.clone(), json!(price.to_string())))
+                .collect();
+            json!({
+                "endpoint": m.endpoint,
+                "tools": tools,
+                "defaultToolPriceUsd": m.default_tool_price_usd.to_string(),
+                "paymentTransports": ["http-402", "mcp-native"],
+            })
+        });
+        to_json(&json!({
+            "agenttoll": env!("CARGO_PKG_VERSION"),
+            "x402Version": 2,
+            "detection": self.detection(),
+            "networks": networks,
+            "routes": routes,
+            "mcp": mcp,
+        }))
+    }
+
+    /// Rewrites a `tools/list` JSON response so each paid tool's description ends with its
+    /// price (`mcp.advertise_prices`, paid-mcp-tools skill). Same text as the Rust gateway's
+    /// `advertise_prices`. `undefined` when the body is not a tools/list result or there is
+    /// no `mcp` section; the caller then passes the body through unchanged.
+    pub fn advertise_prices(&self, body: &[u8]) -> Option<String> {
+        let m = self.config.mcp.as_ref()?;
+        let mut msg: Value = serde_json::from_slice(body).ok()?;
+        for tool in msg.pointer_mut("/result/tools")?.as_array_mut()? {
+            let Some(name) = tool.get("name").and_then(Value::as_str) else {
+                continue;
+            };
+            let price = m
+                .tools
+                .get(name)
+                .copied()
+                .unwrap_or(m.default_tool_price_usd);
+            if price.is_free() {
+                continue;
+            }
+            let description = tool
+                .get("description")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            tool["description"] = json!(
+                format!("{description} (Paid tool: ${price} USDC per call via x402.)").trim_start()
+            );
+        }
+        Some(to_json(&msg))
+    }
 }
 
 /// Canonical request path (see `agenttoll_core::path::normalize`).
 #[wasm_bindgen]
 pub fn normalize_path(raw: &str) -> String {
     path::normalize(raw)
+}
+
+/// Canonical JSON (compact, object keys sorted), as `serde_json::Value::to_string` prints
+/// it in the Rust gateway. The replay key of a payment is the canonical JSON of its signed
+/// `payload`, so re-encoding the same payment never dodges the guard. Errors when `json`
+/// is not JSON.
+#[wasm_bindgen]
+pub fn canonical_json(json: &str) -> Result<String, String> {
+    let value: Value = serde_json::from_str(json).map_err(err)?;
+    Ok(sorted(value).to_string())
+}
+
+fn sorted(value: Value) -> Value {
+    match value {
+        Value::Object(map) => Value::Object(
+            map.into_iter()
+                .map(|(k, v)| (k, sorted(v)))
+                .collect::<std::collections::BTreeMap<_, _>>()
+                .into_iter()
+                .collect(),
+        ),
+        Value::Array(items) => Value::Array(items.into_iter().map(sorted).collect()),
+        other => other,
+    }
 }
 
 #[cfg(test)]
@@ -290,5 +411,41 @@ mod tests {
     #[test]
     fn missing_env_is_an_error() {
         assert!(Core::new(YAML, "{}").is_err());
+    }
+
+    #[test]
+    fn d4_semantics_cross_the_boundary() {
+        let core = Core::new(YAML, ENV).unwrap();
+        let t: Value = serde_json::from_str(&core.timeouts_json()).unwrap();
+        assert_eq!(t["verifyMs"], 5000);
+        assert_eq!(t["settleMs"], 20000);
+
+        let mcp: Value = serde_json::from_str(&core.mcp_json().unwrap()).unwrap();
+        assert_eq!(mcp["challenge"], "mcp-native");
+        assert_eq!(mcp["tools"]["search_docs"], "0.005");
+
+        let d: Value = serde_json::from_str(&core.discovery_json()).unwrap();
+        assert_eq!(d["x402Version"], 2);
+        assert_eq!(d["agenttoll"], env!("CARGO_PKG_VERSION"));
+        assert_eq!(d["routes"][0]["priceUsd"], "0.002");
+        assert_eq!(d["mcp"]["tools"]["search_docs"], "0.005");
+        assert_eq!(d["networks"].as_array().unwrap().len(), 2);
+        assert_eq!(d["networks"][0]["payTo"], "0x1");
+
+        let list = br#"{"jsonrpc":"2.0","id":1,"result":{"tools":[{"name":"search_docs","description":"Search the docs."},{"name":"ping","description":"Free."}]}}"#;
+        let out: Value = serde_json::from_str(&core.advertise_prices(list).unwrap()).unwrap();
+        assert_eq!(
+            out["result"]["tools"][0]["description"],
+            "Search the docs. (Paid tool: $0.005 USDC per call via x402.)"
+        );
+        assert_eq!(out["result"]["tools"][1]["description"], "Free.");
+        assert!(core.advertise_prices(b"not json").is_none());
+        assert!(core.advertise_prices(br#"{"result":{}}"#).is_none());
+
+        assert_eq!(
+            canonical_json("{ \"b\": [ {\"z\":1, \"a\":2} ], \"a\": \"x\" }").unwrap(),
+            r#"{"a":"x","b":[{"a":2,"z":1}]}"#
+        );
+        assert!(canonical_json("{nope").is_err());
     }
 }
