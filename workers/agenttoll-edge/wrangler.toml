@@ -1,0 +1,32 @@
+# AgentToll edge edition: the same x402 v2 paywall as crates/agenttoll-gateway, on a
+# Cloudflare Worker. Detection, pricing, path canonicalization and MCP inspection run the
+# Rust `agenttoll-core` crate compiled to WASM (crates/agenttoll-core-wasm), so both editions
+# answer with the same PAYMENT-REQUIRED for the same config.
+name = "agenttoll-edge"
+main = "src/index.ts"
+compatibility_date = "2026-09-15"
+
+# `import config from '../agenttoll.edge.yaml'` bundles the config as text (the root .gitignore hides any agenttoll.yaml). `.wasm` imports are
+# compiled modules by default.
+[[rules]]
+type = "Text"
+globs = ["**/*.yaml"]
+fallthrough = true
+
+[vars]
+# ${VAR} placeholders in agenttoll.edge.yaml are filled from these vars (and from .dev.vars /
+# secrets). Override the whole config with AGENTTOLL_CONFIG (the YAML text) if you prefer.
+AGENTTOLL_ORIGIN = "http://localhost:4000"
+AGENTTOLL_SOLANA_PAYTO = "replace-with-your-solana-wallet"
+AGENTTOLL_BASE_PAYTO = "0x0000000000000000000000000000000000000001"
+
+# Revenue ledger (ARCHITECTURE.md §1.6). Create with `wrangler d1 create agenttoll-ledger`
+# and paste the id; `wrangler dev --local` and the tests use a local SQLite automatically.
+[[d1_databases]]
+binding = "LEDGER"
+database_name = "agenttoll-ledger"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[observability]
+enabled = true

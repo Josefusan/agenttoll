@@ -1,0 +1,37 @@
+# AgentToll edge config (named .edge.yaml because the root .gitignore hides agenttoll.yaml): the same schema as agenttoll.example.yaml at the repo root (the Rust
+# gateway reads that one; `listen`/`admin_listen` are ignored here, a Worker has no ports).
+# ${VAR} comes from wrangler [vars], .dev.vars or secrets. Prices are quoted strings.
+origin: "${AGENTTOLL_ORIGIN}"
+listen: 0.0.0.0:8402
+admin_listen: 127.0.0.1:8403
+detection: agents-only
+
+networks:
+  solana:
+    network: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"   # devnet (KB-SOL-01)
+    asset: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU" # devnet USDC (KB-SOL-01)
+    pay_to: "${AGENTTOLL_SOLANA_PAYTO}"
+    facilitator: "https://facilitator.payai.network"     # KB-X402-04
+  base:
+    network: "eip155:84532"                               # Base Sepolia (KB-BASE-01)
+    asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e"   # Base Sepolia USDC (KB-BASE-01)
+    pay_to: "${AGENTTOLL_BASE_PAYTO}"
+    facilitator: "https://x402.org/facilitator"          # testnet (KB-X402-04)
+
+routes:
+  - match: "GET /api/quote"
+    price_usd: "0.002"
+    description: "Live price quote"
+  - match: "GET /api/*"
+    price_usd: "0.001"
+  - match: "GET /blog/*"
+    price_usd: "0.001"
+  - match: "/*"
+    price_usd: "0"
+
+mcp:
+  endpoint: /mcp
+  default_tool_price_usd: "0"
+  tools:
+    search_docs: "0.005"
+    generate_report: "0.05"

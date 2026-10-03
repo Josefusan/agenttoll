@@ -1,0 +1,7 @@
+# Copy to .dev.vars for `wrangler dev --local`. These fill the ${VAR} placeholders in
+# agenttoll.edge.yaml; none of them is a secret, but wallets differ per founder.
+AGENTTOLL_ORIGIN=http://localhost:4000
+AGENTTOLL_SOLANA_PAYTO=YourSolanaDevnetWalletPubkey
+AGENTTOLL_BASE_PAYTO=0x0000000000000000000000000000000000000001
+# Set to 1 to expose GET /.agenttoll/ledger (never in production).
+# AGENTTOLL_DEBUG=1

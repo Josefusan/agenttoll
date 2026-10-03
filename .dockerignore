@@ -1,0 +1,13 @@
+target/
+**/node_modules/
+**/.next/
+.demo/
+.env
+.env.*
+!.env.example
+*.db
+*.keypair.json
+drive/
+context/
+workers/
+apps/dashboard/.env.local

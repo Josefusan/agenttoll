@@ -1,0 +1,5 @@
+node_modules/
+.wrangler/
+# Built by `npm run build:wasm` from crates/agenttoll-core-wasm.
+src/core/
+.dev.vars
