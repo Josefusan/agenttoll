@@ -24,6 +24,9 @@ const USER_AGENT: &str = concat!(
     " (+https://github.com/Josefusan/agenttoll)"
 );
 
+/// Settlements from AgentToll's local simulated facilitator (demo/mock-facilitator).
+const SIMULATED_PREFIX: &str = "SIMULATED-";
+
 #[derive(Clone, Copy, PartialEq, Eq, ValueEnum)]
 enum Network {
     /// Solana devnet USDC (primary).
@@ -69,11 +72,21 @@ struct CappedSelector {
     max_atomic: u128,
 }
 
+/// USDC on the networks the buyer pays on (KB-SOL-01, KB-BASE-01). The cap is in 6-decimal
+/// USDC units, so a quote in any other asset is refused rather than mis-capped.
+const USDC_ASSETS: &[&str] = &[
+    "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU", // Solana devnet
+    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // Solana mainnet
+    "0x036CbD53842c5426634e7929541eC2318f3dCF7e",   // Base Sepolia
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",   // Base mainnet
+];
+
 impl PaymentSelector for CappedSelector {
     fn select<'a>(&self, candidates: &'a [PaymentCandidate]) -> Option<&'a PaymentCandidate> {
         candidates.iter().find(|c| {
             let amount: u128 = c.amount.to_string().parse().unwrap_or(u128::MAX);
-            let ok = c.chain_id.namespace() == self.namespace && amount <= self.max_atomic;
+            let usdc = USDC_ASSETS.iter().any(|a| a.eq_ignore_ascii_case(&c.asset));
+            let ok = c.chain_id.namespace() == self.namespace && usdc && amount <= self.max_atomic;
             if !ok {
                 eprintln!(
                     "skipping quote {} {} on {} (cap {} atomic)",
@@ -153,7 +166,11 @@ async fn main() -> anyhow::Result<()> {
                 r["network"].as_str().unwrap_or("?")
             );
             println!("tx:     {tx}");
-            if !tx.is_empty() {
+            if tx.starts_with(SIMULATED_PREFIX) {
+                println!(
+                    "note:   SIMULATED settlement from a local test facilitator; nothing went on chain"
+                );
+            } else if !tx.is_empty() {
                 println!("view:   {}", explorer(args.network, tx));
             }
         }

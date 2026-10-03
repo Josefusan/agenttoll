@@ -8,15 +8,20 @@ repository.workspace = true
 [dependencies]
 agenttoll-core = { version = "0.1.0", path = "../agenttoll-core" }
 anyhow = "1.0.104"
-axum = "0.8.9"
+axum = { version = "0.8.9", features = ["macros"] }
 base64 = "0.23.1"
 clap = { version = "4.6.7", features = ["derive"] }
 dotenvy = "0.15.7"
+futures-util = "0.3.34"
 reqwest = { version = "0.13.5", default-features = false, features = ["stream", "json", "rustls", "http2"] }
 rusqlite = { version = "0.40.2", features = ["bundled"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 thiserror = "2.0.21"
 tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "net", "sync"] }
+tokio-stream = { version = "0.1.19", features = ["sync"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+
+[dev-dependencies]
+flate2 = "1.1.10"
