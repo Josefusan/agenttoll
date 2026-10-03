@@ -1,0 +1,50 @@
+# AgentToll demo stack: demo origin, SIMULATED facilitator, gateway, founder dashboard.
+#   cp .env.example .env   # set AGENTTOLL_SOLANA_PAYTO, AGENTTOLL_ADMIN_TOKEN, AGENTTOLL_PUBLIC_URL
+#   docker compose up --build
+# Published ports bind to 127.0.0.1 unless GATEWAY_BIND / DASHBOARD_BIND say otherwise.
+# The dashboard has no login of its own: only publish it for a demo with demo data.
+services:
+  origin:
+    build: .
+    command: ["agenttoll-demo-origin"]
+    environment:
+      ORIGIN_LISTEN: 0.0.0.0:4000
+
+  facilitator:
+    build: .
+    command: ["agenttoll-mock-facilitator"]
+    environment:
+      MOCK_FACILITATOR_LISTEN: 0.0.0.0:4020
+
+  gateway:
+    build: .
+    command: ["agenttoll-gateway", "--config", "/etc/agenttoll/agenttoll.yaml"]
+    depends_on: [origin, facilitator]
+    environment:
+      AGENTTOLL_SOLANA_PAYTO: ${AGENTTOLL_SOLANA_PAYTO:?set AGENTTOLL_SOLANA_PAYTO in .env}
+      AGENTTOLL_ADMIN_TOKEN: ${AGENTTOLL_ADMIN_TOKEN:?set AGENTTOLL_ADMIN_TOKEN (24+ chars) in .env}
+      AGENTTOLL_PUBLIC_URL: ${AGENTTOLL_PUBLIC_URL:-http://localhost:8402}
+      RUST_LOG: info
+    volumes:
+      - ./deploy/agenttoll.docker.yaml:/etc/agenttoll/agenttoll.yaml:ro
+      - ledger:/data
+    ports:
+      - "${GATEWAY_BIND:-127.0.0.1}:8402:8402"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8402/.well-known/agenttoll.json"]
+      interval: 10s
+      retries: 6
+
+  dashboard:
+    build: ./apps/dashboard
+    depends_on: [gateway]
+    environment:
+      AGENTTOLL_ADMIN_URL: http://gateway:8403
+      AGENTTOLL_ADMIN_TOKEN: ${AGENTTOLL_ADMIN_TOKEN}
+    ports:
+      - "${DASHBOARD_BIND:-127.0.0.1}:3000:3000"
+    restart: unless-stopped
+
+volumes:
+  ledger:
