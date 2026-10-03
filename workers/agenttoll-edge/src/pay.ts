@@ -19,7 +19,7 @@ import { canonical_json } from './core/agenttoll_core.js';
 import * as facilitator from './facilitator';
 import { challenge, jsonrpcError, mcpChallenge, text, type Gateway, type Incoming, type Verdict } from './gateway';
 import type { RevenueEvent, SettleStatus } from './ledger';
-import { attachMcpReceipt, mcpSucceeded } from './mcp';
+import { attachMcpReceipt, mcpFailedExplicitly, mcpSucceeded } from './mcp';
 import { forward } from './proxy';
 import { X402_VERSION, encodeHeader, headers as x402Headers, parseRequirements, requirements, type PriceTag, type QuoteNetwork } from './x402';
 
@@ -166,14 +166,24 @@ export async function handlePaid(gw: Gateway, req: PaidRequest): Promise<Respons
     return text(502, 'origin response too large or interrupted; payment not settled');
   }
   const contentType = origin.headers.get('content-type') ?? '';
-  const failed =
-    !(origin.status >= 200 && origin.status < 300) ||
-    (mcpCallIds !== undefined && !mcpSucceeded(origin.headers, content, mcpCallIds));
-  if (failed) {
+  const passThrough = () => new Response(content, { status: origin.status, statusText: origin.statusText, headers: origin.headers });
+  if (!(origin.status >= 200 && origin.status < 300)) {
     // Not settled, so the payment was not consumed: let the agent retry it.
     gw.replay.release(replayKey);
     console.log(`origin answered ${origin.status}; payment not settled`);
-    return new Response(content, { status: origin.status, statusText: origin.statusText, headers: origin.headers });
+    return passThrough();
+  }
+  if (mcpCallIds !== undefined && !mcpSucceeded(origin.headers, content, mcpCallIds)) {
+    gw.replay.release(replayKey);
+    // A tool that provably failed returns its error, unpaid. Anything the gateway cannot
+    // verify (unmatched ids, compressed or unreadable bodies) is withheld: serving it
+    // unsettled would hand out paid content for free.
+    if (mcpFailedExplicitly(origin.headers, content, mcpCallIds)) {
+      console.log('MCP tool failed; payment not settled');
+      return passThrough();
+    }
+    console.warn('MCP result could not be verified; payment not settled, content withheld');
+    return text(502, 'tool result could not be verified; payment not settled; content withheld');
   }
 
   // 6. Settle. Content is released only on success, or when the outcome is unknown.

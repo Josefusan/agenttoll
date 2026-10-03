@@ -65,9 +65,11 @@ replay (key = canonical JSON of the signed `payload`), MCP-native challenge on a
 `tools/call` (HTTP 200 tool result with `isError`, `structuredContent`, `PAYMENT-REQUIRED`;
 `mcp.challenge: http-402` keeps the 402), payment in `params._meta["x402/payment"]` stripped
 before the origin and receipted in `result._meta["x402/payment-response"]`, no settlement for a
-JSON-RPC error, `isError`, an SSE error after a notification or a compressed body,
-`Accept-Encoding` dropped on paid MCP forwards, `tools/list` price advertising and
-`GET /.well-known/agenttoll.json`.
+JSON-RPC error, `isError`, an SSE error after a notification or a compressed body, and
+unsettled 2xx content is returned only when every paid call provably failed; anything
+unverifiable (compressed, wrong or duplicate ids) is a 502 with the content withheld, while a
+float id echoed as an integer still settles. `Accept-Encoding` is dropped on paid MCP
+forwards; `tools/list` price advertising and `GET /.well-known/agenttoll.json`.
 `test/parity.test.ts` runs the Rust gateway and the Worker on one config and one mock
 facilitator and asserts the decoded and the raw `PAYMENT-REQUIRED` JSON, 402 bodies, the
 MCP-native challenge body (byte-identical, host masked), the discovery JSON, the advertised
@@ -92,8 +94,8 @@ gzip and plain tool results) are equal. Everything started is killed in `afterAl
 - **No unbilled-traffic log.** The Rust gateway writes uncharged agent requests to
   `request_log` for the "not billing yet" report; the Worker only logs them to the console.
 - **Compressed origin bodies.** workerd decodes `Content-Encoding` transparently but keeps the
-  header, so a compressed paid MCP result is still never settled (same decision as Rust); the
-  decoded content is re-encoded on the way out by the runtime.
+  header, so a compressed paid MCP result is never settled and is withheld with a 502 (same
+  decision as Rust, which cannot read it at all).
 - **`unconfirmed:<hash>`** uses SHA-256 (first 16 hex) where Rust uses `DefaultHasher`; the id
   only needs to be stable within one edition.
 - Not used: Hono and `@x402/hono`. The handler is one `fetch`, and `@x402/hono` prices from

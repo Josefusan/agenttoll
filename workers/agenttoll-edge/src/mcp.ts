@@ -61,6 +61,12 @@ function messagesOf(value: unknown): unknown[] | undefined {
  */
 export function toolCallIds(body: Uint8Array): unknown[] {
   const messages = messagesOf(parseJson(body)) ?? [];
+  // Duplicate ids make responses ambiguous (a `ping` result could answer a paid call), so
+  // such a batch is never settled.
+  const ids = messages
+    .filter((m): m is Record<string, unknown> => isRecord(m) && 'method' in m && 'id' in m)
+    .map((m) => JSON.stringify(m.id));
+  if (new Set(ids).size !== ids.length) return [null];
   return messages
     .filter((m): m is Record<string, unknown> => isRecord(m) && m.method === 'tools/call')
     .map((m) => m.id ?? null);
@@ -86,34 +92,54 @@ export function isToolsList(body: Uint8Array): boolean {
  * doubt the buyer is not charged.
  */
 export function mcpSucceeded(headers: Headers, content: Uint8Array, callIds: unknown[]): boolean {
-  if (callIds.length === 0 || headers.has('content-encoding')) return false;
+  const messages = mcpMessages(headers, content);
+  if (messages === undefined || callIds.length === 0) return false;
+  return callIds.every((id) =>
+    messages.some(
+      (m) =>
+        responseTo(m, id) && !('error' in m) && 'result' in m && !(isRecord(m.result) && m.result.isError === true),
+    ),
+  );
+}
+
+/**
+ * True when the body is readable and every paid call got an explicit failure (JSON-RPC
+ * `error` or `result.isError`): the only unsettled MCP content that may be returned.
+ */
+export function mcpFailedExplicitly(headers: Headers, content: Uint8Array, callIds: unknown[]): boolean {
+  const messages = mcpMessages(headers, content);
+  if (messages === undefined || callIds.length === 0) return false;
+  return callIds.every((id) =>
+    messages.some((m) => responseTo(m, id) && ('error' in m || (isRecord(m.result) && m.result.isError === true))),
+  );
+}
+
+/**
+ * JSON-RPC messages in an origin response, or `undefined` if the body cannot be judged
+ * (compressed, not UTF-8, not JSON). workerd decodes `Content-Encoding` transparently but
+ * keeps the header, and like the Rust gateway any encoded answer counts as unreadable.
+ */
+function mcpMessages(headers: Headers, content: Uint8Array): Record<string, unknown>[] | undefined {
+  if (headers.has('content-encoding')) return undefined;
   let text: string;
   try {
     text = utf8.decode(content);
   } catch {
-    return false;
+    return undefined;
   }
   const isSse = (headers.get('content-type') ?? '').startsWith('text/event-stream');
-  let messages: unknown[];
-  if (isSse) {
-    messages = sseMessages(text);
-  } else {
-    const parsed = messagesOf(parseText(text));
-    if (parsed === undefined) return false;
-    messages = parsed;
-  }
-  return callIds.every((id) => {
-    if (id === null) return false;
-    const want = JSON.stringify(id);
-    return messages.some(
-      (m) =>
-        isRecord(m) &&
-        JSON.stringify(m.id) === want &&
-        !('error' in m) &&
-        'result' in m &&
-        !(isRecord(m.result) && m.result.isError === true),
-    );
-  });
+  const messages = isSse ? sseMessages(text) : messagesOf(parseText(text));
+  return messages?.filter(isRecord);
+}
+
+/**
+ * A response (not a request or notification) answering request `id`. Numeric ids compare by
+ * value, because servers in other languages may echo `9.0` as `9`.
+ */
+function responseTo(message: Record<string, unknown>, id: unknown): boolean {
+  if (id === null || 'method' in message || !('id' in message)) return false;
+  if (typeof message.id === 'number' && typeof id === 'number') return message.id === id;
+  return JSON.stringify(message.id) === JSON.stringify(id);
 }
 
 /** JSON-RPC messages carried by an SSE body: one per event, multi-line `data:` joined. */

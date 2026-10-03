@@ -83,7 +83,8 @@ function mcpOrigin(body: Json, res: http.ServerResponse): void {
   } else {
     result = {};
   }
-  const message = JSON.stringify({ jsonrpc: '2.0', id, result });
+  // `wrong_id` answers another request's id, so nothing proves the paid call succeeded.
+  const message = JSON.stringify({ jsonrpc: '2.0', id: tool === 'wrong_id' ? 12345 : id, result });
   if (tool.startsWith('sse_')) {
     const note = JSON.stringify({ jsonrpc: '2.0', method: 'notifications/message', params: { level: 'info', data: 'working' } });
     res.writeHead(200, { 'content-type': 'text/event-stream' });
@@ -275,6 +276,7 @@ ${challenge}  tools:
     sse_broken: "0.005"
     gzip_ok: "0.005"
     gzip_broken: "0.005"
+    wrong_id: "0.005"
 ledger:
   url: "sqlite::memory:"
 timeouts:

@@ -439,14 +439,48 @@ describe('MCP-native transport (D4, KB-X402-05)', () => {
     expect(fac.state.settleCalls - base.settle).toBe(1);
   });
 
-  test('a compressed tool response is never settled', async () => {
-    // Even a successful-looking compressed answer cannot be judged, so it is not charged.
-    for (const tool of ['gzip_broken', 'gzip_ok']) {
-      const res = await payTool(W, tool);
-      expect(res.status, tool).toBe(200);
-    }
+  test('a compressed tool response is never settled and never served unpaid', async () => {
+    // A compressed success cannot be verified: withheld, not settled, not served.
+    const res = await payTool(W, 'gzip_ok');
+    expect(res.status).toBe(502);
+    expect(await res.text()).not.toContain('ok');
+    // A compressed failure cannot be proven a failure either: also withheld.
+    expect((await payTool(W, 'gzip_broken')).status).toBe(502);
     expect(fac.state.settleCalls - base.settle).toBe(0);
     expect((await ledgerRows()).length).toBe(base.rows);
+  });
+
+  test('a float id echoed as an integer is settled, not leaked', async () => {
+    const { payment } = await mcpQuote(W, 'search_docs');
+    // Raw body so the id stays `9.0`; the origin echoes it back as 9.
+    const body = `{"jsonrpc":"2.0","id":9.0,"method":"tools/call","params":{"name":"search_docs","_meta":{"x402/payment":${JSON.stringify(payment)}}}}`;
+    const res = await mcp(W, body);
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain('search_docs ok');
+    expect(fac.state.settleCalls - base.settle, 'served content is always paid for').toBe(1);
+  });
+
+  test('unverifiable 2xx MCP content is withheld', async () => {
+    // The paid call is id 9; the origin answers id 12345, so nothing proves success.
+    const res = await payTool(W, 'wrong_id');
+    expect(res.status).toBe(502);
+    expect(await res.text()).not.toContain('wrong_id ok');
+    expect(fac.state.settleCalls - base.settle).toBe(0);
+    // Released: the same payment is not a replay.
+    expect((await payTool(W, 'wrong_id')).status).toBe(502);
+    expect(fac.state.verifyCalls - base.verify).toBe(2);
+  });
+
+  test('a batch with duplicate request ids never settles', async () => {
+    const batch = '[{"jsonrpc":"2.0","id":1,"method":"ping"},{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_docs"}}]';
+    const quote = await mcp(W, batch);
+    expect(quote.status).toBe(402);
+    const pr = challenge(quote);
+    const accepted = (pr.accepts as Record<string, unknown>[]).find((a) => a.network === SOLANA_DEVNET);
+    const payment = encodeHeader({ x402Version: 2, resource: pr.resource, accepted, payload: { transaction: signedTx() } });
+    const res = await mcp(W, batch, '/mcp', { 'payment-signature': payment });
+    expect(res.status).toBe(502);
+    expect(calls()).toEqual([1, 0, 0]);
   });
 
   test('paid MCP forwards ask for uncompressed responses', async () => {

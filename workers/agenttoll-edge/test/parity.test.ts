@@ -23,6 +23,7 @@ import {
   mcpQuote,
   payFor,
   payTool,
+  signedTx,
   startFacilitator,
   startOrigin,
   startWorker,
@@ -271,19 +272,52 @@ describe.skipIf(!haveCargo)('Rust gateway vs Worker parity', () => {
     }
   });
 
-  test('settle decisions agree for SSE, compressed and plain MCP results', async () => {
-    const expected: Record<string, number> = { sse_broken: 0, sse_ok: 1, gzip_ok: 0, gzip_broken: 0, search_docs: 1, broken_tool: 0 };
-    for (const [tool, settles] of Object.entries(expected)) {
-      for (const [name, base] of [
-        ['rust', R],
-        ['worker', W],
-      ] as const) {
+  const editions = [
+    ['rust', () => R],
+    ['worker', () => W],
+  ] as const;
+
+  test('settle decisions agree for SSE, compressed, wrong-id and plain MCP results', async () => {
+    // tool -> [HTTP status, /settle calls]. Unverifiable 2xx results are withheld (502).
+    const expected: Record<string, [number, number]> = {
+      sse_broken: [200, 0],
+      sse_ok: [200, 1],
+      gzip_ok: [502, 0],
+      gzip_broken: [502, 0],
+      wrong_id: [502, 0],
+      search_docs: [200, 1],
+      broken_tool: [200, 0],
+    };
+    for (const [tool, [status, settles]] of Object.entries(expected)) {
+      for (const [name, base] of editions) {
         const before = fac.state.settleCalls;
-        const res = await payTool(base, tool);
-        expect(res.status, `${name} ${tool}`).toBe(200);
+        const res = await payTool(base(), tool);
+        expect(res.status, `${name} ${tool}`).toBe(status);
         expect(fac.state.settleCalls - before, `${name} ${tool} settle count`).toBe(settles);
         expect(res.headers.has('payment-response'), `${name} ${tool} receipt`).toBe(settles === 1);
+        if (status === 502) expect(await res.text(), `${name} ${tool} leaked`).not.toContain(' ok');
       }
+    }
+  });
+
+  test('float ids settle and duplicate-id batches never do, on both', async () => {
+    for (const [name, base] of editions) {
+      const { payment } = await mcpQuote(base(), 'search_docs');
+      const before = fac.state.settleCalls;
+      const body = `{"jsonrpc":"2.0","id":9.0,"method":"tools/call","params":{"name":"search_docs","_meta":{"x402/payment":${JSON.stringify(payment)}}}}`;
+      const res = await mcp(base(), body);
+      expect(res.status, `${name} float id`).toBe(200);
+      expect(fac.state.settleCalls - before, `${name} float id settle count`).toBe(1);
+
+      const batch = '[{"jsonrpc":"2.0","id":1,"method":"ping"},{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_docs"}}]';
+      const quote = await mcp(base(), batch);
+      expect(quote.status, `${name} duplicate-id quote`).toBe(402);
+      const pr = challenge(quote);
+      const accepted = (pr.accepts as Record<string, unknown>[]).find((a) => a.network === SOLANA_DEVNET);
+      const header = encodeHeader({ x402Version: 2, resource: pr.resource, accepted, payload: { transaction: signedTx() } });
+      const dup = await mcp(base(), batch, '/mcp', { 'payment-signature': header });
+      expect(dup.status, `${name} duplicate ids`).toBe(502);
+      expect(fac.state.settleCalls - before, `${name} duplicate ids settle count`).toBe(1);
     }
   });
 
