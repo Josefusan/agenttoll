@@ -110,6 +110,7 @@ mcp:
   endpoint: /mcp
   tools:
     search_docs: "0.005"
+  challenge: http-402
 ledger:
   url: "sqlite::memory:"
 "#
