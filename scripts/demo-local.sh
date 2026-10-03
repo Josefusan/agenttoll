@@ -66,7 +66,8 @@ print(f"revenue ${t['revenue_atomic'] / 1e6:.3f} | payments {t['payments']} | ag
 for e in s["recent"][:3]:
     print(" ", e["route"], e["agent_name"], e["tx_signature"], e["status"], "(simulated)" if e["simulated"] else "")
 for u in s["unbilled"]:
-    print("  not billing yet:", u["agent"], u["reason"], u["requests"], "requests")
+    n = u["requests"]
+    print(f"  not billing yet: {u[agent]} ({u[reason]}) {n} request{ if n == 1 else s}")
 PY
 
 if [ -n "${KEEP:-}" ]; then
