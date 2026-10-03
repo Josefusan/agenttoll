@@ -423,6 +423,15 @@ fn mcp_messages(headers: &HeaderMap, content: &[u8]) -> Option<Vec<Value>> {
     }
 }
 
+/// Identity of a JSON-RPC id under the same rule `response_to` uses: numbers by value
+/// (`9` and `9.0` are one id), everything else by JSON text.
+fn id_key(id: &Value) -> String {
+    match id.as_f64() {
+        Some(n) if id.is_number() => format!("n:{n}"),
+        _ => format!("j:{id}"),
+    }
+}
+
 /// A response (not a request or notification) answering request `id`. Numeric ids compare
 /// by value, because servers in other languages may echo `9.0` as `9`.
 fn response_to(message: &Value, id: &Value) -> bool {
@@ -473,7 +482,7 @@ pub fn tool_call_ids(body: &[u8]) -> Vec<Value> {
     let ids: Vec<String> = messages
         .iter()
         .filter(|m| m.get("method").is_some())
-        .filter_map(|m| m.get("id").map(Value::to_string))
+        .filter_map(|m| m.get("id").map(id_key))
         .collect();
     let unique: std::collections::HashSet<&String> = ids.iter().collect();
     if unique.len() != ids.len() {
@@ -668,6 +677,24 @@ mod tests {
 
     #[test]
     fn duplicate_request_ids_are_never_settled() {
+        let by_value = br#"[{"jsonrpc":"2.0","id":9,"method":"ping"},{"jsonrpc":"2.0","id":9.0,"method":"tools/call","params":{"name":"a"}}]"#;
+        assert_eq!(
+            tool_call_ids(by_value),
+            vec![Value::Null],
+            "9 and 9.0 are the same id"
+        );
+        let big = br#"[{"jsonrpc":"2.0","id":9007199254740992,"method":"ping"},{"jsonrpc":"2.0","id":9007199254740993,"method":"tools/call","params":{"name":"a"}}]"#;
+        assert_eq!(
+            tool_call_ids(big),
+            vec![Value::Null],
+            "ids equal as f64 collide"
+        );
+        let distinct = br#"[{"jsonrpc":"2.0","id":1,"method":"ping"},{"jsonrpc":"2.0","id":"1","method":"tools/call","params":{"name":"a"}}]"#;
+        assert_eq!(
+            tool_call_ids(distinct),
+            vec![serde_json::json!("1")],
+            "number 1 and string \"1\" differ"
+        );
         let batch = br#"[{"jsonrpc":"2.0","id":1,"method":"ping"},{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"a"}}]"#;
         assert_eq!(tool_call_ids(batch), vec![Value::Null]);
     }
