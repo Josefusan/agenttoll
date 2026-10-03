@@ -242,15 +242,29 @@ pub async fn handle_paid(gw: &Gateway, req: PaidRequest<'_>) -> Response {
         .get(header::CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .unwrap_or("");
-    let failed = !origin_status.is_success()
-        || mcp_call_ids
-            .as_deref()
-            .is_some_and(|ids| !mcp_succeeded(&origin_parts.headers, &content, ids));
-    if failed {
+    if !origin_status.is_success() {
         // Not settled, so the payment was not consumed: let the agent retry it.
         gw.replay.release(&replay_key);
         tracing::info!(status = %origin_status, "origin did not succeed; payment not settled");
         return Response::from_parts(origin_parts, Body::from(content));
+    }
+    if let Some(ids) = mcp_call_ids.as_deref()
+        && !mcp_succeeded(&origin_parts.headers, &content, ids)
+    {
+        gw.replay.release(&replay_key);
+        // A tool that provably failed returns its error, unpaid. Anything the gateway cannot
+        // verify (unmatched ids, compressed or unreadable bodies) is withheld: serving it
+        // unsettled would hand out paid content for free.
+        if mcp_failed_explicitly(&origin_parts.headers, &content, ids) {
+            tracing::info!("MCP tool failed; payment not settled");
+            return Response::from_parts(origin_parts, Body::from(content));
+        }
+        tracing::warn!("MCP result could not be verified; payment not settled, content withheld");
+        return (
+            StatusCode::BAD_GATEWAY,
+            "tool result could not be verified; payment not settled; content withheld",
+        )
+            .into_response();
     }
 
     // 6. Settle. Content is released only on success, or when the outcome is unknown.
@@ -359,34 +373,67 @@ fn short_hash(key: &str) -> String {
 /// Anything it cannot read (compressed, truncated, not JSON-RPC) counts as a failure: when
 /// in doubt the buyer is not charged.
 fn mcp_succeeded(headers: &HeaderMap, content: &[u8], call_ids: &[Value]) -> bool {
-    if call_ids.is_empty() || headers.contains_key(header::CONTENT_ENCODING) {
-        return false;
-    }
-    let Ok(text) = std::str::from_utf8(content) else {
+    let Some(messages) = mcp_messages(headers, content) else {
         return false;
     };
+    !call_ids.is_empty()
+        && call_ids.iter().all(|id| {
+            messages.iter().any(|m| {
+                response_to(m, id)
+                    && m.get("error").is_none()
+                    && m.get("result").is_some()
+                    && m.pointer("/result/isError") != Some(&Value::Bool(true))
+            })
+        })
+}
+
+/// True when the body is readable and every paid call got an explicit failure (JSON-RPC
+/// `error` or `result.isError`): the only unsettled MCP content that may be returned.
+fn mcp_failed_explicitly(headers: &HeaderMap, content: &[u8], call_ids: &[Value]) -> bool {
+    let Some(messages) = mcp_messages(headers, content) else {
+        return false;
+    };
+    !call_ids.is_empty()
+        && call_ids.iter().all(|id| {
+            messages.iter().any(|m| {
+                response_to(m, id)
+                    && (m.get("error").is_some()
+                        || m.pointer("/result/isError") == Some(&Value::Bool(true)))
+            })
+        })
+}
+
+/// JSON-RPC messages in an origin response, or `None` if the body cannot be judged
+/// (compressed, not UTF-8, not JSON).
+fn mcp_messages(headers: &HeaderMap, content: &[u8]) -> Option<Vec<Value>> {
+    if headers.contains_key(header::CONTENT_ENCODING) {
+        return None;
+    }
+    let text = std::str::from_utf8(content).ok()?;
     let is_sse = headers
         .get(header::CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .is_some_and(|t| t.starts_with("text/event-stream"));
-    let messages = if is_sse {
-        sse_messages(text)
-    } else {
-        match serde_json::from_str::<Value>(text) {
-            Ok(Value::Array(items)) => items,
-            Ok(message) => vec![message],
-            Err(_) => return false,
-        }
-    };
-    call_ids.iter().all(|id| {
-        messages.iter().any(|m| {
-            !id.is_null()
-                && m.get("id") == Some(id)
-                && m.get("error").is_none()
-                && m.get("result").is_some()
-                && m.pointer("/result/isError") != Some(&Value::Bool(true))
-        })
-    })
+    if is_sse {
+        return Some(sse_messages(text));
+    }
+    match serde_json::from_str::<Value>(text).ok()? {
+        Value::Array(items) => Some(items),
+        message => Some(vec![message]),
+    }
+}
+
+/// A response (not a request or notification) answering request `id`. Numeric ids compare
+/// by value, because servers in other languages may echo `9.0` as `9`.
+fn response_to(message: &Value, id: &Value) -> bool {
+    if id.is_null() || message.get("method").is_some() {
+        return false;
+    }
+    match (message.get("id"), id) {
+        (Some(Value::Number(a)), Value::Number(b)) => a.as_f64() == b.as_f64(),
+        (Some(a), b) => a == b,
+        (None, _) => false,
+    }
 }
 
 /// JSON-RPC messages carried by an SSE body: one per event, multi-line `data:` joined.
@@ -421,6 +468,17 @@ pub fn tool_call_ids(body: &[u8]) -> Vec<Value> {
         Ok(message) => vec![message],
         Err(_) => return Vec::new(),
     };
+    // Duplicate ids make responses ambiguous (a `ping` result could answer a paid call), so
+    // such a batch is never settled.
+    let ids: Vec<String> = messages
+        .iter()
+        .filter(|m| m.get("method").is_some())
+        .filter_map(|m| m.get("id").map(Value::to_string))
+        .collect();
+    let unique: std::collections::HashSet<&String> = ids.iter().collect();
+    if unique.len() != ids.len() {
+        return vec![Value::Null];
+    }
     messages
         .iter()
         .filter(|m| m.get("method").and_then(Value::as_str) == Some("tools/call"))
@@ -565,6 +623,53 @@ mod tests {
             !mcp_succeeded(&sse, note.as_bytes(), &id),
             "no result at all"
         );
+    }
+
+    #[test]
+    fn numeric_ids_match_by_value_and_failures_are_explicit() {
+        let json = json_headers("application/json");
+        let ok = br#"{"jsonrpc":"2.0","id":9,"result":{"content":[]}}"#;
+        assert!(mcp_succeeded(
+            &json,
+            ok,
+            &[serde_json::from_str("9.0").unwrap()]
+        ));
+        assert!(!mcp_succeeded(
+            &json,
+            br#"{"jsonrpc":"2.0","id":"9","result":{}}"#,
+            &[json!(9)]
+        ));
+        let err = br#"{"jsonrpc":"2.0","id":9,"result":{"isError":true}}"#;
+        assert!(mcp_failed_explicitly(&json, err, &[json!(9)]));
+        assert!(
+            !mcp_failed_explicitly(&json, ok, &[json!(9)]),
+            "success is not a failure"
+        );
+        assert!(
+            !mcp_failed_explicitly(
+                &json,
+                br#"{"jsonrpc":"2.0","id":"9","result":{"isError":true}}"#,
+                &[json!(9)]
+            ),
+            "unmatched"
+        );
+        let mut gz = json_headers("application/json");
+        gz.insert(header::CONTENT_ENCODING, HeaderValue::from_static("gzip"));
+        assert!(
+            !mcp_failed_explicitly(&gz, err, &[json!(9)]),
+            "unreadable is not provably failed"
+        );
+        let request_echo = br#"{"jsonrpc":"2.0","id":9,"method":"tools/call","result":{}}"#;
+        assert!(
+            !mcp_succeeded(&json, request_echo, &[json!(9)]),
+            "a request is not a response"
+        );
+    }
+
+    #[test]
+    fn duplicate_request_ids_are_never_settled() {
+        let batch = br#"[{"jsonrpc":"2.0","id":1,"method":"ping"},{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"a"}}]"#;
+        assert_eq!(tool_call_ids(batch), vec![Value::Null]);
     }
 
     #[test]

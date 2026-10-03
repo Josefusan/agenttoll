@@ -165,6 +165,7 @@ mcp:
     sse_broken: "0.005"
     gzip_ok: "0.005"
     gzip_broken: "0.005"
+    wrong_id: "0.005"
 ledger:
   url: "sqlite::memory:"
 timeouts:
@@ -663,6 +664,9 @@ fn mcp_origin_response(body: Value, seen: &Mutex<Option<Value>>) -> axum::respon
         .unwrap_or("")
         .to_string();
     let mut message = mcp_origin(body, seen);
+    if tool == "wrong_id" {
+        message["id"] = json!(12345);
+    }
     if tool.ends_with("_broken") {
         message["result"] =
             json!({ "isError": true, "content": [{ "type": "text", "text": "tool crashed" }] });
@@ -711,13 +715,62 @@ async fn sse_tool_success_after_a_notification_is_settled() {
 }
 
 #[tokio::test]
-async fn compressed_tool_response_is_never_settled() {
+async fn compressed_tool_response_is_never_settled_and_never_served_unpaid() {
     let h = start().await;
-    // Even a successful-looking compressed answer cannot be judged, so it is not charged.
-    for tool in ["gzip_broken", "gzip_ok"] {
-        let res = h.pay_tool(tool).await;
-        assert_eq!(res.status(), 200, "{tool}");
-    }
+    // A compressed success cannot be verified: withheld, not settled, not served.
+    let res = h.pay_tool("gzip_ok").await;
+    assert_eq!(res.status(), 502);
+    assert!(!res.text().await.unwrap().contains("ok"));
+    // A compressed failure cannot be proven a failure either: also withheld.
+    assert_eq!(h.pay_tool("gzip_broken").await.status(), 502);
+    assert_eq!(h.fac.settle_calls.load(Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn float_id_echoed_as_integer_is_settled_not_leaked() {
+    let h = start().await;
+    let call = json!({ "jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": { "name": "search_docs" } });
+    let challenge: Value = h.mcp(call).await.json().await.unwrap();
+    let required = &challenge["result"]["structuredContent"];
+    let payment = json!({ "x402Version": 2, "resource": required["resource"], "accepted": required["accepts"][0],
+        "payload": { "transaction": signed_tx() } });
+    // Raw body so the id stays `9.0`; the mock origin (serde) echoes it back as 9.0 or 9.
+    let body = format!(
+        r#"{{"jsonrpc":"2.0","id":9.0,"method":"tools/call","params":{{"name":"search_docs","_meta":{{"x402/payment":{payment}}}}}}}"#
+    );
+    let res = h
+        .http
+        .post(format!("{}/mcp", h.url))
+        .header("content-type", "application/json")
+        .body(body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(res.status(), 200);
+    assert_eq!(
+        h.fac.settle_calls.load(Ordering::SeqCst),
+        1,
+        "served content is always paid for"
+    );
+}
+
+#[tokio::test]
+async fn unverifiable_2xx_mcp_content_is_withheld() {
+    let h = start().await;
+    // The paid call is id 9; the origin answers a different id, so nothing proves success.
+    let call = json!({ "jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": { "name": "wrong_id" } });
+    let challenge: Value = h.mcp(call.clone()).await.json().await.unwrap();
+    let required = &challenge["result"]["structuredContent"];
+    let mut paid = call;
+    paid["params"]["_meta"] = json!({ "x402/payment": {
+        "x402Version": 2, "resource": required["resource"], "accepted": required["accepts"][0],
+        "payload": { "transaction": signed_tx() } } });
+    let res = h.mcp(paid).await;
+    assert_eq!(res.status(), 502);
+    assert!(
+        !res.text().await.unwrap().contains("wrong_id ok"),
+        "no free content"
+    );
     assert_eq!(h.fac.settle_calls.load(Ordering::SeqCst), 0);
 }
 
