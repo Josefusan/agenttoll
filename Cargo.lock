@@ -103,6 +103,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "agenttoll-core-wasm"
+version = "0.1.0"
+dependencies = [
+ "agenttoll-core",
+ "http 1.5.0",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "agenttoll-demo-origin"
 version = "0.1.0"
 dependencies = [

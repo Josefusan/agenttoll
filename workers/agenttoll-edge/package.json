@@ -1,0 +1,24 @@
+{
+  "name": "agenttoll-edge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AgentToll x402 paywall as a Cloudflare Worker; detector/pricer/MCP logic is agenttoll-core compiled to WASM",
+  "type": "module",
+  "scripts": {
+    "build:wasm": "wasm-pack build ../../crates/agenttoll-core-wasm --target web --release --out-dir ../../workers/agenttoll-edge/src/core --out-name agenttoll_core && rm -f src/core/.gitignore src/core/package.json",
+    "ensure:wasm": "test -f src/core/agenttoll_core_bg.wasm || npm run build:wasm",
+    "predev": "npm run ensure:wasm",
+    "dev": "wrangler dev --local",
+    "pretest": "npm run ensure:wasm",
+    "test": "vitest run",
+    "test:parity": "vitest run test/parity.test.ts",
+    "typecheck": "npm run ensure:wasm && tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261001.1",
+    "@types/node": "^26.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.3",
+    "wrangler": "^4.147.0"
+  }
+}
