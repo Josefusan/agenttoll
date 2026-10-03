@@ -81,7 +81,7 @@ Full design: [ARCHITECTURE.md](ARCHITECTURE.md). Every design decision with its 
 
 ## Money rules
 
-- **Humans never pay.** In the default `agents-only` mode only self-declared or verified agents are charged; guesses (curl, headless browsers) are logged, not billed.
+- **Humans never pay.** In the default `agents-only` mode only agents that identify themselves (AI crawler user agents, MCP clients, anyone presenting a payment) are charged; guesses (curl, headless browsers) are logged, not billed. Cryptographic Web Bot Auth verification is on the roadmap, not built.
 - **Agents never pay for errors.** Settlement happens only after the origin succeeds. For MCP, a tool that errors (JSON-RPC error or `isError`) is never charged, and a result the gateway cannot verify is withheld rather than given away.
 - **Content only after settlement.** If the facilitator rejects the payment, the agent gets the 402, not the content. If settlement times out after the origin answered, the content is served and the payment is recorded as `unconfirmed`, so nobody is charged without service and nothing goes unrecorded.
 - **One payment, one resource.** Payments are checked against the gateway's own quote (amount, asset, recipient, network), bound to the resource and tool they were quoted for, and refused if replayed.
