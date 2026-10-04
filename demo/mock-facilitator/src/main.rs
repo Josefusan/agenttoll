@@ -4,6 +4,12 @@
 //! request shape only, and `/settle` returns a transaction id starting with `SIMULATED-`,
 //! which the gateway ledger, dashboard and buyer all label as simulated. Never point a
 //! production gateway at it.
+//!
+//! Fault knobs, for the eval suite only. They are off unless `MOCK_FACILITATOR_FAULTS=1`.
+//! When on, a payment whose `paymentPayload.payload.mock` is `"verify_fail"` is rejected by
+//! `/verify`, and one whose value is `"settle_timeout"` makes `/settle` sleep for
+//! `MOCK_FACILITATOR_SLOW_MS` (default 3000) before answering, so a gateway with a shorter
+//! settle budget gives up and records the payment as unconfirmed.
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -63,14 +69,50 @@ fn invalid_reason(body: &Value) -> Option<&'static str> {
     None
 }
 
+/// A fault a payment asks for with `paymentPayload.payload.mock`.
+#[derive(Debug, PartialEq)]
+enum Fault {
+    VerifyFail,
+    SettleTimeout,
+}
+
+fn requested_fault(body: &Value) -> Option<Fault> {
+    match body["paymentPayload"]["payload"]["mock"].as_str()? {
+        "verify_fail" => Some(Fault::VerifyFail),
+        "settle_timeout" => Some(Fault::SettleTimeout),
+        _ => None,
+    }
+}
+
+fn faults_enabled() -> bool {
+    std::env::var("MOCK_FACILITATOR_FAULTS").is_ok_and(|v| v == "1")
+}
+
+fn slow_ms() -> u64 {
+    std::env::var("MOCK_FACILITATOR_SLOW_MS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(3000)
+}
+
 async fn verify(Json(body): Json<Value>) -> Json<Value> {
-    match invalid_reason(&body) {
+    verify_with(faults_enabled(), &body)
+}
+
+fn verify_with(faults: bool, body: &Value) -> Json<Value> {
+    if faults && requested_fault(body) == Some(Fault::VerifyFail) {
+        return Json(json!({ "isValid": false, "invalidReason": "mock_verify_failure" }));
+    }
+    match invalid_reason(body) {
         Some(reason) => Json(json!({ "isValid": false, "invalidReason": reason })),
         None => Json(json!({ "isValid": true, "payer": "SIMULATED-BUYER" })),
     }
 }
 
 async fn settle(Json(body): Json<Value>) -> Json<Value> {
+    if faults_enabled() && requested_fault(&body) == Some(Fault::SettleTimeout) {
+        tokio::time::sleep(std::time::Duration::from_millis(slow_ms())).await;
+    }
     let network = body["paymentRequirements"]["network"].clone();
     if let Some(reason) = invalid_reason(&body) {
         return Json(
@@ -127,6 +169,21 @@ mod tests {
             invalid_reason(&json!({ "x402Version": 2, "paymentPayload": {} })),
             Some("invalid_payload")
         );
+    }
+
+    #[test]
+    fn fault_knobs_are_read_from_the_payload_and_gated() {
+        let with = |mock: &str| json!({ "x402Version": 2, "paymentPayload": { "payload": { "mock": mock } },
+            "paymentRequirements": { "amount": "2000", "payTo": "p", "network": "n" } });
+        assert_eq!(requested_fault(&with("verify_fail")), Some(Fault::VerifyFail));
+        assert_eq!(requested_fault(&with("settle_timeout")), Some(Fault::SettleTimeout));
+        assert_eq!(requested_fault(&with("other")), None);
+        assert_eq!(requested_fault(&json!({ "paymentPayload": { "payload": {} } })), None);
+        let Json(on) = verify_with(true, &with("verify_fail"));
+        assert_eq!(on["isValid"], false);
+        assert_eq!(on["invalidReason"], "mock_verify_failure");
+        let Json(off) = verify_with(false, &with("verify_fail"));
+        assert_eq!(off["isValid"], true, "knobs are ignored unless enabled");
     }
 
     #[test]

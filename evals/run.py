@@ -40,7 +40,7 @@ ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 
 import checks  # noqa: E402  (custom checks that need more than a request and an expectation)
-from checks import Fail  # noqa: E402
+from checks import Fail, Skip  # noqa: E402
 
 BINARIES = {
     "gateway": "agenttoll-gateway",
@@ -164,6 +164,10 @@ networks:
     pay_to: "{BASE_PAYTO}"
     facilitator: "http://127.0.0.1:{self.fac_port}"   # SIMULATED
 
+timeouts:
+  verify_ms: 5000
+  settle_ms: 1000   # short, so the settle-timeout case does not wait the 20 s default
+
 routes:
   - match: "GET /api/quote"
     price_usd: "0.002"
@@ -224,7 +228,8 @@ ledger:
         config = self.write_config()
         self.spawn("origin", [self.bin("origin")], {"ORIGIN_LISTEN": f"127.0.0.1:{self.origin_port}"})
         self.spawn("facilitator", [self.bin("facilitator")],
-                   {"MOCK_FACILITATOR_LISTEN": f"127.0.0.1:{self.fac_port}"})
+                   {"MOCK_FACILITATOR_LISTEN": f"127.0.0.1:{self.fac_port}",
+                    "MOCK_FACILITATOR_FAULTS": "1", "MOCK_FACILITATOR_SLOW_MS": "3000"})
         self.wait_port("origin", self.origin_port)
         self.wait_port("facilitator", self.fac_port, "/supported")
         self.spawn("gateway", [self.bin("gateway"), "--config", str(config)], {
@@ -270,6 +275,10 @@ class Ctx:
         self.settled_count = 0
         self.settled_by_network: dict[str, int] = {}
         self.settled_agents: set[str] = set()
+        # Payments the gateway served without a settlement (settle timeout): ledger status unconfirmed.
+        self.unconfirmed_atomic = 0
+        self.unconfirmed_count = 0
+        self.unconfirmed_by_network: dict[str, int] = {}
         self.steps: dict[str, dict] = {}
 
     # -- plumbing
@@ -303,6 +312,10 @@ class Ctx:
             if wait_for is None or wait_for(r.json) or time.time() > deadline:
                 return r.json
             time.sleep(0.15)
+
+    def build_payment(self, spec: dict, prior: "Response"):
+        """(PAYMENT-SIGNATURE header value, payload) built from the challenge in `prior`."""
+        return build_payment(self, spec, prior)
 
     def note_settlement(self, resp: Response) -> None:
         receipt = resp.receipt
@@ -547,6 +560,8 @@ def run_case(ctx: Ctx, case: dict) -> dict:
             else:
                 line, notes = run_step(ctx, step)
                 evidence.append(line + (f" | ok: {', '.join(notes)}" if notes else ""))
+    except Skip as e:
+        status, error = "skip", ctx.redact(str(e))
     except Fail as e:
         status, error = "fail", ctx.redact(str(e))
     except Exception as e:  # a crashed case is a failed case, never a skipped one
@@ -556,7 +571,7 @@ def run_case(ctx: Ctx, case: dict) -> dict:
         "group": case.get("group", case["id"].split("-")[0]),
         "promise": case["promise"],
         "status": status,
-        "evidence": [ctx.redact(e) for e in evidence] + ([f"FAILED: {error}"] if error else []),
+        "evidence": [ctx.redact(e) for e in evidence] + ([f"{'SKIPPED' if status == 'skip' else 'FAILED'}: {error}"] if error else []),
         "seconds": round(time.time() - started, 3),
     }
 
@@ -619,13 +634,15 @@ def write_results(results: list[dict], meta: dict) -> None:
     out = HERE / "results"
     out.mkdir(exist_ok=True)
     passed = sum(r["status"] == "pass" for r in results)
-    doc = {**meta, "total": len(results), "passed": passed, "failed": len(results) - passed,
+    skipped = sum(r["status"] == "skip" for r in results)
+    failed = sum(r["status"] == "fail" for r in results)
+    doc = {**meta, "total": len(results), "passed": passed, "skipped": skipped, "failed": failed,
            "cases": results}
     (out / "latest.json").write_text(json.dumps(doc, indent=2) + "\n")
     lines = [
         "# AgentToll eval results",
         "",
-        f"Run: {meta['generated']} | commit {meta['commit']} | binaries {meta['bin_dir']} | {passed}/{len(results)} passed",
+        f"Run: {meta['generated']} | commit {meta['commit']} | binaries {meta['bin_dir']} | {passed}/{len(results)} passed, {skipped} skipped, {failed} failed",
         "",
         "All payments in this run are SIMULATED (mock facilitator, `SIMULATED-` transaction ids). "
         "Nothing went on chain.",
@@ -672,7 +689,7 @@ def main() -> int:
         for case in cases:
             r = run_case(ctx, case)
             results.append(r)
-            print(f"{'PASS' if r['status'] == 'pass' else 'FAIL'}  {r['id']:<9} {r['promise']}")
+            print(f"{r['status'].upper():<4}  {r['id']:<9} {r['promise']}")
             if r["status"] != "pass":
                 print("      " + r["evidence"][-1])
         discovery = ctx.gw("GET", "/.well-known/agenttoll.json").json or {}
@@ -691,8 +708,9 @@ def main() -> int:
         print("--only run: results files not written")
     else:
         write_results(results, meta)
-    failed = [r for r in results if r["status"] != "pass"]
-    print(f"\n{len(results) - len(failed)}/{len(results)} passed; results in evals/results/latest.{{json,md}}" if not args.only else "")
+    failed = [r for r in results if r["status"] == "fail"]
+    skipped = [r for r in results if r["status"] == "skip"]
+    print(f"\n{sum(r['status'] == 'pass' for r in results)}/{len(results)} passed, {len(skipped)} skipped ({', '.join(r['id'] for r in skipped) or 'none'}); results in evals/results/latest.{{json,md}}" if not args.only else "")
     return 1 if failed else 0
 
 

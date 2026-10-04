@@ -5,7 +5,10 @@ Assembles a packet from the repo, asks N independent judges (headless Claude CLI
 to score it against evals/judge/rubric.md, aggregates, and writes
 evals/judge/results/latest.json and latest.md.
 
-Usage: python3 evals/judge/judge.py [--judges 3] [--model sonnet] [--dry-run]
+Usage: python3 evals/judge/judge.py [--judges 3] [--model sonnet] [--dry-run] [--no-exclude-system1]
+
+By default the packet leaves out results/system1.json, so the judges read the docs
+themselves instead of repeating the rule output. The choice is recorded in latest.md.
 """
 from __future__ import annotations
 
@@ -57,7 +60,15 @@ def sh(args, **kw):
     return subprocess.run(args, capture_output=True, text=True, cwd=ROOT, **kw)
 
 
-def build_packet() -> tuple[str, list[str]]:
+def git_head() -> str:
+    """Short commit, with -dirty when tracked files outside the results directories differ."""
+    head = sh(["git", "rev-parse", "--short", "HEAD"]).stdout.strip()
+    status = sh(["git", "status", "--porcelain", "--untracked-files=no", "--", ".",
+                 ":(exclude)evals/results", ":(exclude)evals/judge/results"]).stdout.strip()
+    return head + ("-dirty" if status else "")
+
+
+def build_packet(include_system1: bool = False) -> tuple[str, list[str]]:
     parts, used = [], []
 
     def add(rel: str, label: str | None = None):
@@ -72,7 +83,8 @@ def build_packet() -> tuple[str, list[str]]:
         add(str(p.relative_to(ROOT)))
     add("docs/USE_CASES.md")
     add("evals/results/latest.md")
-    add("evals/judge/results/system1.json")
+    if include_system1:
+        add("evals/judge/results/system1.json")
     tree = sh(["git", "ls-files"]).stdout
     parts.append(f"\n===== git ls-files (tree) =====\n{tree}")
     used.append("git ls-files")
@@ -115,6 +127,12 @@ def validate(obj) -> None:
         raise ValueError("need 3 improvements")
 
 
+def resolved_models(envelope: dict) -> list[str]:
+    """Model ids the claude CLI actually used, from the JSON envelope's modelUsage."""
+    usage = envelope.get("modelUsage")
+    return sorted(usage) if isinstance(usage, dict) else []
+
+
 def run_judge(idx: int, prompt: str, model: str, timeout: int) -> dict:
     env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
     last_err = ""
@@ -135,7 +153,7 @@ def run_judge(idx: int, prompt: str, model: str, timeout: int) -> dict:
             validate(obj)
             obj["_meta"] = {
                 "judge": idx, "attempt": attempt, "cost_usd": envelope.get("total_cost_usd"),
-                "duration_ms": envelope.get("duration_ms"),
+                "duration_ms": envelope.get("duration_ms"), "model_ids": resolved_models(envelope),
             }
             return obj
         except Exception as e:  # noqa: BLE001
@@ -176,7 +194,13 @@ def render_md(res: dict) -> str:
     a = res["aggregate"]
     L = [
         "# LLM-as-judge results", "",
-        f"Run: {res['generated_at']}. Commit: `{res['commit']}`. Judges: {res['judges_ok']}/{res['judges_requested']} returned valid JSON. Model: `{res['model']}`.",
+        f"Run: {res['generated_at']}. Commit: `{res['commit']}`. Judges: {res['judges_ok']}/{res['judges_requested']} returned valid JSON. "
+        f"Model alias: `{res['model']}`. Resolved model id: {', '.join(f'`{m}`' for m in res['resolved_models']) or 'not reported by the CLI'}.",
+        "System-1 output in the packet: " + ("yes, `evals/judge/results/system1.json` was included, so the judges saw the rule results."
+                                             if res["system1_in_packet"] else
+                                             "no, `evals/judge/results/system1.json` was left out, so the judges read the docs independently of the rule results."),
+        f"Limitation: all {res['judges_requested']} judges use the same model and differ only by lens prompt. "
+        "Their agreement is weaker evidence than agreement between independent models.",
         "Judges are skeptical, see `rubric.md`. Scores are model opinions on the packet, not ground truth.", "",
         f"**Weighted total (median per criterion): {a['weighted_total']} / 100**. "
         f"Per-judge totals: {a['total_by_judge']}. Spread: {a['total_spread']}. Mean criterion spread: {a['mean_criterion_spread']}.", "",
@@ -209,6 +233,8 @@ def main() -> int:
     ap.add_argument("--judges", type=int, default=3)
     ap.add_argument("--model", default="sonnet")
     ap.add_argument("--timeout", type=int, default=900)
+    ap.add_argument("--exclude-system1", action=argparse.BooleanOptionalAction, default=True,
+                    help="leave results/system1.json out of the packet (default); --no-exclude-system1 includes it")
     ap.add_argument("--dry-run", action="store_true", help="build the packet and prompt, call no model")
     a = ap.parse_args()
 
@@ -216,7 +242,7 @@ def main() -> int:
     missing = [c for c in IDS if c not in rubric]
     if missing:
         sys.exit(f"rubric.md is missing criterion ids: {missing}")
-    packet, used = build_packet()
+    packet, used = build_packet(include_system1=not a.exclude_system1)
     prompts = [build_prompt(packet, rubric, LENSES[i % len(LENSES)]) for i in range(a.judges)]
     if a.dry_run:
         print(f"packet {len(packet)} chars from {used}; prompt {len(prompts[0])} chars; {a.judges} judges")
@@ -227,10 +253,11 @@ def main() -> int:
     if not ok:
         print(json.dumps([j.get("_error") for j in judges], indent=1))
         sys.exit("no judge returned valid JSON")
-    commit = sh(["git", "rev-parse", "--short", "HEAD"]).stdout.strip()
+    commit = git_head()
+    models = sorted({m for j in ok for m in j["_meta"].get("model_ids", [])})
     res = {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-        "commit": commit, "model": a.model, "judges_requested": a.judges, "judges_ok": len(ok),
+        "commit": commit, "model": a.model, "resolved_models": models, "system1_in_packet": not a.exclude_system1, "judges_requested": a.judges, "judges_ok": len(ok),
         "lenses": LENSES[: a.judges], "packet_files": used, "packet_chars": len(packet),
         "aggregate": aggregate(judges, packet), "judges": judges,
     }

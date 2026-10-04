@@ -1,7 +1,7 @@
 [
   {
     "id": "STAT-01",
-    "promise": "Ledger revenue and payment count equal exactly what the run saw settle; no refused or failed attempt was charged",
+    "promise": "Ledger revenue and payment count equal exactly what the run saw settle, plus the one unconfirmed payment from FAIL-02; no refused or failed attempt was charged",
     "steps": [
       {
         "check": "ledger_matches_observed"
@@ -10,7 +10,7 @@
   },
   {
     "id": "STAT-02",
-    "promise": "Stats separate simulated money: simulated_atomic equals revenue here, unconfirmed is 0, real is 0",
+    "promise": "Stats separate simulated money: simulated_atomic equals what settled, unconfirmed_atomic equals only the FAIL-02 payment, real is 0",
     "steps": [
       {
         "check": "simulated_separated"
@@ -19,7 +19,7 @@
   },
   {
     "id": "STAT-03",
-    "promise": "Every ledger row is labelled simulated with a SIMULATED- tx id",
+    "promise": "Every settled ledger row is labelled simulated with a SIMULATED- tx id; the FAIL-02 row is unconfirmed and not flagged simulated",
     "steps": [
       {
         "check": "recent_all_labelled"

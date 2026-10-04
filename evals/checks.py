@@ -21,6 +21,11 @@ class Fail(AssertionError):
     pass
 
 
+class Skip(Exception):
+    """The case could not run for a reason outside the product (for example the public devnet RPC
+    is unreachable). Reported as SKIP with the reason, never as PASS, and it does not fail the run."""
+
+
 def _need(cond, msg):
     if not cond:
         raise Fail(msg)
@@ -99,13 +104,41 @@ def mcp_text_equals_structured(ctx):
 
 # ------------------------------------------------------------------ buyer CLI
 
-def _run_buyer(ctx, url, *extra):
+NETWORK_ERROR = re.compile(r"error sending request|connection (refused|reset|closed)|timed? ?out|dns error|"
+                           r"failed to lookup|network is unreachable|tcp connect|too many requests|\b429\b", re.I)
+
+
+def _run_buyer_once(ctx, url, *extra):
     env = {**os.environ,
            "BUYER_SOLANA_KEYPAIR": str(ctx.stack.buyer_keypair),
            "SOLANA_RPC_URL": os.environ.get("EVAL_SOLANA_RPC", "https://api.devnet.solana.com")}
     env.pop("BUYER_EVM_PRIVATE_KEY", None)
     return subprocess.run([ctx.stack.bin("buyer"), url, *extra], capture_output=True, text=True,
                           env=env, timeout=90, cwd=ctx.stack.tmp)
+
+
+def _run_buyer(ctx, url, *extra):
+    """Runs the buyer CLI. A failure that looks like a devnet RPC network error is retried once
+    (after 2 s, and only if the ledger did not move). If it fails the same way again the case is
+    SKIPPED with the reason: an unreachable public RPC says nothing about AgentToll."""
+    before = ctx.admin_stats()["totals"]["payments"]
+    try:
+        out = _run_buyer_once(ctx, url, *extra)
+    except subprocess.TimeoutExpired:
+        out = subprocess.CompletedProcess([], 124, "", "timed out waiting for the buyer CLI (devnet RPC)")
+    for attempt in (1, 2):
+        if out.returncode == 0 or not NETWORK_ERROR.search(out.stderr):
+            return out
+        if ctx.admin_stats()["totals"]["payments"] != before:
+            return out  # the ledger moved, so this is not a clean pre-payment network error
+        if attempt == 1:
+            time.sleep(2)
+            try:
+                out = _run_buyer_once(ctx, url, *extra)
+            except subprocess.TimeoutExpired:
+                out = subprocess.CompletedProcess([], 124, "", "timed out waiting for the buyer CLI (devnet RPC)")
+    rpc = os.environ.get("EVAL_SOLANA_RPC", "https://api.devnet.solana.com")
+    raise Skip(f"Solana devnet RPC unreachable after one retry ({rpc}); buyer stderr: {out.stderr.strip()[-160:]!r}")
 
 
 def buyer_paid_flow(ctx):
@@ -215,33 +248,47 @@ def ledger_matches_observed(ctx):
     """Revenue in /admin/stats equals exactly what the runner saw settle. Every refused,
     replayed, tampered, failed-origin and facilitator-down attempt added nothing."""
     t = ctx.admin_stats()["totals"]
-    _need(t["revenue_atomic"] == ctx.settled_atomic,
-          f"ledger revenue {t['revenue_atomic']} != observed settled {ctx.settled_atomic}")
-    _need(t["payments"] == ctx.settled_count, f"ledger payments {t['payments']} != observed {ctx.settled_count}")
-    return f"ledger revenue_atomic={t['revenue_atomic']} payments={t['payments']} == observed ({ctx.settled_atomic}, {ctx.settled_count})"
+    want_atomic = ctx.settled_atomic + ctx.unconfirmed_atomic
+    want_count = ctx.settled_count + ctx.unconfirmed_count
+    _need(t["revenue_atomic"] == want_atomic,
+          f"ledger revenue {t['revenue_atomic']} != observed settled {ctx.settled_atomic} + unconfirmed {ctx.unconfirmed_atomic}")
+    _need(t["payments"] == want_count, f"ledger payments {t['payments']} != observed {want_count}")
+    return (f"ledger revenue_atomic={t['revenue_atomic']} payments={t['payments']} == observed settled "
+            f"({ctx.settled_atomic}, {ctx.settled_count}) + unconfirmed ({ctx.unconfirmed_atomic}, {ctx.unconfirmed_count})")
 
 
 def simulated_separated(ctx):
     """Simulated money is reported separately and is never mistaken for settled chain money."""
     t = ctx.admin_stats()["totals"]
     _need({"simulated_atomic", "unconfirmed_atomic"} <= set(t), "totals lacks simulated/unconfirmed fields")
-    _need(t["simulated_atomic"] == t["revenue_atomic"] > 0,
-          f"simulated_atomic {t['simulated_atomic']} != revenue_atomic {t['revenue_atomic']}")
-    _need(t["unconfirmed_atomic"] == 0, f"unconfirmed_atomic is {t['unconfirmed_atomic']}")
-    real = t["revenue_atomic"] - t["simulated_atomic"]
+    _need(t["simulated_atomic"] == ctx.settled_atomic > 0,
+          f"simulated_atomic {t['simulated_atomic']} != observed simulated settlements {ctx.settled_atomic}")
+    _need(t["unconfirmed_atomic"] == ctx.unconfirmed_atomic,
+          f"unconfirmed_atomic is {t['unconfirmed_atomic']}, observed {ctx.unconfirmed_atomic}")
+    real = t["revenue_atomic"] - t["simulated_atomic"] - t["unconfirmed_atomic"]
     _need(real == 0, f"{real} atomic counted as real money in a simulated run")
-    return f"simulated_atomic={t['simulated_atomic']} of revenue_atomic={t['revenue_atomic']}; real (non-simulated)=0; unconfirmed=0"
+    return (f"simulated_atomic={t['simulated_atomic']} + unconfirmed_atomic={t['unconfirmed_atomic']} "
+            f"(only the settle-timeout case) = revenue_atomic={t['revenue_atomic']}; real (neither)=0")
 
 
 def recent_all_labelled(ctx):
-    """Every ledger row carries simulated=true, a SIMULATED- id, status settled."""
+    """Every settled row carries simulated=true, a SIMULATED- id, status settled. The only other rows
+    are the settle-timeout case's: status unconfirmed, an unconfirmed: id, never flagged simulated."""
     recent = ctx.admin_stats()["recent"]
     _need(recent, "no recent events")
+    unconfirmed = 0
     for e in recent:
+        if e["status"] == "unconfirmed":
+            unconfirmed += 1
+            _need(e["tx_signature"].startswith("unconfirmed:") and e["simulated"] is False,
+                  f"unconfirmed row {e['tx_signature']!r} simulated={e['simulated']}")
+            continue
         _need(e["simulated"] is True, f"row {e['tx_signature']} not flagged simulated")
         _need(e["tx_signature"].startswith("SIMULATED-"), f"row tx {e['tx_signature']!r} lacks SIMULATED-")
         _need(e["status"] == "settled", f"row status {e['status']}")
-    return f"{len(recent)} recent rows all simulated=true, SIMULATED- tx, status settled"
+    _need(unconfirmed <= ctx.unconfirmed_count, f"{unconfirmed} unconfirmed rows, runner caused {ctx.unconfirmed_count}")
+    return (f"{len(recent) - unconfirmed} recent rows simulated=true, SIMULATED- tx, status settled; "
+            f"{unconfirmed} unconfirmed (settle-timeout case only)")
 
 
 def failures_not_in_ledger(ctx):
@@ -256,7 +303,10 @@ def failures_not_in_ledger(ctx):
 def by_network_both(ctx):
     stats = ctx.admin_stats()
     nets = {n["network"]: n["revenue_atomic"] for n in stats["by_network"]}
-    for net, amount in ctx.settled_by_network.items():
+    observed = dict(ctx.settled_by_network)
+    for net, amount in ctx.unconfirmed_by_network.items():
+        observed[net] = observed.get(net, 0) + amount
+    for net, amount in observed.items():
         _need(nets.get(net) == amount, f"by_network[{net}]={nets.get(net)} != observed {amount}")
     _need(len(nets) >= 2, f"expected revenue on both rails, got {nets}")
     return f"by_network {nets} matches observed per-network totals"
@@ -277,6 +327,40 @@ def agents_attributed(ctx):
 
 
 # ------------------------------------------------------------------ fault injection
+
+def settle_timeout_unconfirmed(ctx):
+    """The facilitator accepts /verify but /settle outlasts the gateway's settle budget (the eval
+    config sets 1000 ms; the SIMULATED facilitator sleeps longer when the payment asks for it).
+    The outcome is unknown, so the buyer is served and the ledger records the payment as
+    unconfirmed, with no receipt and an unconfirmed: id. The payment stays claimed."""
+    quote = _agent_get(ctx, "/api/quote")
+    spec = {"payload": {"transaction": "EVAL-settle-timeout", "mock": "settle_timeout"}}
+    header, payload = ctx.build_payment(spec, quote)
+    before = ctx.admin_stats()["totals"]
+    paid = ctx.gw("GET", "/api/quote", headers={"User-Agent": GPTBOT, "PAYMENT-SIGNATURE": header})
+    _need(paid.status == 200, f"settle timeout: got {paid.status}, want 200 (content served)")
+    _need("SOL/USD" in paid.text, "settle timeout: content was not served")
+    _need("payment-response" not in paid.headers, "settle timeout: a receipt was returned for an unknown outcome")
+    stats = ctx.admin_stats()
+    t = stats["totals"]
+    _need(t["unconfirmed_atomic"] == before["unconfirmed_atomic"] + 2000,
+          f"unconfirmed_atomic {before['unconfirmed_atomic']} -> {t['unconfirmed_atomic']}, want +2000")
+    _need(t["payments"] == before["payments"] + 1, f"payments {before['payments']} -> {t['payments']}")
+    row = stats["recent"][0]
+    _need(row["status"] == "unconfirmed", f"ledger row status {row['status']!r}, want 'unconfirmed'")
+    _need(row["tx_signature"].startswith("unconfirmed:"), f"ledger tx {row['tx_signature']!r} lacks unconfirmed:")
+    _need(row["simulated"] is False, "an unconfirmed row must not be flagged simulated (no SIMULATED- id was issued)")
+    again = ctx.gw("GET", "/api/quote", headers={"User-Agent": GPTBOT, "PAYMENT-SIGNATURE": header})
+    _need(again.status == 402 and "SOL/USD" not in again.text,
+          f"replay of the unconfirmed payment: got {again.status}, want 402 without content")
+    amount = int(payload["accepted"]["amount"])
+    ctx.unconfirmed_atomic += amount
+    ctx.unconfirmed_count += 1
+    net = payload["accepted"]["network"]
+    ctx.unconfirmed_by_network[net] = ctx.unconfirmed_by_network.get(net, 0) + amount
+    return (f"settle timeout: 200 with content, no receipt, ledger row status=unconfirmed tx={row['tx_signature'][:20]}..., "
+            f"unconfirmed_atomic +{amount}, replay -> 402")
+
 
 def stop_facilitator(ctx):
     """Stops the facilitator process this run started (never anything else)."""
