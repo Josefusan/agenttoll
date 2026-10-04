@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AgentToll hero film</title>
+<!--
+  AgentToll hero film, 90 s, one continuous timeline on the scene engine (video/engine).
+  Every on-screen string is sourced in SHOTLIST.md (next to this file). Caption pills are mirrored
+  in captions.json for the guardrail checks. Payments shown are SIMULATED (mock facilitator); every
+  frame that shows a payment or settlement carries the gold "SIMULATED · no funds moved" badge.
+-->
+<link rel="stylesheet" href="../../engine/engine.css">
+<script src="../../engine/timeline.js"></script>
+<style>
+  .grp { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 960px 540px; }
+  .sub { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 960px 540px; }
+  .wipe { position: absolute; top: -200px; height: 1480px; width: 240px; left: 0; pointer-events: none; z-index: 40;
+    background: linear-gradient(90deg, rgba(139,92,246,0) 0%, rgba(139,92,246,0.55) 30%, rgba(59,130,246,0.75) 50%, rgba(45,212,191,0.55) 70%, rgba(45,212,191,0) 100%);
+    filter: blur(14px); }
+  .wipe-core { position: absolute; top: -200px; height: 1480px; width: 3px; left: 0; z-index: 41; pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.95) 70%, rgba(255,255,255,0));
+    box-shadow: 0 0 18px rgba(167,139,250,0.9), 0 0 42px rgba(45,212,191,0.6); }
+
+  /* wordmark lockup (open + close) */
+  .lock-icon { position: absolute; width: 176px; height: 176px; left: 872px; filter: drop-shadow(0 24px 48px rgba(109,40,217,0.55)); }
+  .center { text-align: center; }
+  .tagline { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 46px/1.25 var(--sans); letter-spacing: -0.02em; color: var(--text); }
+  .tagline .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .repo { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 30px/1 var(--mono); color: var(--teal); letter-spacing: 0.01em; }
+  .event { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 18px/1 var(--mono); color: var(--muted); letter-spacing: 0.32em; }
+
+  /* labels + pills */
+  .who { position: absolute; font: 600 18px/1 var(--mono); letter-spacing: 0.2em; color: var(--muted); white-space: nowrap; }
+  .who b { color: var(--text); font-weight: 700; }
+  .pill { position: absolute; display: inline-flex; align-items: center; gap: 10px; padding: 9px 16px 9px 14px; border-radius: 999px; white-space: nowrap;
+    font: 700 19px/1 var(--mono); letter-spacing: 0.01em; }
+  .pill i { width: 9px; height: 9px; border-radius: 50%; display: block; }
+  .pill.ok { color: #4ADE80; background: rgba(74,222,128,0.12); box-shadow: 0 0 0 1px rgba(74,222,128,0.45) inset, 0 8px 30px -8px rgba(74,222,128,0.5); }
+  .pill.ok i { background: #4ADE80; box-shadow: 0 0 10px #4ADE80; }
+  .pill.pay { color: var(--gold); background: rgba(251,191,36,0.12); box-shadow: 0 0 0 1px rgba(251,191,36,0.5) inset, 0 8px 30px -8px rgba(251,191,36,0.55); }
+  .pill.pay i { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+  .pill.bad { color: #F87171; background: rgba(248,113,113,0.12); box-shadow: 0 0 0 1px rgba(248,113,113,0.5) inset, 0 8px 30px -8px rgba(248,113,113,0.5); }
+  .pill.bad i { background: #F87171; box-shadow: 0 0 10px #F87171; }
+
+  .fn { position: absolute; font: 400 15px/1.45 var(--mono); color: var(--dim); letter-spacing: 0.01em; white-space: nowrap; }
+  .fn b { color: var(--muted); font-weight: 500; }
+  .note { position: absolute; font: 400 28px/1.45 var(--sans); color: var(--muted); letter-spacing: -0.01em; }
+  .note b { color: var(--text); font-weight: 600; }
+
+  /* terminal extras */
+  .at-term .ln .c-clip { display: inline-block; max-width: 100%; white-space: nowrap; overflow: hidden; vertical-align: top;
+    -webkit-mask-image: linear-gradient(90deg, #000 78%, rgba(0,0,0,0)); mask-image: linear-gradient(90deg, #000 78%, rgba(0,0,0,0)); }
+  .at-term .ln { position: relative; }
+  .lnhl { position: absolute; left: -12px; right: -12px; top: -2px; bottom: -2px; border-radius: 8px; pointer-events: none; }
+  .lnhl.red { background: rgba(248,113,113,0.12); box-shadow: 0 0 0 1px rgba(248,113,113,0.45) inset; }
+  .lnhl.gold { background: rgba(251,191,36,0.10); box-shadow: 0 0 0 1px rgba(251,191,36,0.45) inset; }
+
+  /* decoded quote card (02) */
+  .card { position: absolute; border-radius: 18px; background: rgba(14,12,32,0.92); overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 1px 0 rgba(255,255,255,0.07) inset, 0 40px 80px -24px rgba(0,0,0,0.7); }
+  .card .hd { height: 52px; display: flex; align-items: center; gap: 14px; padding: 0 24px; border-bottom: 1px solid var(--line);
+    font: 600 15px/1 var(--mono); letter-spacing: 0.16em; color: var(--muted); background: rgba(255,255,255,0.025); white-space: nowrap; }
+  .card .hd b { color: var(--teal); font-weight: 700; }
+  .card .hd .src { margin-left: auto; letter-spacing: 0.02em; color: var(--dim); font-weight: 400; }
+  .qrow { position: relative; display: flex; align-items: center; height: 50px; padding: 0 24px; font: 400 21px/1 var(--mono); white-space: nowrap; }
+  .qrow .k { width: 236px; color: var(--t-dim); }
+  .qrow .v { color: var(--t-text); }
+  .qrow .n { margin-left: 22px; font: 600 20px/1 var(--sans); letter-spacing: -0.01em; display: inline-flex; align-items: center; gap: 10px; }
+  .qrow .n .arr { font-family: var(--mono); color: var(--dim); font-weight: 400; }
+  .qrow .hlb { position: absolute; left: 10px; right: 10px; top: 4px; bottom: 4px; border-radius: 10px; }
+  .qrow.gold .v, .qrow.gold .n { color: var(--gold); }
+  .qrow.gold .hlb { background: rgba(251,191,36,0.10); box-shadow: 0 0 0 1px rgba(251,191,36,0.42) inset; }
+  .qrow.teal .n { color: var(--teal); }
+  .qrow.teal .hlb { background: rgba(45,212,191,0.08); box-shadow: 0 0 0 1px rgba(45,212,191,0.35) inset; }
+  .qrow.vio .n { color: #C4B5FD; }
+  .qrow.vio .hlb { background: rgba(139,92,246,0.10); box-shadow: 0 0 0 1px rgba(139,92,246,0.42) inset; }
+
+  /* step rail (03) */
+  .rail { position: absolute; display: flex; gap: 14px; }
+  .step { position: relative; display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 20px 0 10px; border-radius: 999px;
+    font: 600 19px/1 var(--sans); color: var(--dim); background: rgba(255,255,255,0.03); box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset; white-space: nowrap; }
+  .step .no { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font: 700 15px/1 var(--mono);
+    color: var(--dim); background: rgba(255,255,255,0.05); }
+  .step .ring { position: absolute; inset: 0; border-radius: 999px; padding: 2px; background: var(--grad);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; }
+  .step.goldstep .ring { background: linear-gradient(90deg, #FDE68A, #FBBF24, #F59E0B); }
+
+  /* dashboard browser content (04/05) */
+  .dash { position: relative; overflow: hidden; }
+  .dash > img.page { position: absolute; left: 0; top: 0; display: block; }
+  .lift { position: absolute; border-radius: 10px; background-repeat: no-repeat; transform-origin: 50% 50%; }
+  .lift .glow { position: absolute; inset: -3px; border-radius: 12px; box-shadow: 0 0 0 2px rgba(251,191,36,0.85), 0 0 26px rgba(251,191,36,0.55); opacity: 0; }
+  .money { position: absolute; font: 800 30px/1 var(--sans); color: var(--gold); letter-spacing: -0.02em; white-space: nowrap; padding: 0.22em 0.42em; border-radius: 0.4em; background: rgba(9,8,22,0.92); box-shadow: 0 0 0 1px rgba(251,191,36,0.6) inset, 0 0 24px rgba(251,191,36,0.45); }
+  .tip { position: absolute; width: 238px; padding: 6px 9px 7px; border-radius: 6px; background: #F4F4F6; color: #1C1B22;
+    font: 400 10.5px/1.35 -apple-system, "Inter", sans-serif; box-shadow: 0 0 0 0.5px rgba(0,0,0,0.25), 0 6px 18px rgba(0,0,0,0.45); }
+
+  /* caps card (04) */
+  .crow { position: relative; display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 26px;
+    font: 400 21px/1 var(--mono); color: var(--t-text); border-bottom: 1px solid rgba(255,255,255,0.05); white-space: nowrap; }
+  .crow .k { color: var(--t-dim); }
+  .crow .v { color: var(--text); font-weight: 600; }
+  .crow .hlb { position: absolute; left: 8px; right: 8px; top: 5px; bottom: 5px; border-radius: 10px; opacity: 0;
+    background: rgba(248,113,113,0.12); box-shadow: 0 0 0 1.5px rgba(248,113,113,0.7) inset, 0 0 28px rgba(248,113,113,0.25); }
+  .cfoot { padding: 18px 26px; display: flex; gap: 12px; align-items: center; font: 400 17px/1.4 var(--sans); color: var(--muted); }
+
+  /* tools card (05) */
+  .trow { position: relative; padding: 18px 28px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .trow .nm { font: 600 25px/1.1 var(--mono); color: var(--text); display: flex; align-items: center; gap: 14px; }
+  .trow .ds { margin-top: 10px; font: 400 20px/1.35 var(--sans); color: var(--muted); white-space: nowrap; }
+  .trow .ds .pr { color: var(--gold); font-weight: 600; }
+  .trow .ds .fr { color: #4ADE80; font-weight: 600; }
+  .trow .hlb { position: absolute; left: 8px; right: 8px; top: 6px; bottom: 6px; border-radius: 12px; opacity: 0;
+    background: rgba(251,191,36,0.07); box-shadow: 0 0 0 1.5px rgba(251,191,36,0.6) inset; }
+  .crop { position: absolute; border-radius: 16px; overflow: hidden; background-repeat: no-repeat;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 40px 80px -24px rgba(0,0,0,0.7); }
+  .crop .lbl { position: absolute; right: 16px; top: 14px; font: 600 13px/1 var(--mono); letter-spacing: 0.14em; color: var(--dim); }
+
+  /* proof */
+  .at-stat .num { font-size: 92px; }
+  .proofline { position: absolute; font: 500 31px/1.4 var(--sans); color: var(--text); letter-spacing: -0.015em; }
+  .proofline .m { color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+'use strict';
+const TICKS = [5, 14, 26, 42, 70, 78, 86];
+const S = AT.scene({ duration: 90, progress: { ticks: TICKS }, seed: 11 });
+const { el, style, show, progress, ease, lerp, clamp, spring, tween } = AT;
+const W = 1920, H = 1080;
+const CAP = '../../captures/';
+const DOCS = '../../../docs/assets/';
+const BRAND = '../../../brand/';
+
+/* ------------------------------------------------------------------ groups + transitions
+   Each scene lives in a .grp inside S.world. A group enters and exits with a "push" (old scene
+   scales up and blurs out, new one arrives from slightly small) or is cut by a gradient wipe.
+   While on screen it drifts in very slowly (Ken Burns) so nothing is ever fully static. */
+const groups = {};
+function group(name, t0, t1, o = {}) {
+  const e = el('div', 'grp', S.world); e.id = 'g-' + name;
+  return (groups[name] = { e, t0, t1, enter: o.enter || 'push', exit: o.exit || 'push', drift: o.drift == null ? 0.022 : o.drift, clip: null });
+}
+const wipes = [];
+function Wipe(at, dur, from, to, dir = 1) {
+  const band = el('div', 'wipe', S.overlay), core = el('div', 'wipe-core', S.overlay);
+  wipes.push({ at, dur, from, to, dir, band, core });
+  groups[from].exit = 'wipe'; groups[to].enter = 'wipe';
+}
+const SKEW = 220; // horizontal offset of the wipe edge between top and bottom
+S.every(t => {
+  // wipes first: they set clip polygons on the two groups involved
+  for (const g of Object.values(groups)) g.clip = null;
+  for (const w of wipes) {
+    w.band.style.visibility = w.core.style.visibility = 'hidden';
+    const p = progress(t, w.at, w.at + w.dur);
+    const vis = t >= w.at - 0.001 && t <= w.at + w.dur + 0.001 && p > 0 && p < 1;
+    const X = lerp(-SKEW - 260, W + 260, ease.easeInOutCubic(p));
+    const xt = w.dir > 0 ? X + SKEW / 2 : W - X - SKEW / 2, xb = w.dir > 0 ? X - SKEW / 2 : W - X + SKEW / 2;
+    const A = groups[w.from], B = groups[w.to];
+    if (t < w.at) { B.clip = 'hide'; continue; }
+    if (t >= w.at + w.dur) { A.clip = 'hide'; continue; }
+    if (w.dir > 0) {
+      A.clip = `polygon(${xt}px -40px, 2000px -40px, 2000px 1120px, ${xb}px 1120px)`;
+      B.clip = `polygon(-80px -40px, ${xt}px -40px, ${xb}px 1120px, -80px 1120px)`;
+    } else {
+      A.clip = `polygon(-80px -40px, ${xt}px -40px, ${xb}px 1120px, -80px 1120px)`;
+      B.clip = `polygon(${xt}px -40px, 2000px -40px, 2000px 1120px, ${xb}px 1120px)`;
+    }
+    const ang = Math.atan2(SKEW, 1480) * (w.dir > 0 ? 1 : -1) * 180 / Math.PI;
+    const xm = (xt + xb) / 2;
+    for (const [e, wd] of [[w.band, 240], [w.core, 3]]) {
+      e.style.visibility = vis ? 'visible' : 'hidden';
+      e.style.transform = `translateX(${(xm - wd / 2).toFixed(1)}px) rotate(${ang.toFixed(2)}deg)`;
+      e.style.opacity = (Math.sin(Math.PI * p) * 1.4).toFixed(3);
+    }
+  }
+  for (const g of Object.values(groups)) {
+    const live = t >= g.t0 - 0.001 && t <= g.t1 + 0.001 && g.clip !== 'hide';
+    // display:none, not visibility: components set visibility:visible on their own nodes
+    if (!live) { g.e.style.display = 'none'; continue; }
+    g.e.style.display = 'block';
+    let o = 1, s = 1 + g.drift * ease.easeInOutSine(progress(t, g.t0, g.t1)), blur = 0;
+    if (g.enter === 'push') {
+      const p = ease.easeOutCubic(progress(t, g.t0, g.t0 + 0.75));
+      o *= ease.easeOutCubic(progress(t, g.t0, g.t0 + 0.45)); s *= lerp(0.9, 1, p); blur += (1 - p) * 14;
+    }
+    if (g.exit === 'push') {
+      const q = ease.easeInCubic(progress(t, g.t1 - 0.5, g.t1));
+      o *= 1 - q; s *= 1 + 0.14 * q; blur += q * 16;
+    }
+    g.e.style.opacity = o >= 0.999 ? '1' : o.toFixed(4);
+    g.e.style.transform = `scale(${s.toFixed(5)})`;
+    g.e.style.filter = blur > 0.1 ? `blur(${blur.toFixed(2)}px)` : 'none';
+    g.e.style.clipPath = g.clip && g.clip !== 'hide' ? g.clip : 'none';
+  }
+});
+
+/* small helpers */
+function node(html, cls, parent, pos) { const e = el('div', cls, parent, html); AT.place(e, pos || {}); return e; }
+function anim(e, o) { S.every(t => show(e, t, o)); return e; }
+function center(h) { h.el.style.width = W + 'px'; h.el.style.left = '0px'; h.el.style.textAlign = 'center';
+  for (const ln of h.el.querySelectorAll('.line')) ln.style.margin = '0 auto'; return h; }
+
+/* ================================================================== 00 COLD OPEN (0 - 5) */
+const g0 = group('open', 0, 5.4).e;
+AT.Terminal({
+  parent: g0, x: 300, y: 380, w: 1320, h: 230, title: 'zsh', at: 0.15, out: 2.35, fontSize: 23,
+  lines: [
+    { cmd: "curl -s -i -A 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' http://127.0.0.1:8502/api/quote", at: 0.4, dur: 0.95 },
+    { out: [['HTTP/1.1 402 Payment Required', 'yellow bold']], at: 1.5 },
+    { out: [['x-agenttoll-verdict: ', 'dim'], ['ua:ClaudeBot', 'cyan']], at: 1.6 },
+  ],
+});
+{
+  const icon = AT.img(BRAND + 'icon.svg', 'lock-icon', g0); icon.style.top = '214px';
+  S.every(t => {
+    const sp = spring(t - 2.45, 180, 18);
+    style(icon, { o: ease.easeOutCubic(progress(t, 2.45, 2.75)), s: lerp(0.5, 1, sp), y: (1 - Math.min(1, sp)) * 30, r: (1 - sp) * -8 });
+  });
+  center(AT.Headline({ parent: g0, lines: [{ text: 'AgentToll', grad: true }], at: 2.6, y: 410, size: 150 }));
+  const tg = node('Agents already use your product. <span class="g">Now you can bill them.</span>', 'tagline', g0, { y: 626 });
+  anim(tg, { at: 3.15, dur: 0.8, y: 22, blur: 8 });
+}
+
+/* ================================================================== 01 THE PROBLEM (5 - 14) */
+const g1 = group('problem', 4.9, 14.7).e;
+AT.SectionLabel({ parent: g1, num: '01', text: 'THE PROBLEM', at: 5.0, x: 128, y: 160, out: 8.75 });
+AT.Headline({ parent: g1, lines: ['Agents read.', { text: 'Founders pay.', grad: true }], at: 5.1, x: 122, y: 214, size: 112, out: 8.7 });
+anim(node('Until now the choices were <b>block them</b> or <b>absorb it.</b>', 'note', g1, { x: 128, y: 500, w: 720 }), { at: 6.3, out: 8.7 });
+AT.Terminal({
+  parent: g1, x: 960, y: 196, w: 864, h: 560, title: 'agents on free pages', at: 5.35, out: 8.75, fontSize: 18, wrap: true,
+  lines: [
+    { cmd: `for ua in 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' 'Mozilla/5.0 (compatible; GPTBot/1.2)' 'Mozilla/5.0 (compatible; GPTBot/1.2)' 'Mozilla/5.0 (compatible; PerplexityBot/1.0)' 'CCBot/2.0'; do curl -s -o /dev/null -w "%{http_code}  $ua\\n" -A "$ua" http://127.0.0.1:8502/; done`, at: 6.0, dur: 1.05 },
+    { out: [
+      [['200', 'green bold'], ['  Mozilla/5.0 (compatible; ', 'white'], ['ClaudeBot', 'cyan'], ['/1.0)', 'white']],
+      [['200', 'green bold'], ['  Mozilla/5.0 (compatible; ', 'white'], ['ClaudeBot', 'cyan'], ['/1.0)', 'white']],
+      [['200', 'green bold'], ['  Mozilla/5.0 (compatible; ', 'white'], ['ClaudeBot', 'cyan'], ['/1.0)', 'white']],
+      [['200', 'green bold'], ['  Mozilla/5.0 (compatible; ', 'white'], ['GPTBot', 'cyan'], ['/1.2)', 'white']],
+      [['200', 'green bold'], ['  Mozilla/5.0 (compatible; ', 'white'], ['GPTBot', 'cyan'], ['/1.2)', 'white']],
+      [['200', 'green bold'], ['  Mozilla/5.0 (compatible; ', 'white'], ['PerplexityBot', 'cyan'], ['/1.0)', 'white']],
+      [['200', 'green bold'], ['  ', 'white'], ['CCBot', 'cyan'], ['/2.0', 'white']],
+    ], at: 7.2, step: 0.13 },
+    { prompt: true, at: 8.15 },
+  ],
+});
+// the real dashboard: "Agent traffic you are not billing yet" (state 02, zero payments)
+const D2K = 1400 / 1320, D2X = 300; // crop: page x 300..1620 into a 1400 px wide browser
+{
+  const wrap = el('div', 'dash'); wrap.style.height = (1138 * D2K) + 'px';
+  const im = AT.img(CAP + 'dashboard/dashboard-02-unbilled-no-payments-full.png', 'page', wrap);
+  im.style.width = (1920 * D2K) + 'px'; im.style.left = (-D2X * D2K) + 'px';
+  AT.Browser({ parent: g1, x: 260, y: 120, w: 1400, h: 880, at: 8.85, url: 'http://127.0.0.1:3502', tabs: ['AgentToll Revenue', 'New Tab'],
+    content: wrap, scroll: [[0, 0], [9.75, 0], [10.75, 418, ease.easeInOutCubic]] });
+}
+AT.Cursor({ parent: g1, at: 11.0, out: 13.2, path: [
+  { t: 11.0, x: 1300, y: 900 },
+  { t: 11.8, x: 520, y: 570 },
+  { t: 12.5, x: 1538, y: 572, arc: 0.08 },
+  { t: 13.1, x: 1530, y: 650 },
+] });
+
+/* ================================================================== 02 SAME URL, TWO ANSWERS (14 - 26) */
+const g2 = group('twoanswers', 13.9, 26.1).e;
+AT.SectionLabel({ parent: g2, num: '02', text: 'SAME URL, TWO ANSWERS', at: 14.0, x: 96, y: 128 });
+anim(node('<b>PERSON</b> · Chrome', 'who', g2, { x: 96, y: 186 }), { at: 14.1, y: 12, blur: 4 });
+anim(node('<b>AGENT</b> · ClaudeBot', 'who', g2, { x: 992, y: 186 }), { at: 14.35, y: 12, blur: 4 });
+const ok200 = node('<i></i>200 OK', 'pill ok', g2, { x: 770, y: 176 });
+const p402 = node('<i></i>402 Payment Required', 'pill pay', g2, { x: 1546, y: 176 });
+S.every(t => {
+  for (const [e, at] of [[ok200, 16.05], [p402, 18.95]]) {
+    const sp = spring(t - at, 320, 18);
+    style(e, { o: ease.easeOutCubic(progress(t, at, at + 0.15)), s: lerp(0.6, 1, sp) });
+  }
+});
+{
+  const wrap = el('div', 'dash'); wrap.style.height = '348px'; wrap.style.background = '#fff';
+  const im = AT.img(CAP + 'origin/origin-api-quote.png', 'page', wrap); im.style.width = '2500px';
+  S.every(t => { const p = progress(t, 15.95, 16.2); wrap.style.opacity = p.toFixed(3); });
+  AT.Browser({ parent: g2, x: 96, y: 230, w: 860, h: 440, at: 13.95, url: 'http://127.0.0.1:8502/api/quote', typeUrl: { at: 14.95, cps: 36 },
+    tabs: ['127.0.0.1:8502/api/quote'], content: wrap });
+}
+const hdr = node(`<div class="hd"><b>RESPONSE</b> HEADERS <span class="src">video/captures/origin/origin.json</span></div>
+  <div class="qrow"><span class="k">status</span><span class="v" style="color:#4ADE80;font-weight:700">200</span></div>
+  <div class="qrow"><span class="k">content-type</span><span class="v">application/json</span></div>
+  <div class="qrow"><span class="k">content-length</span><span class="v">80</span></div>`, 'card', g2, { x: 96, y: 690, w: 860, h: 206 });
+S.every(t => { show(hdr, t, { at: 16.35, dur: 0.7, y: 24, blur: 6 }); [...hdr.querySelectorAll('.qrow')].forEach((r, i) => show(r, t, { at: 16.5 + i * 0.08, dur: 0.5, y: 10, blur: 3 })); });
+const PR_B64 = 'eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQQVlNRU5ULVNJR05BVFVSRSBoZWFkZXIgaXMgcmVxdWlyZWQiLCJyZXNvdXJjZSI6eyJ1cmwiOiJodHRwOi8vMTI3LjAuMC4xOjg1MDIvYXBpL3F1b3RlIiwiZGVzY3JpcHRpb24iOiJMaXZlIHByaWNlIHF1b3RlIn0sImFjY2VwdHMiOlt7InNjaGVtZSI6ImV4YWN0IiwibmV0d29yayI6InNvbGFuYTpFdFdUUkFCWmFZcTZpTWZlWUtvdVJ1MTY2VlUyeHFhMSIsImFtb3VudCI6IjIwMDAiLCJhc3NldCI6IjR6TU1DOXNydDVSaTVYMTRHQWdYaGFIaWkzR25QQUVFUllQSmdaSkRuY0RVIiwicGF5VG8iOiJHM3I5bTdFamoxVG4xVWR4RkZCckpSdzUyWDZWN1FnejJSYnJvckp0bW9VdCIsIm1heFRpbWVvdXRTZWNvbmRzIjo2MCwiZXh0cmEiOnsiZmVlUGF5ZXIiOiJHTG9VM2UxUFZUbU5OTTVQSllKc3IzRnVpWkd5cWZ0N1BxRmNrOGd5QnQxQSJ9fV19';
+const t2 = AT.Terminal({
+  parent: g2, x: 992, y: 230, w: 832, h: 292, title: 'zsh — agent', at: 14.3, fontSize: 18, wrap: true,
+  lines: [
+    { cmd: "curl -s -i -A 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' http://127.0.0.1:8502/api/quote", at: 17.6, dur: 1.05 },
+    { out: [['HTTP/1.1 402 Payment Required', 'yellow bold']], at: 18.85 },
+    { out: [['content-type: application/json', 'dim']], at: 18.92 },
+    { out: [['payment-required: ' + PR_B64, 'clip white']], at: 18.99 },
+    { out: [['x-agenttoll-verdict: ', 'dim'], ['ua:ClaudeBot', 'cyan']], at: 19.06 },
+  ],
+});
+// highlight the payment-required header line (the decoded card grows out of it)
+{
+  let hl = null;
+  S.every(t => {
+    if (!hl) { const ln = [...t2.el.querySelectorAll('.ln')].find(l => l.textContent.startsWith('payment-required:')); if (ln) hl = el('div', 'lnhl gold', ln); }
+    if (hl) { const v = ease.easeOutCubic(progress(t, 20.25, 20.5)) * (1 - ease.easeInCubic(progress(t, 22.0, 22.4))); hl.style.opacity = v.toFixed(3); }
+  });
+}
+// decoded quote card: values from video/captures/terminal/payment-required-decoded.json
+const qc = node(`<div class="hd"><b>PAYMENT-REQUIRED</b> DECODED <span class="src">base64 -d · x402Version 2</span></div>
+  <div class="qrow"><span class="k">scheme</span><span class="v">"exact"</span></div>
+  <div class="qrow gold" data-k="amount"><div class="hlb"></div><span class="k">amount</span><span class="v">"2000"</span><span class="n"><span class="arr">=</span>$0.002 USDC</span></div>
+  <div class="qrow teal" data-k="network"><div class="hlb"></div><span class="k">network</span><span class="v">"solana:EtWTRABZ…qa1"</span><span class="n"><span class="arr">=</span>Solana devnet</span></div>
+  <div class="qrow vio" data-k="payTo"><div class="hlb"></div><span class="k">payTo</span><span class="v">"G3r9m7Ej…JtmoUt"</span><span class="n"><span class="arr">=</span>the seller's wallet</span></div>
+  <div class="qrow"><span class="k">maxTimeoutSeconds</span><span class="v">60</span></div>`, 'card', g2, { x: 992, y: 546, w: 832, h: 312 });
+qc.id = 'qcard';
+{
+  const rows = [...qc.querySelectorAll('.qrow')];
+  const notes = { amount: 21.75, network: 22.35, payTo: 22.95 };
+  S.every(t => {
+    // grows out of the header line above: rises from y-40 with a vertical unfold
+    const p = ease.easeOutExpo(progress(t, 20.4, 21.2));
+    style(qc, { o: ease.easeOutCubic(progress(t, 20.4, 20.7)), y: (1 - p) * -36, sy: lerp(0.86, 1, p), blur: (1 - p) * 6 });
+    qc.style.transformOrigin = '50% 0';
+    rows.forEach((r, i) => show(r, t, { at: 20.65 + i * 0.09, dur: 0.6, y: 12, blur: 4 }));
+    for (const r of rows) {
+      const k = r.dataset.k; if (!k) continue;
+      const a = notes[k], n = r.querySelector('.n'), b = r.querySelector('.hlb');
+      const v = ease.easeOutCubic(progress(t, a, a + 0.35));
+      style(n, { o: v, x: (1 - ease.easeOutExpo(progress(t, a, a + 0.6))) * -18 });
+      b.style.opacity = v.toFixed(3);
+    }
+  });
+}
+
+/* ================================================================== 03 HOW IT WORKS (26 - 42) */
+const g3 = group('how', 25.8, 42.5).e;
+AT.SectionLabel({ parent: g3, num: '03', text: 'HOW IT WORKS', at: 25.95, x: 128, y: 128 });
+const STEPS = [['Quote', 28.0], ['Sign', 30.0], ['Verify', 31.4], ['Origin answers', 33.2], ['Settle', 35.0], ['USDC to your pay_to', 36.0]];
+const STEP_END = 38.1;
+const rail = node('', 'rail', g3, { x: 128, y: 186 });
+const stepEls = STEPS.map(([txt], i) => el('div', 'step' + (i === 5 ? ' goldstep' : ''), rail, `<div class="ring"></div><span class="no">${i + 1}</span>${txt}`));
+S.every(t => {
+  stepEls.forEach((e, i) => {
+    show(e, t, { at: 26.1 + i * 0.07, dur: 0.6, y: 14, blur: 4 });
+    const a = STEPS[i][1], b = i < 5 ? STEPS[i + 1][1] : STEP_END;
+    const on = ease.easeOutCubic(progress(t, a, a + 0.25)) * (1 - ease.easeInCubic(progress(t, b, b + 0.3)));
+    const done = t >= b ? 1 : 0;
+    e.querySelector('.ring').style.opacity = on.toFixed(3);
+    const col = on > 0.5 ? (i === 5 ? '#FBBF24' : '#F5F4FF') : done ? '#A9A6C9' : '#6B6890';
+    e.style.color = col;
+    const no = e.querySelector('.no');
+    no.style.background = on > 0.5 ? (i === 5 ? 'rgba(251,191,36,0.2)' : 'rgba(45,212,191,0.2)') : done ? 'rgba(45,212,191,0.12)' : 'rgba(255,255,255,0.05)';
+    no.style.color = on > 0.5 ? (i === 5 ? '#FBBF24' : '#2DD4BF') : done ? '#2DD4BF' : '#6B6890';
+    e.style.transform = (e.style.transform === 'none' ? '' : e.style.transform) + ` scale(${(1 + 0.04 * on).toFixed(4)})`;
+  });
+});
+const dg = el('div', 'sub', g3);
+AT.Diagram({
+  parent: dg, x: 0, y: 0, w: 1920, h: 1080,
+  nodes: [
+    { id: 'agent', x: 330, y: 500, w: 330, h: 124, tag: 'AGENT', title: 'Agent', sub: 'Claude + pay-mcp', at: 26.05 },
+    { id: 'gw', x: 960, y: 500, w: 330, h: 124, tag: 'GATEWAY', title: 'AgentToll', sub: 'in front of your origin', at: 26.15 },
+    { id: 'origin', x: 1590, y: 500, w: 330, h: 124, tag: 'SELLER', title: 'Your origin', sub: 'GET /api/quote', at: 26.25 },
+    { id: 'fac', x: 960, y: 790, w: 330, h: 124, tag: 'x402 FACILITATOR', title: 'Facilitator', sub: '/verify · /settle', at: 26.35 },
+    { id: 'wallet', x: 1590, y: 790, w: 330, h: 124, tag: 'YOUR WALLET', title: 'pay_to', sub: 'USDC lands here', at: 26.45, active: [[36.95, 41.0]] },
+  ],
+  edges: [
+    { id: 'ag1', from: 'agent', to: 'gw', lane: -22, at: 26.6 },
+    { id: 'ag2', from: 'agent', to: 'gw', lane: 22, at: 26.65 },
+    { id: 'go1', from: 'gw', to: 'origin', lane: -22, at: 26.75 },
+    { id: 'go2', from: 'gw', to: 'origin', lane: 22, at: 26.8 },
+    { id: 'gf1', from: 'gw', to: 'fac', lane: -40, at: 26.9 },
+    { id: 'gf2', from: 'gw', to: 'fac', lane: 40, at: 26.95 },
+    { id: 'fw', from: 'fac', to: 'wallet', at: 27.05 },
+  ],
+  packets: [
+    { edge: 'ag1', at: 28.05, dur: 0.8, label: 'GET /api/quote' },
+    { edge: 'ag2', at: 28.95, dur: 0.8, label: '402 · $0.002', color: '#FBBF24', reverse: true, chipSide: 1 },
+    { edge: 'ag1', at: 30.05, dur: 0.9, label: 'PAYMENT-SIGNATURE', color: '#8B5CF6' },
+    { edge: 'gf1', at: 31.45, dur: 0.7, label: '/verify', color: '#3B82F6', chipSide: 1 },
+    { edge: 'gf2', at: 32.25, dur: 0.6, label: 'isValid', color: '#3B82F6', reverse: true },
+    { edge: 'go1', at: 33.25, dur: 0.75, label: 'GET /api/quote' },
+    { edge: 'go2', at: 34.1, dur: 0.7, label: '200', color: '#4ADE80', reverse: true, chipSide: 1 },
+    { edge: 'gf1', at: 35.05, dur: 0.7, label: '/settle', color: '#3B82F6', chipSide: 1 },
+    { edge: 'fw', at: 36.05, dur: 0.9, label: '$0.002 USDC', color: '#FBBF24' },
+    { edge: 'ag2', at: 37.1, dur: 0.85, label: '200 + data', color: '#2DD4BF', reverse: true, chipSide: 1 },
+  ],
+});
+anim(node('<b>Flow:</b> verify → origin → settle (KB-X402-06) · <b>Headers:</b> PAYMENT-REQUIRED, PAYMENT-SIGNATURE (KB-X402-01) · <b>Facilitator:</b> /verify, /settle (KB-X402-04)', 'fn', dg, { x: 128, y: 900 }), { at: 27.6, y: 8, blur: 2 });
+S.every(t => {
+  const p = ease.easeInOutCubic(progress(t, 38.15, 38.85));
+  style(dg, { o: lerp(1, 0.16, p), s: lerp(1, 0.965, p), blur: 7 * p });
+});
+center(AT.Headline({ parent: g3, lines: ['Funds go to your pay_to.', { text: 'AgentToll holds nothing.', grad: true }], at: 38.45, y: 360, size: 104, stagger: 0.07 }));
+
+/* ================================================================== 04 USING IT (42 - 70) */
+const g4 = group('using', 41.7, 70.3).e;
+AT.SectionLabel({ parent: g4, num: '04', text: 'USING IT', at: 41.95, x: 96, y: 120, out: 60.3 });
+const FLAGS = ' --model sonnet --mcp-config mcp.json --strict-mcp-config --tools "" --allowedTools "mcp__agenttoll-pay" --no-session-persistence --output-format stream-json --verbose';
+const RUN1 = 'Find the price of http://127.0.0.1:28402/api/quote with your agenttoll-pay tools. If it is within your spending caps, pay for it. Then tell me the data you received and the receipt: amount, network, transaction id, and whether the payment was simulated.';
+const RUN2 = 'Call the generate_report tool on the MCP server at http://127.0.0.1:28402/mcp with call_paid_tool. You may spend up to 10 cents on it. If your wallet refuses, tell me exactly why and do not try to work around it. Then call spend_status and tell me what you have spent in total today.';
+const SESSION = 'Session: model claude-sonnet-5-5, MCP servers: agenttoll-pay (connected)';
+const REFUSAL = 'Refused before signing (no money moved, nothing counted against caps): quote $0.05 is above BUYER_MAX_USD_PER_CALL ($0.01); not paid';
+const tool = (name, args) => [['→ ', 'dim'], [name, 'magenta bold'], ['  ' + args, 'dim']];
+const res = segs => [['  └ ', 'dim'], ...segs];
+const t4 = AT.Terminal({
+  parent: g4, x: 96, y: 170, w: 900, h: 770, title: 'claude -p  ·  MCP: agenttoll-pay', at: 41.95, fontSize: 17, lineHeight: 1.55, wrap: true,
+  lines: [
+    { cmd: `claude -p "${RUN1}"${FLAGS}`, at: 43.45, dur: 1.75 },
+    { out: [[SESSION, 'dim']], at: 45.35 },
+    { out: tool('get_quote', '{"url": "http://127.0.0.1:28402/api/quote"}'), at: 45.8 },
+    { out: res([['"status": 402', 'yellow'], [', "usd": "0.002", "network_name": "Solana devnet"', 'white']]), at: 46.25 },
+    { out: tool('spend_status', '{}'), at: 46.6 },
+    { out: res([['"per_call_usd": "0.01", "per_day_usd": "0.25", "spent_usd": "0"', 'white']]), at: 46.95 },
+    { out: [['Claude  ', 'cyan bold'], ["The price is $0.002 on Solana devnet. That is under the $0.01 per-call cap and the $0.25 daily cap, so I'll pay.", 'white']], at: 47.55 },
+    { out: tool('pay_and_fetch', '{"url": "http://127.0.0.1:28402/api/quote", "max_usd": 0.002}'), at: 48.75 },
+    { out: res([['"status": 200, "paid": true, "tx": ', 'white'], ['"SIMULATED-2133136493f49f4aee5a4b43"', 'yellow bold']]), at: 49.45 },
+    { out: [['    "note": "The gateway returned a SIMULATED transaction id: this payment was simulated and nothing moved on chain."', 'dim']], at: 49.85 },
+    { out: [['Claude  ', 'cyan bold'], ['I paid the quote, and the payment was simulated, so no money moved on chain.', 'white']], at: 50.45 },
+    { blank: true, at: 57.1 },
+    { cmd: `claude -p "${RUN2}"${FLAGS}`, at: 57.35, dur: 1.6 },
+    { out: [[SESSION, 'dim']], at: 59.1 },
+    { out: tool('call_paid_tool', '{"server_url": "http://127.0.0.1:28402/mcp", "tool": "generate_report", "max_usd": 0.1}'), at: 59.5 },
+    { out: res([['"error": "refused:per_call"', 'red bold']]), at: 60.1 },
+    { out: [['    "message": "' + REFUSAL + '"', 'red']], at: 60.2 },
+    { out: [['Claude  ', 'cyan bold'], ["The wallet refused the payment. I won't try to work around it, but I'll still check spend status as you asked.", 'white']], at: 62.0 },
+  ],
+});
+{ // red highlight behind the refusal message
+  let hl = null;
+  S.every(t => {
+    if (!hl) { const ln = [...t4.el.querySelectorAll('.ln')].find(l => l.textContent.includes('Refused before signing')); if (ln) hl = el('div', 'lnhl red', ln); }
+    if (hl) hl.style.opacity = (ease.easeOutCubic(progress(t, 60.45, 60.8)) * (1 - 0.5 * ease.easeInOutSine(progress(t, 64.5, 66)))).toFixed(3);
+  });
+}
+// the dashboard right after that Claude run: docs/assets/claude-pays-dashboard.png (1440 CSS px page, 2x)
+const DK = 0.64, DX = 100, DSCROLL = 177; // crop page x from 100, scale 0.64, scroll to the live feed
+const dcss = (x, y) => [(x - DX) * DK, y * DK];
+const B4 = { x: 1030, y: 170, w: 794, h: 770 };
+const dashWrap = el('div', 'dash'); dashWrap.style.height = (1321 * DK) + 'px';
+{
+  const im = AT.img(DOCS + 'claude-pays-dashboard.png', 'page', dashWrap);
+  im.style.width = (1440 * DK) + 'px'; im.style.left = (-DX * DK) + 'px';
+}
+// a row crop that lifts out of the screenshot (same pixels, raised + gold ring)
+function liftRow(parent, src, pageW, k, ox, r) {
+  const e = el('div', 'lift', parent); const [x, y] = [(r[0] - ox) * k, r[1] * k];
+  AT.place(e, { x, y, w: r[2] * k, h: r[3] * k });
+  e.style.backgroundImage = `url(${src})`; e.style.backgroundSize = `${pageW * k}px auto`;
+  e.style.backgroundPosition = `${(-r[0] * k).toFixed(2)}px ${(-r[1] * k).toFixed(2)}px`;
+  const g = el('div', 'glow', e); return { e, g };
+}
+const ROW_QUOTE = [126, 878, 778, 50], ROW_DOCS = [126, 822, 778, 52]; // CSS px in claude-pays-dashboard.png
+const lq = liftRow(dashWrap, DOCS + 'claude-pays-dashboard.png', 1440, DK, DX, ROW_QUOTE);
+lq.e.id = 'row-quote';
+const pillQ = el('div', 'at-abs', dashWrap); AT.place(pillQ, { x: (544 - DX) * DK, y: 893 * DK, w: 70 * DK, h: 21 * DK }); pillQ.id = 'pill-quote';
+const money1 = node('+$0.002', 'money', dashWrap, { x: (690 - DX) * DK, y: 878 * DK - 6 });
+money1.style.fontSize = '15px';
+const tip = node('Paid through the local simulated facilitator. No on-chain transaction exists.', 'tip', dashWrap, { x: (598 - DX) * DK, y: 914 * DK + 16 });
+tip.style.width = '150px'; tip.style.fontSize = '7.2px'; tip.style.padding = '4px 6px 5px'; tip.style.borderRadius = '4px';
+S.every(t => {
+  const up = ease.easeOutCubic(progress(t, 52.2, 52.6)) * (1 - ease.easeInOutCubic(progress(t, 56.2, 56.8)));
+  style(lq.e, { s: 1 + 0.035 * up, y: -3 * up });
+  lq.e.style.boxShadow = up > 0.01 ? `0 ${(14 * up).toFixed(1)}px ${(30 * up).toFixed(1)}px rgba(0,0,0,${(0.55 * up).toFixed(3)})` : 'none';
+  lq.g.style.opacity = (up * (0.75 + 0.25 * Math.sin(Math.max(0, t - 52.6) * 5))).toFixed(3);
+  const m = progress(t, 52.35, 53.7);
+  style(money1, { o: ease.easeOutCubic(progress(m, 0, 0.15)) * (1 - ease.easeInCubic(progress(m, 0.7, 1))), y: -22 * ease.easeOutCubic(m), s: lerp(0.8, 1, spring(t - 52.35, 300, 16)) });
+  style(tip, { o: ease.easeOutCubic(progress(t, 54.5, 54.62)) * (1 - ease.easeInCubic(progress(t, 56.3, 56.45))) });
+});
+const b4 = AT.Browser({ parent: g4, ...B4, at: 41.75, url: 'http://127.0.0.1:23402', tabs: ['AgentToll Revenue'], content: dashWrap,
+  scroll: [[0, 0], [50.6, 0], [51.4, DSCROLL, ease.easeInOutCubic]] });
+b4.el.id = 'b4';
+// world rect of a page CSS rect (after the scroll has run)
+const dworld = r => { const [x, y] = dcss(r[0], r[1]); return [B4.x + x, B4.y + 92 + y - DSCROLL, r[2] * DK, r[3] * DK]; };
+// caps card (pay-mcp spend_status from Run 2 of the transcript)
+const caps = node(`<div class="hd"><b>pay-mcp</b> SPEND_STATUS <span class="src">wallet caps · Run 2</span></div>
+  <div class="crow" id="cap-call"><div class="hlb"></div><span class="k">per_call_usd</span><span class="v">"0.01"</span></div>
+  <div class="crow"><span class="k">per_day_usd</span><span class="v">"0.25"</span></div>
+  <div class="crow"><span class="k">spent_usd</span><span class="v">"0.002"</span></div>
+  <div class="crow"><span class="k">remaining_usd</span><span class="v">"0.248"</span></div>
+  <div class="cfoot"><span class="pill bad" style="position:relative"><i></i>refused:per_call</span><span>generate_report quoted $0.05</span></div>`, 'card', g4, { x: 1070, y: 300, w: 714, h: 392 });
+{
+  const hlb = caps.querySelector('#cap-call .hlb'), rows = [...caps.querySelectorAll('.crow, .cfoot')];
+  S.every(t => {
+    const p = ease.easeOutExpo(progress(t, 60.35, 61.15));
+    style(caps, { o: ease.easeOutCubic(progress(t, 60.35, 60.65)), y: (1 - p) * 40, s: lerp(0.94, 1, p), blur: (1 - p) * 8 });
+    rows.forEach((r, i) => show(r, t, { at: 60.5 + i * 0.07, dur: 0.5, y: 10, blur: 3 }));
+    hlb.style.opacity = (ease.easeOutCubic(progress(t, 60.9, 61.2)) * (0.7 + 0.3 * Math.cos(Math.max(0, t - 61.2) * 4.5))).toFixed(3);
+    // the dashboard steps back while the caps card is up
+    const d = ease.easeInOutCubic(progress(t, 60.1, 60.7));
+    b4.view.style.opacity = lerp(1, 0.28, d).toFixed(3);
+    b4.view.style.filter = d > 0.01 ? `blur(${(5 * d).toFixed(2)}px)` : 'none';
+  });
+}
+const RQ = dworld(ROW_QUOTE), PQ = dworld([544, 893, 70, 21]);
+AT.Cursor({ parent: g4, at: 42.9, out: 69.4, path: [
+  { t: 42.9, x: 1500, y: 1020 },
+  { t: 43.3, x: 560, y: 760, click: true },
+  { t: 50.9, x: 600, y: 760 },
+  { t: 51.5, x: RQ[0] + RQ[2] * 0.62, y: RQ[1] + RQ[3] * 0.6, move: 0.6 },
+  { t: 54.35, x: PQ[0] + PQ[2] * 0.45, y: PQ[1] + PQ[3] * 0.6, move: 0.55, arc: 0.1 },
+  { t: 56.6, x: PQ[0] + PQ[2] * 0.45, y: PQ[1] + PQ[3] * 0.6 },
+  { t: 57.25, x: 560, y: 820, click: true, move: 0.6 },
+  { t: 60.4, x: 600, y: 830 },
+  { t: 61.1, at: '#cap-call', ax: 0.82, ay: 0.55, move: 0.65 },
+] });
+
+/* ================================================================== 05 MCP SERVERS SELL PER TOOL (70 - 78) */
+const g5 = group('mcp', 70.0, 78.5).e;
+AT.SectionLabel({ parent: g5, num: '05', text: 'MCP SERVERS SELL PER TOOL', at: 70.05, x: 96, y: 120 });
+const tools = node(`<div class="hd"><b>POST /mcp</b> TOOLS/LIST <span class="src">free · prices in each description</span></div>
+  <div class="trow" id="tool-docs"><div class="hlb"></div><div class="nm">search_docs</div><div class="ds">Search Acme's documentation. <span class="pr">(Paid tool: $0.005 USDC per call via x402.)</span></div></div>
+  <div class="trow"><div class="hlb"></div><div class="nm">generate_report</div><div class="ds">Generate a market report. <span class="pr">(Paid tool: $0.05 USDC per call via x402.)</span></div></div>
+  <div class="trow"><div class="hlb"></div><div class="nm">ping_free</div><div class="ds"><span class="fr">A free tool.</span></div></div>`, 'card', g5, { x: 96, y: 170, w: 880, h: 404 });
+{
+  const rows = [...tools.querySelectorAll('.trow')], hl = tools.querySelector('#tool-docs .hlb');
+  S.every(t => {
+    show(tools, t, { at: 70.1, dur: 0.8, y: 30, blur: 8, scale: 0.98 });
+    rows.forEach((r, i) => show(r, t, { at: 70.35 + i * 0.16, dur: 0.6, y: 14, blur: 4 }));
+    hl.style.opacity = ease.easeOutCubic(progress(t, 72.1, 72.4)).toFixed(3);
+  });
+}
+AT.Terminal({
+  parent: g5, x: 1010, y: 170, w: 814, h: 404, title: 'claude -p  ·  MCP: agenttoll-pay', at: 70.25, fontSize: 17, lineHeight: 1.55, wrap: true,
+  lines: [
+    { out: [['Run 3 · docs/assets/claude-pays-transcript.md', 'dim']], at: 70.7 },
+    { out: tool('call_paid_tool', '{"server_url": "http://127.0.0.1:28402/mcp", "tool": "search_docs", "arguments": {"query": "x402"}}'), at: 72.2 },
+    { out: res([['"text": "3 results for \\"x402\\": install, configure, pricing."', 'white']]), at: 72.85 },
+    { out: res([['"usd": "0.005", "payment_transport": "mcp-native", "tx": ', 'white'], ['"SIMULATED-d25d80847de12b78e8cd599d"', 'yellow bold']]), at: 73.25 },
+    { out: [['Claude  ', 'cyan bold'], ['I paid $0.005 (5000 atomic USDC units) on Solana devnet. The payment was simulated.', 'white']], at: 73.9 },
+  ],
+});
+// live feed crop from the same dashboard capture: header + both rows (search_docs on top, newest first)
+const LF = [112, 772, 806, 166], LK = 1.6;
+const feed = node('', 'crop', g5, { x: 315, y: 608, w: LF[2] * LK, h: LF[3] * LK });
+feed.style.backgroundImage = `url(${DOCS}claude-pays-dashboard.png)`;
+feed.style.backgroundSize = `${1440 * LK}px auto`;
+feed.style.backgroundPosition = `${-LF[0] * LK}px ${-LF[1] * LK}px`;
+const ld = liftRow(feed, DOCS + 'claude-pays-dashboard.png', 1440, LK, LF[0], [ROW_DOCS[0], ROW_DOCS[1] - LF[1], ROW_DOCS[2], ROW_DOCS[3]]);
+ld.e.style.backgroundPosition = `${(-ROW_DOCS[0] * LK).toFixed(2)}px ${(-ROW_DOCS[1] * LK).toFixed(2)}px`;
+const money2 = node('+$0.005', 'money', g5, { x: 315 + (700 - LF[0]) * LK, y: 608 + (ROW_DOCS[1] - LF[1]) * LK - 8 });
+S.every(t => {
+  show(feed, t, { at: 74.3, dur: 0.8, y: 40, blur: 8 });
+  const up = ease.easeOutCubic(progress(t, 74.9, 75.3));
+  style(ld.e, { s: 1 + 0.025 * up, y: -2 * up });
+  ld.e.style.boxShadow = up > 0.01 ? `0 ${(12 * up).toFixed(1)}px ${(28 * up).toFixed(1)}px rgba(0,0,0,${(0.5 * up).toFixed(3)})` : 'none';
+  ld.g.style.opacity = (up * (0.75 + 0.25 * Math.sin(Math.max(0, t - 75.3) * 5))).toFixed(3);
+  const m = progress(t, 75.0, 76.4);
+  style(money2, { o: ease.easeOutCubic(progress(m, 0, 0.15)) * (1 - ease.easeInCubic(progress(m, 0.7, 1))), y: -26 * ease.easeOutCubic(m), s: lerp(0.8, 1, spring(t - 75.0, 300, 16)) });
+});
+
+/* ================================================================== 06 PROOF (78 - 86) */
+const g6 = group('proof', 77.7, 86.3).e;
+AT.SectionLabel({ parent: g6, num: '06', text: 'PROOF', at: 77.8, x: 128, y: 196 });
+AT.Headline({ parent: g6, lines: ['The repo grades itself.'], at: 77.9, x: 122, y: 248, size: 96 });
+const STATS = [
+  { to: 119, label: 'black-box evals pass', format: v => `${Math.round(v)}/119`, at: 78.5 },
+  { to: 93, label: 'Rust tests', at: 78.75 },
+  { to: 69, label: 'pay-mcp tests', at: 79.0 },
+  { to: 21, label: 'Worker parity tests', at: 79.25 },
+];
+const SW = [500, 340, 340, 444]; let sx = 128;
+STATS.forEach((s, i) => { AT.Ticker(Object.assign({ parent: g6, x: sx, y: 450, w: SW[i], dur: 1.5 }, s)); sx += SW[i] + 24; });
+anim(node('Talks to the real <b>PayAI</b> and <b>x402.org</b> facilitators.<br><span class="m">Settlement waits on funded devnet and testnet wallets.</span>', 'proofline', g6, { x: 128, y: 700, w: 1500 }), { at: 81.4 });
+anim(node('<b>Sources:</b> evals/results/latest.md · README.md (tests) · docs/assets/real-facilitator-handshake.md', 'fn', g6, { x: 128, y: 830 }), { at: 81.9, y: 8, blur: 2 });
+
+/* ================================================================== 07 CLOSE (86 - 90) */
+const g7 = group('close', 86.0, 90, { drift: 0.03 }).e;
+{
+  const icon = AT.img(BRAND + 'icon.svg', 'lock-icon', g7); icon.style.top = '170px';
+  S.every(t => { const sp = spring(t - 86.25, 180, 18); style(icon, { o: ease.easeOutCubic(progress(t, 86.25, 86.55)), s: lerp(0.6, 1, sp), y: (1 - Math.min(1, sp)) * 24 }); });
+  center(AT.Headline({ parent: g7, lines: [{ text: 'AgentToll', grad: true }], at: 86.35, y: 366, size: 150 }));
+  anim(node('Agents already use your product. <span class="g">Now you can bill them.</span>', 'tagline', g7, { y: 580 }), { at: 86.8, dur: 0.8, y: 22, blur: 8 });
+  anim(node('github.com/Josefusan/agenttoll', 'repo', g7, { y: 700 }), { at: 87.3, y: 16, blur: 6 });
+  anim(node("COLOSSEUM CRYPTO WORLD'S FAIR", 'event', g7, { y: 770 }), { at: 87.6, y: 12, blur: 4 });
+}
+
+/* ================================================================== wipes, camera, badges, captions */
+Wipe(13.9, 0.8, 'problem', 'twoanswers', 1);
+Wipe(41.7, 0.8, 'how', 'using', -1);
+Wipe(77.7, 0.8, 'mcp', 'proof', 1);
+
+// Camera rects are world px. 01 card + 02 targets are computed from the layouts above.
+const card01 = [260 + (352 - D2X) * D2K, 120 + 92 + 607 * D2K - 418 - 8, 1216 * D2K, 560];
+AT.Camera({ keys: [
+  { t: 11.0, to: card01, dur: 0.95, pad: 40 },
+  { t: 13.0, to: 'full', dur: 0.8 },
+  // 02: push into the browser JSON, back, push into the 402 headers, back, then into the price row
+  { t: 16.25, to: [96, 236, 860, 260], dur: 0.8, pad: 40 },
+  { t: 17.25, to: 'full', dur: 0.75 },
+  { t: 19.15, to: [992, 236, 832, 286], dur: 0.75, pad: 40 },
+  { t: 20.15, to: 'full', dur: 0.75 },
+  { t: 24.55, to: [992, 648, 832, 50], dur: 1.0, pad: 60, ease: ease.easeInOutQuart },
+  { t: 26.0, to: 'full', dur: 0.05 },
+  // 04: zoom into the live feed as the row lifts, back out for the refusal
+  { t: 51.45, to: dworld([112, 815, 806, 125]), dur: 0.9, pad: 70 },
+  { t: 56.4, to: 'full', dur: 0.85 },
+  { t: 60.55, to: [96, 300, 1700, 640], dur: 1.0, pad: 20 },
+  { t: 65.2, to: 'full', dur: 1.0 },
+] });
+
+AT.Badge({ at: 28.95, out: 41.75, right: 64, y: 96 });
+AT.Badge({ at: 45.9, out: 77.75, right: 64, y: 96 });
+
+// Footnotes (overlay, never zoomed)
+for (const [html, at, out] of [
+  ['<b>Real capture:</b> dashboard state 02, film stack (video/captures/dashboard). No payments yet.', 9.2, 13.75],
+  ['<b>Real captures</b> on the film stack, 127.0.0.1:8502 · <b>Browser:</b> video/captures/origin · <b>Terminal:</b> video/captures/terminal', 14.6, 25.6],
+  ['<b>Claude run:</b> docs/assets/claude-pays-transcript.md (2026-10-04, gateway :28402) · <b>Dashboard:</b> docs/assets/claude-pays-dashboard.png, right after that run', 42.6, 69.6],
+  ['<b>tools/list:</b> video/captures/terminal/mcp-tools-list.json · <b>Claude run 3:</b> docs/assets/claude-pays-transcript.md · <b>Live feed:</b> docs/assets/claude-pays-dashboard.png', 70.4, 77.6],
+]) anim(node(html, 'fn', S.overlay, { x: 64, y: 1036 }), { at, out, y: 6, blur: 2 });
+const tipNote = node('Tooltip redrawn from the badge\'s title text (headless capture does not paint native tooltips).', 'fn', S.overlay, { x: 64, y: 1012 });
+anim(tipNote, { at: 54.5, out: 56.4, y: 6, blur: 2 });
+
+AT.Caption({ cues: [
+  { at: 5.6, end: 8.8, text: 'Agents read your site all day. They pay nothing.' },
+  { at: 9.3, end: 13.7, text: 'The dashboard counts them: 8 agent requests on routes with no price.', hl: ['8'] },
+  { at: 14.6, end: 18.0, text: 'Same URL. A person gets the data, free.', hl: ['free.'] },
+  { at: 18.2, end: 21.8, text: 'An agent gets 402 Payment Required, with a price.', gold: ['402', 'Payment', 'Required,'] },
+  { at: 22.0, end: 25.6, text: 'People: free. Agents: $0.002.', hl: ['free.'], gold: ['$0.002.'] },
+  { at: 26.6, end: 29.8, text: 'The agent asks. AgentToll answers with a price.' },
+  { at: 30.0, end: 33.0, text: 'The agent signs. The facilitator verifies.' },
+  { at: 33.2, end: 35.8, text: 'Your origin answers. Then the payment settles.' },
+  { at: 36.0, end: 38.2, text: 'USDC goes to your pay_to.', gold: ['USDC'], hl: ['pay_to.'] },
+  { at: 38.4, end: 41.6, text: 'Settle only after the origin succeeds.' },
+  { at: 42.6, end: 46.0, text: 'Claude gets a wallet: pay-mcp, with hard spend caps.', hl: ['pay-mcp,'] },
+  { at: 46.2, end: 50.8, text: 'It checks the price, checks its caps, then pays $0.002.', gold: ['$0.002.'] },
+  { at: 51.0, end: 54.0, text: "The payment lands on the founder's dashboard.", gold: ['payment'] },
+  { at: 54.2, end: 57.0, text: 'Simulated: no on-chain transaction exists.', gold: ['Simulated:'] },
+  { at: 57.2, end: 60.4, text: "Now a $0.05 tool. Claude's per-call cap is $0.01.", gold: ['$0.05', '$0.01.'] },
+  { at: 60.6, end: 64.6, text: 'Refused before signing. No money moved.', hl: ['Refused'] },
+  { at: 64.8, end: 69.6, text: "The wallet's caps win. Claude does not work around them." },
+  { at: 70.4, end: 73.8, text: 'MCP servers sell per tool. tools/list carries each price.', hl: ['tools/list'] },
+  { at: 74.0, end: 77.6, text: 'initialize and tools/list stay free. search_docs: $0.005.', hl: ['free.'], gold: ['$0.005.'] },
+  { at: 78.4, end: 82.8, text: '119 of 119 evals pass. 93 Rust tests. 21 Worker parity tests.', hl: ['119', '93', '21'] },
+  { at: 83.0, end: 85.8, text: 'Devnet and testnet only. Demo payments are simulated.', gold: ['simulated.'] },
+] });
+</script>
+</body>
+</html>

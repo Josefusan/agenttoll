@@ -1,0 +1,182 @@
+[
+  {
+    "start": 3.15,
+    "end": 5.4,
+    "text": "Agents already use your product. Now you can bill them.",
+    "kind": "title"
+  },
+  {
+    "start": 5.1,
+    "end": 9.2,
+    "text": "Agents read. Founders pay.",
+    "kind": "title"
+  },
+  {
+    "start": 5.6,
+    "end": 8.8,
+    "text": "Agents read your site all day. They pay nothing.",
+    "kind": "caption"
+  },
+  {
+    "start": 6.3,
+    "end": 9.2,
+    "text": "Until now the choices were block them or absorb it.",
+    "kind": "title"
+  },
+  {
+    "start": 9.3,
+    "end": 13.7,
+    "text": "The dashboard counts them: 8 agent requests on routes with no price.",
+    "kind": "caption"
+  },
+  {
+    "start": 14.6,
+    "end": 18.0,
+    "text": "Same URL. A person gets the data, free.",
+    "kind": "caption"
+  },
+  {
+    "start": 18.2,
+    "end": 21.8,
+    "text": "An agent gets 402 Payment Required, with a price.",
+    "kind": "caption"
+  },
+  {
+    "start": 22.0,
+    "end": 25.6,
+    "text": "People: free. Agents: $0.002.",
+    "kind": "caption"
+  },
+  {
+    "start": 26.6,
+    "end": 29.8,
+    "text": "The agent asks. AgentToll answers with a price.",
+    "kind": "caption"
+  },
+  {
+    "start": 30.0,
+    "end": 33.0,
+    "text": "The agent signs. The facilitator verifies.",
+    "kind": "caption"
+  },
+  {
+    "start": 33.2,
+    "end": 35.8,
+    "text": "Your origin answers. Then the payment settles.",
+    "kind": "caption"
+  },
+  {
+    "start": 36.0,
+    "end": 38.2,
+    "text": "USDC goes to your pay_to.",
+    "kind": "caption"
+  },
+  {
+    "start": 38.4,
+    "end": 41.6,
+    "text": "Settle only after the origin succeeds.",
+    "kind": "caption"
+  },
+  {
+    "start": 38.45,
+    "end": 42.5,
+    "text": "Funds go to your pay_to. AgentToll holds nothing.",
+    "kind": "title"
+  },
+  {
+    "start": 42.6,
+    "end": 46.0,
+    "text": "Claude gets a wallet: pay-mcp, with hard spend caps.",
+    "kind": "caption"
+  },
+  {
+    "start": 46.2,
+    "end": 50.8,
+    "text": "It checks the price, checks its caps, then pays $0.002.",
+    "kind": "caption"
+  },
+  {
+    "start": 51.0,
+    "end": 54.0,
+    "text": "The payment lands on the founder's dashboard.",
+    "kind": "caption"
+  },
+  {
+    "start": 54.2,
+    "end": 57.0,
+    "text": "Simulated: no on-chain transaction exists.",
+    "kind": "caption"
+  },
+  {
+    "start": 57.2,
+    "end": 60.4,
+    "text": "Now a $0.05 tool. Claude's per-call cap is $0.01.",
+    "kind": "caption"
+  },
+  {
+    "start": 60.6,
+    "end": 64.6,
+    "text": "Refused before signing. No money moved.",
+    "kind": "caption"
+  },
+  {
+    "start": 64.8,
+    "end": 69.6,
+    "text": "The wallet's caps win. Claude does not work around them.",
+    "kind": "caption"
+  },
+  {
+    "start": 70.4,
+    "end": 73.8,
+    "text": "MCP servers sell per tool. tools/list carries each price.",
+    "kind": "caption"
+  },
+  {
+    "start": 74.0,
+    "end": 77.6,
+    "text": "initialize and tools/list stay free. search_docs: $0.005.",
+    "kind": "caption"
+  },
+  {
+    "start": 77.9,
+    "end": 86.3,
+    "text": "The repo grades itself.",
+    "kind": "title"
+  },
+  {
+    "start": 78.4,
+    "end": 82.8,
+    "text": "119 of 119 evals pass. 93 Rust tests. 21 Worker parity tests.",
+    "kind": "caption"
+  },
+  {
+    "start": 81.4,
+    "end": 86.3,
+    "text": "Talks to the real PayAI and x402.org facilitators. Settlement waits on funded devnet and testnet wallets.",
+    "kind": "title"
+  },
+  {
+    "start": 83.0,
+    "end": 85.8,
+    "text": "Devnet and testnet only. Demo payments are simulated.",
+    "kind": "caption"
+  },
+  {
+    "start": 86.8,
+    "end": 90.0,
+    "text": "Agents already use your product. Now you can bill them.",
+    "kind": "title"
+  },
+  {
+    "start": 87.3,
+    "end": 90.0,
+    "text": "github.com/Josefusan/agenttoll",
+    "kind": "title"
+  },
+  {
+    "start": 87.6,
+    "end": 90.0,
+    "text": "COLOSSEUM CRYPTO WORLD'S FAIR",
+    "kind": "title"
+  }
+]
