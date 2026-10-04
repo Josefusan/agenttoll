@@ -61,6 +61,8 @@ Rules for both:
 
 Open https://colosseum.com/arena/projects/agenttoll-1. If you are asked to join Crypto World's Fair first, join it and accept the Official Rules checkbox.
 
+Regenerate the copy-paste page with `python3 scripts/build-submission-page.py` before pasting; it reads `docs/COLOSSEUM_SUBMISSION.md` and shows every answer with its character count, and its counts match System-1.
+
 | Form field | What to enter | Source |
 |---|---|---|
 | Project name | `AgentToll` | doc, "Project name" |
