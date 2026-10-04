@@ -1,0 +1,37 @@
+# Gateway config for docker-compose: demo origin + SIMULATED facilitator on the compose
+# network. Every payment is labelled simulated; nothing touches a chain. To take real
+# devnet payments, point `facilitator` at https://facilitator.payai.network and fund the
+# buyer wallet (docs/KNOWLEDGE_BASE.md KB-X402-04, KB-SOL-01).
+origin: http://origin:4000
+listen: 0.0.0.0:8402
+admin_listen: 0.0.0.0:8403          # reachable only on the compose network (not published)
+public_url: "${AGENTTOLL_PUBLIC_URL}"
+detection: agents-only
+
+networks:
+  solana:
+    network: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"   # devnet (KB-SOL-01)
+    asset: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU" # devnet USDC (KB-SOL-01)
+    pay_to: "${AGENTTOLL_SOLANA_PAYTO}"
+    facilitator: "http://facilitator:4020"               # SIMULATED
+
+routes:
+  - match: "GET /api/quote"
+    price_usd: "0.002"
+    description: "Live price quote"
+  - match: "GET /api/*"
+    price_usd: "0.001"
+  - match: "GET /blog/*"
+    price_usd: "0.001"
+  - match: "/*"
+    price_usd: "0"
+
+mcp:
+  endpoint: /mcp
+  advertise_prices: true
+  tools:
+    search_docs: "0.005"
+    generate_report: "0.05"
+
+ledger:
+  url: "sqlite:///data/agenttoll.db"
