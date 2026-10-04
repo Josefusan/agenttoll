@@ -4,8 +4,10 @@
 # payment is labelled SIMULATED. Ctrl-C (or the end of the script) stops everything.
 #   bash scripts/demo-local.sh          # run the scripted walkthrough and exit
 #   KEEP=1 bash scripts/demo-local.sh   # leave the stack running for the dashboard
+#   STACK_ONLY=1 bash scripts/demo-local.sh   # start the stack, skip the walkthrough (empty ledger)
 # Ports (defaults in brackets): GATEWAY_PORT [8402] ADMIN_PORT [8403] ORIGIN_PORT [4000]
-# FACILITATOR_PORT [4020]. Set CARGO_TARGET_DIR to reuse an existing build.
+# FACILITATOR_PORT [4020]. Set CARGO_TARGET_DIR to reuse an existing build, and
+# PROFILE=release to use release binaries (default: debug).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -16,8 +18,9 @@ GATEWAY_PORT="${GATEWAY_PORT:-8402}"; ADMIN_PORT="${ADMIN_PORT:-8403}"
 ORIGIN_PORT="${ORIGIN_PORT:-4000}"; FACILITATOR_PORT="${FACILITATOR_PORT:-4020}"
 
 echo "Building (first run compiles about 400 crates; later runs are instant)..."
-cargo build -q -p agenttoll-gateway -p agenttoll-demo-origin -p agenttoll-buyer -p agenttoll-mock-facilitator
-BIN="${CARGO_TARGET_DIR:-$ROOT/target}/debug"
+PROFILE="${PROFILE:-debug}"
+cargo build -q $([ "$PROFILE" = release ] && echo --release) -p agenttoll-gateway -p agenttoll-demo-origin -p agenttoll-buyer -p agenttoll-mock-facilitator
+BIN="${CARGO_TARGET_DIR:-$ROOT/target}/$PROFILE"
 
 # The shipped config uses the default ports; write a copy with yours.
 sed -e "s#127.0.0.1:4000#127.0.0.1:$ORIGIN_PORT#" -e "s#127.0.0.1:4020#127.0.0.1:$FACILITATOR_PORT#" \
@@ -41,6 +44,14 @@ for _ in $(seq 50); do curl -fs -o /dev/null http://127.0.0.1:$GATEWAY_PORT/ 2>/
 
 GW=http://127.0.0.1:$GATEWAY_PORT
 step() { printf '\n\033[1;36m== %s\033[0m\n' "$*"; }
+
+if [ -n "${STACK_ONLY:-}" ]; then
+  step "Stack is running with an empty ledger. Ctrl-C stops it."
+  echo "gateway $GW | admin http://127.0.0.1:$ADMIN_PORT | origin :$ORIGIN_PORT | facilitator :$FACILITATOR_PORT (SIMULATED)"
+  echo "buyer keypair: $ROOT/.demo/buyer.json | pay_to: $AGENTTOLL_SOLANA_PAYTO"
+  echo "admin token:   $AGENTTOLL_ADMIN_TOKEN"
+  wait
+fi
 
 step "1. A human opens the site: free"
 curl -s -o /dev/null -w "HTTP %{http_code}\n" -A "Mozilla/5.0 (Macintosh) Chrome/141" -H "Accept-Language: en" -H "Sec-Fetch-Mode: navigate" $GW/api/quote

@@ -141,7 +141,7 @@ buyer configured in Claude Desktop.
 4. **(0:30)** Prompt: *"Pay for it with pay_and_fetch, max 1 cent, and tell me the price in the
    data and the transaction link."* Claude pays, quotes the data, and gives the
    `explorer.solana.com/tx/...?cluster=devnet` link. Click it.
-5. **(0:45)** Dashboard ticks: one settlement, $0.002, agent `pay-mcp`. Prompt: *"How much have
+5. **(0:45)** Dashboard ticks: one settlement, $0.002, agent `AgentToll-Buyer`. Prompt: *"How much have
    you spent today?"* `spend_status` answers with today's total and what is left under the caps.
 6. **(0:55)** Prompt: *"Call generate_report on http://localhost:8402/mcp."* Claude refuses:
    "$0.05 is above BUYER_MAX_USD_PER_CALL ($0.01); not paid." Say: "The caps are the point.
