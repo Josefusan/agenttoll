@@ -140,13 +140,13 @@ Earnings land in the `pay_to` address you choose: a self-custody wallet, a stabl
 
 ## Status
 
-Hackathon build, devnet and testnet only. Each part is built as a separate pull request and reviewed by an independent adversarial critic agent before merge:
+Hackathon build, devnet and testnet only. Test counts were re-run on 2026-10-04 at commit 0c54a00 (`cargo test --release --workspace`, `npm test` in `demo/pay-mcp` and `workers/agenttoll-edge`). Each part is built as a separate pull request and reviewed by an independent adversarial critic agent before merge:
 
 | Part | Tests |
 |---|---|
-| Rust gateway + core + buyer + demo stack | 87 |
+| Rust gateway + core + buyer + demo stack | 90 |
 | pay-mcp | 69 |
-| Worker edition (17 are parity tests against the Rust gateway) | 52 |
+| Worker edition (21 are parity tests against the Rust gateway) | 70 |
 | Dashboard | typecheck, lint, build, Playwright checks |
 
 Plan and progress: [docs/ROADMAP.md](docs/ROADMAP.md).

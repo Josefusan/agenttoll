@@ -30,7 +30,7 @@ ClaudeBot: 402 Payment Required, with an x402 v2 quote in the header: $0.002 in 
 
 Humans never see a paywall. Agents get a price. One YAML file.
 
-Rust gateway, 87 tests. Repo link in the next post.
+Rust gateway, 90 tests. Repo link in the next post.
 
 ### LinkedIn (DRAFT)
 
@@ -113,9 +113,9 @@ The dashboard has no login of its own and binds to localhost by default. That is
 
 AgentToll now runs as a Cloudflare Worker too.
 
-Nothing was ported. The Rust core (detection, pricing, path canonicalization, MCP inspection, discovery) compiles to WebAssembly and the Worker calls it. 17 parity tests run both editions on one config and assert byte-identical 402 quotes.
+Nothing was ported. The Rust core (detection, pricing, path canonicalization, MCP inspection, discovery) compiles to WebAssembly and the Worker calls it. 21 parity tests run both editions on one config and assert byte-identical 402 quotes.
 
-52 Worker tests total.
+70 Worker tests total.
 
 ### LinkedIn (DRAFT)
 
@@ -187,5 +187,5 @@ Repo: github.com/Josefusan/agenttoll. If you run an API or an MCP server that ag
 - D3: verify, forward, settle. SQLite ledger. Buyer CLI pays x402 URLs on Solana devnet or Base Sepolia.
 - D4: Admin API + SSE, founder dashboard, MCP-native x402, per-tool pricing, price advertising in `tools/list`, discovery document, simulated facilitator and one-command demo.
 - D5: pay-mcp, Claude's wallet with hard caps. 69 tests.
-- D6: Cloudflare Worker edition sharing the core via WASM. 52 tests, 17 parity.
+- D6: Cloudflare Worker edition sharing the core via WASM. 70 tests, 21 parity.
 - D7: Release branch, Docker stack, README. Critic review on every PR.
