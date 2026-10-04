@@ -1,0 +1,27 @@
+$ npx vitest run  (cwd demo/pay-mcp) exit=0
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m/home/joseph/Hackathons/AgentToll-lane-judge/demo/pay-mcp[39m
+
+ [32m✓[39m test/money.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m test/quote.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 57[2mms[22m[39m
+ [32m✓[39m test/allowlist.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m test/payer.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 1683[2mms[22m[39m
+   [32m✓[39m payAndFetch payment [2m(9)[22m
+     [33m[2m✓[22m[39m a dishonest seller cannot drain past the daily cap by rejecting[33m 896[2mms[22m[39m
+ [32m✓[39m test/spend.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 2649[2mms[22m[39m
+   [32m✓[39m two processes sharing one ledger [2m(2)[22m
+     [33m[2m✓[22m[39m loses no records[33m 1605[2mms[22m[39m
+     [33m[2m✓[22m[39m cannot both pass the daily cap[33m 879[2mms[22m[39m
+ [32m✓[39m test/mcpNative.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m test/caps.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m test/config.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m8 passed[39m[22m[90m (8)[39m
+[2m      Tests [22m [1m[32m69 passed[39m[22m[90m (69)[39m
+[2m   Start at [22m 08:40:05
+[2m   Duration [22m 7.22s[2m (tests 43%, import 39%, transform 16%, worker 2%)[22m
+
+[2m    Isolate [22m [33m8 workers spawned[39m[2m · ~692ms startup each (spawn + environment, per file)[22m
+[2m            [22m [2mat least ~1.15s faster with [22m[33misolate: false[39m[2m — reuses workers across files instead of one per file[22m
+
+
