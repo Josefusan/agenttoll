@@ -1,0 +1,762 @@
+$ cargo test --workspace  (cwd .) exit=0
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 29 tests
+test config::tests::minimal_config_defaults ... ok
+test config::tests::expansion_handles_text_around_vars ... ok
+test config::tests::missing_env_is_an_error ... ok
+test config::tests::rejects_invalid_configs ... ok
+test detector::tests::no_browser_is_ever_charged_in_agents_only ... ok
+test detector::tests::search_bots_charged_only_when_opted_in ... ok
+test mcp::tests::batch_collects_every_call ... ok
+test config::tests::env_values_cannot_inject_yaml ... ok
+test mcp::tests::call_without_name_is_still_a_call ... ok
+test mcp::tests::client_responses_are_free ... ok
+test config::tests::example_config_parses ... ok
+test mcp::tests::malformed_bodies_are_rejected ... ok
+test mcp::tests::discovery_is_free ... ok
+test money::tests::deserialize_rejects_bare_numbers ... ok
+test mcp::tests::single_tool_call ... ok
+test money::tests::displays_trimmed_usd ... ok
+test money::tests::parses_edge_forms ... ok
+test money::tests::parses_kb_amt_examples ... ok
+test money::tests::rejects_bad_input ... ok
+test money::tests::round_trips ... ok
+test path::tests::canonicalizes ... ok
+test detector::tests::detection_table ... ok
+test pricer::tests::methods_are_case_insensitive_in_patterns ... ok
+test pricer::tests::default_tool_price_applies_to_unknown_and_nameless_calls ... ok
+test pricer::tests::mcp_tool_prices ... ok
+test pricer::tests::mcp_endpoint_detection ... ok
+test pricer::tests::path_tricks_do_not_escape_a_price ... ok
+test pricer::tests::tag_carries_route_and_description ... ok
+test pricer::tests::routes_first_match_wins ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+
+running 3 tests
+test tests::missing_env_is_an_error ... ok
+test tests::facade_round_trips_core_results ... ok
+test tests::d4_semantics_cross_the_boundary ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 19 tests
+test facilitator::tests::settled_requires_a_transaction ... ok
+test admin::tests::token_comparison ... ok
+test ledger::tests::rejects_unsupported_urls ... ok
+test pay::tests::collects_tool_call_ids ... ok
+test pay::tests::attaches_receipt_to_result_meta ... ok
+test pay::tests::extracts_and_strips_mcp_payment ... ok
+test pay::tests::mcp_success_reads_every_sse_event ... ok
+test pay::tests::mcp_success_requires_a_good_result_for_every_call ... ok
+test pay::tests::numeric_ids_match_by_value_and_failures_are_explicit ... ok
+test pay::tests::replay_guard_claims_once_and_releases ... ok
+test proxy::tests::origin_headers_drop_payment_and_spoofed_agenttoll_headers ... ok
+test pay::tests::duplicate_request_ids_are_never_settled ... ok
+test proxy::tests::strips_hop_by_hop_and_connection_listed ... ok
+test ledger::tests::records_once_per_signature_and_publishes ... ok
+test proxy::tests::preserve_host_keeps_client_host ... ok
+test ledger::tests::stats_aggregate_revenue_and_unbilled_traffic ... ok
+test x402::tests::challenge_round_trips_through_the_header ... ok
+test x402::tests::decode_rejects_garbage ... ok
+test x402::tests::solana_requires_fee_payer ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 10 tests
+test agents_pass_free_routes_and_heuristic_agents_are_not_charged ... ok
+test fee_payer_is_read_from_facilitator_supported ... ok
+test malformed_and_oversized_mcp_bodies_are_rejected ... ok
+test agent_gets_a_valid_402_and_never_reaches_the_origin ... ok
+test human_gets_the_page_free ... ok
+test origin_never_sees_spoofed_or_payment_headers ... ok
+test mcp_get_is_never_charged ... ok
+test mcp_tools_priced_per_call_discovery_free ... ok
+test path_tricks_still_pay ... ok
+test unverified_payment_is_refused_not_forwarded ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.23s
+
+
+running 27 tests
+test agent_traffic_on_free_routes_is_logged_humans_are_not ... ok
+test a_payment_is_bound_to_its_resource ... ok
+test admin_query_token_only_works_for_events_and_short_tokens_are_refused ... ok
+test admin_api_requires_its_token_and_streams_payments ... ok
+test base_sepolia_payment_works_too ... ok
+test an_mcp_payment_is_bound_to_its_tool ... ok
+test discovery_lists_every_price ... ok
+test failed_mcp_tool_is_never_settled ... ok
+test compressed_tool_response_is_never_settled_and_never_served_unpaid ... ok
+test float_id_echoed_as_integer_is_settled_not_leaked ... ok
+test failed_settlement_withholds_the_content ... ok
+test header_payment_on_mcp_never_leaks_a_body_payment_to_the_origin ... ok
+test origin_error_is_never_settled_and_payment_can_be_retried ... ok
+test mcp_native_payment_is_settled_and_receipted_in_meta ... ok
+test malformed_payment_headers_are_client_errors ... ok
+test invalid_payment_never_reaches_the_origin ... ok
+test re_encoding_a_payment_does_not_dodge_the_replay_guard ... ok
+test paid_mcp_forwards_ask_for_uncompressed_responses ... ok
+test paid_request_is_verified_forwarded_settled_and_recorded ... ok
+test replayed_payment_is_refused ... ok
+test sse_tool_error_after_a_notification_is_not_settled ... ok
+test sse_tool_success_after_a_notification_is_settled ... ok
+test tampered_quotes_are_refused_before_verify ... ok
+test tools_list_advertises_prices ... ok
+test unverifiable_2xx_mcp_content_is_withheld ... ok
+test settle_timeout_serves_content_and_records_it_unconfirmed ... ok
+test stats_separate_simulated_and_unconfirmed_money ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.57s
+
+
+running 2 tests
+test tests::ids_are_unique_and_valid_pubkey_length ... ok
+test tests::shape_checks ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling cfg-if v1.0.5
+   Compiling serde_core v1.0.229
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling serde_derive v1.0.229
+   Compiling libc v0.2.190
+   Compiling serde v1.0.229
+   Compiling zeroize_derive v1.5.0
+   Compiling getrandom v0.2.17
+   Compiling typenum v1.20.1
+   Compiling zeroize v1.9.0
+   Compiling version_check v0.9.5
+   Compiling subtle v2.6.1
+   Compiling once_cell v1.21.4
+   Compiling rand_core v0.6.4
+   Compiling generic-array v0.14.9
+   Compiling equivalent v1.0.2
+   Compiling cpufeatures v0.2.17
+   Compiling const-oid v0.9.6
+   Compiling winnow v1.0.4
+   Compiling crypto-common v0.1.6
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling hashbrown v0.17.1
+   Compiling cfg_aliases v0.2.2
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling indexmap v2.14.2
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling toml_edit v0.25.15+spec-1.1.0
+   Compiling borsh v1.8.1
+   Compiling bytemuck_derive v1.12.1
+   Compiling proc-macro-crate v3.5.0
+   Compiling borsh-derive v1.8.1
+   Compiling bytemuck v1.25.2
+   Compiling semver v1.0.28
+   Compiling rustc_version v0.4.1
+   Compiling autocfg v1.5.1
+   Compiling five8_core v1.0.0
+   Compiling solana-sanitize v3.0.1
+   Compiling five8 v1.0.0
+   Compiling bytes v1.12.1
+   Compiling curve25519-dalek-derive v0.1.1
+   Compiling curve25519-dalek v4.1.3
+   Compiling solana-program-error v3.0.1
+   Compiling solana-atomic-u64 v3.0.1
+   Compiling solana-hash v4.7.0
+   Compiling thiserror v2.0.21
+   Compiling log v0.4.34
+   Compiling thiserror-impl v2.0.21
+   Compiling solana-nullable v1.3.0
+   Compiling libm v0.2.16
+   Compiling solana-sha256-hasher v3.1.0
+   Compiling five8_const v1.0.0
+   Compiling sha2-const-stable v0.1.0
+   Compiling solana-address v2.9.0
+   Compiling num-traits v0.2.19
+   Compiling zmij v1.0.23
+   Compiling pin-project-lite v0.2.17
+   Compiling foldhash v0.2.0
+   Compiling hybrid-array v0.4.15
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling digest v0.11.3
+   Compiling smallvec v1.16.2
+   Compiling serde_json v1.0.151
+   Compiling find-msvc-tools v0.1.14
+   Compiling shlex v2.0.1
+   Compiling signature v2.2.0
+   Compiling jobserver v0.1.35
+   Compiling cc v1.5.1
+   Compiling pkg-config v0.3.34
+   Compiling solana-pubkey v4.4.0
+   Compiling dunce v1.0.5
+   Compiling solana-instruction-error v2.5.0
+   Compiling tracing-core v0.1.36
+   Compiling hmac v0.12.1
+   Compiling tracing-attributes v0.1.31
+   Compiling scopeguard v1.2.0
+   Compiling solana-sdk-ids v3.1.0
+   Compiling bincode v1.3.3
+   Compiling parking_lot_core v0.9.12
+   Compiling lock_api v0.4.14
+   Compiling http v1.5.0
+   Compiling tracing v0.1.44
+   Compiling percent-encoding v2.3.2
+   Compiling futures-core v0.3.34
+   Compiling rustversion v1.0.23
+   Compiling solana-instruction v4.0.0
+   Compiling fnv v1.0.7
+   Compiling slab v0.4.12
+   Compiling solana-instruction v3.5.1
+   Compiling parking_lot v0.12.5
+   Compiling errno v0.3.14
+   Compiling socket2 v0.6.5
+   Compiling synstructure v0.14.0
+   Compiling bitflags v2.13.2
+   Compiling unicode-xid v0.2.6
+   Compiling futures-sink v0.3.34
+   Compiling signal-hook-registry v1.4.8
+   Compiling futures-channel v0.3.34
+   Compiling mio v1.2.3
+   Compiling displaydoc v0.2.7
+   Compiling tokio-macros v2.7.2
+   Compiling futures-macro v0.3.34
+   Compiling futures-io v0.3.34
+   Compiling futures-task v0.3.34
+   Compiling tokio v1.53.1
+   Compiling futures-util v0.3.34
+   Compiling zerofrom-derive v0.1.8
+   Compiling cmake v0.1.58
+   Compiling base64 v0.22.1
+   Compiling fs_extra v1.3.0
+   Compiling aws-lc-sys v0.45.0
+   Compiling zerofrom v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling lazy_static v1.5.1
+   Compiling stable_deref_trait v1.2.1
+   Compiling zerocopy v0.8.59
+   Compiling yoke v0.8.3
+   Compiling ring v0.17.14
+   Compiling rustls-pki-types v1.15.1
+   Compiling either v1.18.0
+   Compiling zerovec-derive v0.11.6
+   Compiling aws-lc-rs v1.18.1
+   Compiling zerovec v0.11.8
+   Compiling strsim v0.11.1
+   Compiling untrusted v0.9.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling rustls v0.23.45
+   Compiling tinystr v0.8.4
+   Compiling solana-sysvar-id v3.1.0
+   Compiling litemap v0.8.3
+   Compiling httparse v1.10.1
+   Compiling writeable v0.6.4
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling tokio-util v0.7.19
+   Compiling icu_properties_data v2.3.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling utf8_iter v1.0.4
+   Compiling unicode-segmentation v1.13.3
+   Compiling convert_case v0.10.0
+   Compiling icu_collections v2.3.0
+   Compiling icu_provider v2.3.1
+   Compiling http-body v1.1.0
+   Compiling form_urlencoded v1.2.2
+   Compiling ruint-macro v1.2.1
+   Compiling tower-service v0.3.3
+   Compiling paste v1.0.15
+   Compiling derive_more-impl v2.1.1
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling sync_wrapper v1.0.2
+   Compiling solana-address v1.1.0
+   Compiling keccak v0.2.2
+   Compiling atomic-waker v1.1.2
+   Compiling solana-program-memory v3.1.0
+   Compiling tower-layer v0.3.3
+   Compiling try-lock v0.2.5
+   Compiling want v0.3.1
+   Compiling solana-account-info v3.1.1
+   Compiling h2 v0.4.19
+   Compiling sha3 v0.11.0
+   Compiling solana-pubkey v3.0.0
+   Compiling idna_adapter v1.2.2
+   Compiling der v0.7.10
+   Compiling alloc-no-stdlib v3.0.0
+   Compiling rand_core v0.10.1
+   Compiling cpufeatures v0.3.1
+   Compiling getrandom v0.4.3
+   Compiling httpdate v1.0.3
+   Compiling crc32fast v1.5.2
+   Compiling hyper v1.11.1
+   Compiling alloc-stdlib v0.3.0
+   Compiling idna v1.1.0
+   Compiling tower v0.5.3
+   Compiling http-body-util v0.1.5
+   Compiling webpki-roots v1.0.9
+   Compiling ff v0.13.1
+   Compiling base64 v0.23.1
+   Compiling simd-adler32 v0.3.10
+   Compiling base16ct v0.2.0
+   Compiling arrayvec v0.7.8
+   Compiling adler2 v2.0.1
+   Compiling ipnet v2.12.2
+   Compiling ident_case v1.0.1
+   Compiling hyper-util v0.1.21
+   Compiling miniz_oxide v0.9.1
+   Compiling sec1 v0.7.3
+   Compiling group v0.13.0
+   Compiling url v2.5.8
+   Compiling brotli-decompressor v6.0.1
+   Compiling chacha20 v0.10.2
+   Compiling solana-get-sysvar v1.0.0
+   Compiling crypto-bigint v0.5.5
+   Compiling alloy-rlp-derive v0.3.16
+   Compiling bs58 v0.5.1
+   Compiling solana-sdk-macro v3.0.1
+   Compiling alloy-rlp v0.3.16
+   Compiling elliptic-curve v0.13.8
+   Compiling rand v0.10.3
+   Compiling flate2 v1.1.10
+   Compiling brotli v9.0.0
+   Compiling spki v0.7.3
+   Compiling rfc6979 v0.4.0
+   Compiling ed25519 v2.2.3
+   Compiling solana-ed25519 v0.2.4
+   Compiling allocator-api2 v0.2.21
+   Compiling ryu v1.0.23
+   Compiling compression-core v0.4.33
+   Compiling foldhash v0.1.5
+   Compiling hashbrown v0.15.5
+   Compiling compression-codecs v0.4.45
+   Compiling ecdsa v0.16.9
+   Compiling ruint v1.20.1
+   Compiling rustls-webpki v0.103.15
+   Compiling sha2 v0.11.0
+   Compiling k256 v0.13.4
+   Compiling tokio-rustls v0.26.6
+   Compiling async-compression v0.4.50
+   Compiling derive_more v2.1.1
+   Compiling solana-transaction-error v3.4.0
+   Compiling const-hex v1.19.3
+   Compiling serde-big-array v0.5.1
+   Compiling getrandom v0.3.4
+   Compiling solana-signature v3.6.0
+   Compiling alloy-primitives v1.7.3
+   Compiling tower-http v0.6.11
+   Compiling hyper-rustls v0.27.10
+   Compiling darling_core v0.24.1
+   Compiling rand_chacha v0.3.1
+   Compiling thiserror v1.0.69
+   Compiling rand v0.8.8
+   Compiling thiserror-impl v1.0.69
+   Compiling byteorder v1.5.0
+   Compiling darling_macro v0.24.1
+   Compiling darling v0.24.1
+   Compiling serde_with_macros v3.24.0
+   Compiling solana-signer v3.0.1
+   Compiling num-derive v0.4.2
+   Compiling feature-probe v0.1.1
+   Compiling bv v0.11.1
+   Compiling serde_with v3.24.0
+   Compiling solana-clock v4.0.0
+   Compiling num_enum_derive v0.7.6
+   Compiling num_enum v0.7.6
+   Compiling solana-clock v3.2.1
+   Compiling serde_urlencoded v0.7.1
+   Compiling solana-epoch-schedule v3.4.0
+   Compiling aho-corasick v1.1.5
+   Compiling openssl-probe v0.2.1
+   Compiling heck v0.5.0
+   Compiling regex-syntax v0.8.11
+   Compiling regex-automata v0.4.18
+   Compiling rustls-native-certs v0.8.4
+   Compiling solana-rent v3.1.0
+   Compiling solana-slot-hashes v3.2.0
+   Compiling solana-serialize-utils v3.1.2
+   Compiling solana-fee-calculator v3.4.0
+   Compiling crossbeam-utils v0.8.23
+   Compiling solana-define-syscall v4.0.1
+   Compiling solana-program-entrypoint v3.1.1
+   Compiling solana-slot-history v3.2.0
+   Compiling solana-epoch-rewards v3.2.0
+   Compiling solana-last-restart-slot v3.2.0
+   Compiling pbkdf2 v0.11.0
+   Compiling solana-seed-phrase v3.0.0
+   Compiling solana-sysvar v3.1.1
+   Compiling solana-instructions-sysvar v3.0.1
+   Compiling anyhow v1.0.104
+   Compiling solana-msg v3.1.0
+   Compiling serde_bytes v0.11.19
+   Compiling solana-short-vec v3.3.0
+   Compiling rand_core v0.9.5
+   Compiling async-trait v0.1.92
+   Compiling mime v0.3.17
+   Compiling rand_chacha v0.9.0
+   Compiling solana-account v3.4.0
+   Compiling itertools v0.12.1
+   Compiling futures-executor v0.3.34
+   Compiling solana-hash v3.1.0
+   Compiling solana-zero-copy v1.3.0
+   Compiling inout v0.1.4
+   Compiling void v1.0.2
+   Compiling unreachable v1.0.0
+   Compiling cipher v0.4.4
+   Compiling futures v0.3.34
+   Compiling rand v0.9.5
+   Compiling spl-discriminator-syn v0.2.1
+   Compiling alloy-sol-type-parser v1.7.3
+   Compiling encoding_rs v0.8.42
+   Compiling zstd-sys v2.1.0+zstd.1.5.7
+   Compiling ahash v0.8.12
+   Compiling ascii v0.9.3
+   Compiling combine v3.8.1
+   Compiling alloy-json-abi v1.7.3
+   Compiling spl-discriminator-derive v0.2.0
+   Compiling solana-message v3.1.0
+   Compiling hash32 v0.3.1
+   Compiling syn-solidity v1.7.3
+   Compiling uriparse v0.6.4
+   Compiling qstring v0.7.2
+   Compiling universal-hash v0.5.1
+   Compiling macro-string v0.2.0
+   Compiling proc-macro-error-attr3 v3.0.1
+   Compiling multiversion_no_op v1.0.0
+   Compiling opaque-debug v0.3.1
+   Compiling derivation-path v0.2.0
+   Compiling rustc-demangle v0.1.28
+   Compiling core_detect v1.0.0
+   Compiling simdutf8 v0.1.5
+   Compiling keccak v0.1.6
+   Compiling solana-sbpf v0.13.1
+   Compiling solana-derivation-path v3.0.0
+   Compiling polyval v0.6.2
+   Compiling proc-macro-error3 v3.0.1
+   Compiling alloy-sol-macro-input v1.7.3
+   Compiling spl-discriminator v0.5.2
+   Compiling ctr v0.9.2
+   Compiling aes v0.8.4
+   Compiling rustls-platform-verifier v0.7.1
+   Compiling tokio-stream v0.1.19
+   Compiling solana-program-option v3.1.0
+   Compiling aead v0.5.2
+   Compiling auto_impl v1.3.0
+   Compiling zstd-safe v7.3.0
+   Compiling syn v1.0.109
+   Compiling aes-gcm-siv v0.11.1
+   Compiling reqwest v0.13.5
+   Compiling solana-transaction-context v3.1.14
+   Compiling alloy-sol-macro-expander v1.7.3
+   Compiling solana-seed-derivable v3.0.0
+   Compiling merlin v3.0.0
+   Compiling sha3 v0.10.9
+   Compiling reqwest v0.12.28
+   Compiling num-integer v0.1.47
+   Compiling bstr v1.13.1
+   Compiling crossbeam-epoch v0.9.21
+   Compiling siphasher v1.0.4
+   Compiling unsafe-libyaml v0.2.11
+   Compiling serde_yaml v0.9.34+deprecated
+   Compiling globset v0.4.20
+   Compiling solana-zk-sdk v4.0.0
+   Compiling alloy-sol-macro v1.7.3
+   Compiling spl-type-length-value v0.9.1
+   Compiling darling_core v0.23.0
+   Compiling cfg_eval v0.1.2
+   Compiling crossbeam-deque v0.8.8
+   Compiling crc-catalog v2.5.0
+   Compiling hashbrown v0.14.5
+   Compiling crc v3.4.0
+   Compiling darling_macro v0.23.0
+   Compiling alloy-sol-types v1.7.3
+   Compiling zstd v0.13.3
+   Compiling memoffset v0.9.1
+   Compiling solana-serde-varint v3.0.1
+   Compiling rayon-core v1.13.0
+   Compiling portable-atomic v1.15.0
+   Compiling minimal-lexical v0.2.1
+   Compiling time-core v0.1.9
+   Compiling arrayref v0.3.9
+   Compiling num-conv v0.2.2
+   Compiling time-macros v0.2.32
+   Compiling nom v7.1.3
+   Compiling solana-account-decoder-client-types v3.1.14
+   Compiling darling v0.23.0
+   Compiling alloy-eip2124 v0.2.0
+   Compiling synstructure v0.12.6
+   Compiling spl-pod v0.7.4
+   Compiling agenttoll-core v0.1.0 (/home/joseph/Hackathons/AgentToll-lane-judge/crates/agenttoll-core)
+   Compiling solana-transaction v3.1.0
+   Compiling solana-system-interface v2.0.0
+   Compiling crossbeam-channel v0.5.17
+   Compiling alloy-serde v2.5.0
+   Compiling alloy-eip2930 v0.2.4
+   Compiling alloy-eip7928 v0.4.11
+   Compiling alloy-eip7702 v0.6.3
+   Compiling alloy-eip8141 v0.1.1
+   Compiling nybbles v0.4.8
+   Compiling ed25519-dalek v2.2.0
+   Compiling solana-program-pack v3.1.0
+   Compiling solana-borsh v3.0.2
+   Compiling nix v0.30.1
+   Compiling solana-commitment-config v3.1.1
+   Compiling data-encoding v2.11.1
+   Compiling solana-svm-feature-set v3.1.14
+   Compiling deranged v0.5.8
+   Compiling solana-version v3.1.14
+   Compiling utf8parse v0.2.2
+   Compiling powerfmt v0.2.0
+   Compiling time v0.3.55
+   Compiling anstyle-parse v1.0.0
+   Compiling agave-feature-set v3.1.14
+   Compiling solana-keypair v3.1.2
+   Compiling alloy-trie v0.9.8
+   Compiling alloy-eips v2.5.0
+   Compiling asn1-rs-derive v0.4.0
+   Compiling alloy-tx-macros v2.5.0
+   Compiling rusticata-macros v4.1.0
+   Compiling asn1-rs-impl v0.1.0
+   Compiling spl-generic-token v2.0.1
+   Compiling solana-cpi v3.1.0
+   Compiling solana-cluster-type v3.2.0
+   Compiling num-bigint v0.2.6
+   Compiling gethostname v0.2.3
+   Compiling solana-reward-info v3.0.0
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling solana-time-utils v3.0.0
+   Compiling vcpkg v0.2.15
+   Compiling colorchoice v1.0.5
+   Compiling anstyle v1.0.14
+   Compiling anstyle-query v1.1.5
+   Compiling anstream v1.0.0
+   Compiling libsqlite3-sys v0.38.2
+   Compiling solana-metrics v3.1.14
+   Compiling solana-transaction-status-client-types v3.1.14
+   Compiling asn1-rs v0.5.2
+   Compiling rayon v1.12.0
+   Compiling alloy-consensus v2.5.0
+   Compiling spl-token-group-interface v0.7.2
+   Compiling axum-core v0.5.6
+   Compiling itertools v0.13.0
+   Compiling num-rational v0.2.4
+   Compiling num-complex v0.2.4
+   Compiling serde_path_to_error v0.1.20
+   Compiling axum-macros v0.5.1
+   Compiling solana-inflation v3.3.0
+   Compiling matchit v0.8.4
+   Compiling clap_lex v1.1.1
+   Compiling oid-registry v0.6.1
+   Compiling clap_builder v4.6.7
+   Compiling axum v0.8.9
+   Compiling solana-rpc-client-types v3.1.14
+   Compiling alloy-json-rpc v2.5.0
+   Compiling dashmap v5.5.3
+   Compiling num-bigint v0.4.8
+   Compiling solana-system-interface v3.3.0
+   Compiling clap_derive v4.6.7
+   Compiling solana-curve25519 v3.1.14
+   Compiling quinn-udp v0.5.16
+   Compiling num_cpus v1.17.0
+   Compiling dlopen2_derive v0.3.0
+   Compiling wasm-bindgen-shared v0.2.129
+   Compiling futures-utils-wasm v0.1.0
+   Compiling solana-perf v3.1.14
+   Compiling base64 v0.13.1
+   Compiling dlopen2 v0.5.0
+   Compiling solana-rayon-threadlimit v3.1.14
+   Compiling spl-token-confidential-transfer-proof-extraction v0.5.1
+   Compiling clap v4.6.7
+   Compiling der-parser v8.2.0
+   Compiling alloy-consensus-any v2.5.0
+   Compiling alloy-network-primitives v2.5.0
+   Compiling spl-token-metadata-interface v0.8.0
+   Compiling spl-token-interface v2.0.0
+   Compiling solana-packet v3.0.0
+   Compiling spl-token-confidential-transfer-proof-generation v0.5.1
+   Compiling reqwest-middleware v0.4.2
+   Compiling fastbloom v0.14.1
+   Compiling num-iter v0.1.46
+   Compiling jsonrpc-core v18.0.0
+   Compiling matchers v0.2.0
+   Compiling regex v1.13.1
+   Compiling rustls-platform-verifier v0.6.2
+   Compiling solana-svm-type-overrides v3.1.14
+   Compiling sharded-slab v0.1.7
+   Compiling solana-zk-sdk-pod v0.1.2
+   Compiling raw-cpuid v11.6.0
+   Compiling tracing-log v0.2.0
+   Compiling hashlink v0.12.2
+   Compiling anza-quinn v0.11.9-rustsec20260037
+   Compiling caps v0.5.6
+   Compiling solana-serde v3.0.0
+   Compiling thread_local v1.1.10
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling nu-ansi-term v0.50.3
+   Compiling fallible-iterator v0.3.0
+   Compiling rustc-hash v2.1.3
+   Compiling tinyvec v1.13.3
+   Compiling unicode-width v0.2.2
+   Compiling solana-measure v3.1.14
+   Compiling dotenvy v0.15.7
+   Compiling lru-slab v0.1.3
+   Compiling anza-quinn-proto v0.11.13-rustsec20260037
+   Compiling console v0.16.6
+   Compiling rusqlite v0.40.2
+   Compiling tracing-subscriber v0.3.23
+   Compiling quanta v0.12.6
+   Compiling solana-net-utils v3.1.14
+   Compiling solana-rpc-client-api v3.1.14
+   Compiling Inflector v0.11.4
+   Compiling num v0.2.1
+   Compiling spl-token-2022-interface v2.1.0
+   Compiling alloy-rpc-types-eth v2.5.0
+   Compiling x509-parser v0.14.0
+   Compiling solana-config-interface v2.0.1
+   Compiling solana-stake-interface v2.0.2
+   Compiling solana-quic-definitions v3.0.0
+   Compiling solana-vote-interface v4.0.4
+   Compiling solana-loader-v3-interface v6.1.1
+   Compiling solana-nonce v3.4.0
+   Compiling solana-address-lookup-table-interface v3.2.0
+   Compiling webpki-roots v0.26.11
+   Compiling spinning_top v0.3.0
+   Compiling solana-curve25519 v4.0.1
+   Compiling sha1 v0.10.7
+   Compiling solana-epoch-info v3.1.0
+   Compiling no-std-compat v0.4.1
+   Compiling futures-timer v3.0.4
+   Compiling parking v2.2.1
+   Compiling rust_decimal v1.43.0
+   Compiling nonzero_ext v0.3.0
+   Compiling utf-8 v0.7.6
+   Compiling unit-prefix v0.5.2
+   Compiling indicatif v0.18.6
+   Compiling tungstenite v0.28.0
+   Compiling governor v0.6.3
+   Compiling event-listener v5.4.2
+   Compiling solana-account-decoder v3.1.14
+   Compiling solana-tls-utils v3.1.14
+   Compiling alloy-rpc-types-any v2.5.0
+   Compiling percentage v0.1.0
+   Compiling solana-transaction-metrics-tracker v3.1.14
+   Compiling solana-connection-cache v3.1.14
+   Compiling solana-zk-elgamal-proof-interface v0.1.3
+   Compiling pem v1.1.1
+   Compiling alloy-transport v2.5.0
+   Compiling phf_shared v0.14.0
+   Compiling alloy-signer v2.5.0
+   Compiling arc-swap v1.9.2
+   Compiling solana-feature-gate-interface v3.1.0
+   Compiling pin-project-internal v1.1.13
+   Compiling histogram v0.6.9
+   Compiling bumpalo v3.20.3
+   Compiling wasm-bindgen-macro-support v0.2.129
+   Compiling pin-project v1.1.13
+   Compiling solana-streamer v3.1.14
+   Compiling solana-rpc-client v3.1.14
+   Compiling alloy-transport-http v2.5.0
+   Compiling alloy-network v2.5.0
+   Compiling phf v0.14.0
+   Compiling spl-token-confidential-transfer-proof-extraction v0.6.1
+   Compiling event-listener-strategy v0.5.4
+   Compiling tokio-tungstenite v0.28.0
+   Compiling agenttoll-gateway v0.1.0 (/home/joseph/Hackathons/AgentToll-lane-judge/crates/agenttoll-gateway)
+   Compiling spl-list-view v0.1.1
+   Compiling spl-program-error-derive v0.6.0
+   Compiling http v0.2.12
+   Compiling wasm-bindgen v0.2.129
+   Compiling async-stream-impl v0.3.6
+   Compiling async-stream v0.3.6
+   Compiling solana-pubsub-client v3.1.14
+   Compiling spl-program-error v0.8.0
+   Compiling spl-tlv-account-resolution v0.11.4
+   Compiling x402-types v2.0.2
+   Compiling async-lock v3.4.2
+   Compiling alloy-chains v0.2.39
+   Compiling alloy-rpc-client v2.5.0
+   Compiling wasm-bindgen-macro v0.2.129
+   Compiling solana-client-traits v3.0.0
+   Compiling spl-token-metadata-interface v1.0.1
+   Compiling dashmap v6.2.1
+   Compiling lru v0.18.5
+   Compiling num-derive v0.5.1
+   Compiling spl-token-2022-interface v3.1.2
+   Compiling alloy-provider v2.5.0
+   Compiling solana-tpu-client v3.1.14
+   Compiling solana-quic-client v3.1.14
+   Compiling spl-transfer-hook-interface v2.1.0
+   Compiling solana-rpc-client-nonce-utils v3.1.14
+   Compiling spl-elgamal-registry-interface v0.2.1
+   Compiling solana-udp-client v3.1.14
+   Compiling spl-token-confidential-transfer-ciphertext-arithmetic v0.5.1
+   Compiling alloy-dyn-abi v1.7.3
+   Compiling spl-memo-interface v2.1.0
+   Compiling solana-security-txt v1.1.3
+   Compiling spl-token-2022 v11.1.0
+   Compiling alloy-contract v2.5.0
+   Compiling solana-client v3.1.14
+   Compiling alloy-signer-local v2.5.0
+   Compiling spl-token v9.0.0
+   Compiling reqwest-middleware v0.5.2
+   Compiling solana-compute-budget-interface v3.1.0
+   Compiling x402-chain-solana v2.0.2
+   Compiling x402-reqwest v2.0.2
+   Compiling x402-chain-eip155 v2.0.2
+   Compiling agenttoll-core-wasm v0.1.0 (/home/joseph/Hackathons/AgentToll-lane-judge/crates/agenttoll-core-wasm)
+   Compiling agenttoll-buyer v0.1.0 (/home/joseph/Hackathons/AgentToll-lane-judge/crates/agenttoll-buyer)
+   Compiling agenttoll-demo-origin v0.1.0 (/home/joseph/Hackathons/AgentToll-lane-judge/demo/origin)
+   Compiling agenttoll-mock-facilitator v0.1.0 (/home/joseph/Hackathons/AgentToll-lane-judge/demo/mock-facilitator)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13m 32s
+     Running unittests src/main.rs (target/debug/deps/agenttoll_buyer-2567536ba69a4922)
+     Running unittests src/lib.rs (target/debug/deps/agenttoll_core-32d24326d552a9fa)
+     Running unittests src/lib.rs (target/debug/deps/agenttoll_core_wasm-fa60ccf607d6ed75)
+     Running unittests src/main.rs (target/debug/deps/agenttoll_demo_origin-a4f7b7df793a4a8e)
+     Running unittests src/lib.rs (target/debug/deps/agenttoll_gateway-36edeb29894f30bb)
+     Running unittests src/main.rs (target/debug/deps/agenttoll_gateway-0d88b6eebf193d9d)
+     Running tests/gateway.rs (target/debug/deps/gateway-ec8952ca5d0823a3)
+     Running tests/payments.rs (target/debug/deps/payments-8e69dfaa50da6277)
+     Running unittests src/main.rs (target/debug/deps/agenttoll_mock_facilitator-bf7c75d081972326)
+   Doc-tests agenttoll_core
+   Doc-tests agenttoll_core_wasm
+   Doc-tests agenttoll_gateway
