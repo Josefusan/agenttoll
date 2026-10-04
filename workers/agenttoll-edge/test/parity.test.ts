@@ -35,6 +35,16 @@ import {
 } from './mocks';
 
 const haveCargo = spawnSync('cargo', ['--version'], { stdio: 'ignore' }).status === 0;
+if (!haveCargo) {
+  console.warn(
+    '\n!!! WARNING: cargo is not on PATH. The 21 Rust gateway vs Worker parity tests are SKIPPED, not passed. ' +
+      'Put ~/.cargo/bin on PATH and rerun (npm run test:parity).\n',
+  );
+}
+
+// cargo writes to CARGO_TARGET_DIR when it is set (relative values resolve against the repo root).
+const TARGET_DIR = path.resolve(REPO_ROOT, process.env.CARGO_TARGET_DIR || 'target');
+const GATEWAY_BIN = path.join(TARGET_DIR, 'debug', process.platform === 'win32' ? 'agenttoll-gateway.exe' : 'agenttoll-gateway');
 
 function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -91,7 +101,7 @@ describe.skipIf(!haveCargo)('Rust gateway vs Worker parity', () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agenttoll-parity-'));
     const configPath = path.join(tmpDir, 'agenttoll.yaml');
     fs.writeFileSync(configPath, yaml);
-    gateway = spawn(path.join(REPO_ROOT, 'target/debug/agenttoll-gateway'), ['--config', configPath], {
+    gateway = spawn(GATEWAY_BIN, ['--config', configPath], {
       cwd: tmpDir,
       env: { ...process.env, ...vars, RUST_LOG: 'warn' },
       stdio: ['ignore', 'pipe', 'pipe'],

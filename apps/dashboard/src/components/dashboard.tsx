@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLiveStats } from "@/hooks/use-live-stats";
 import { agentLabel, atomicToUsd, compactInt } from "@/lib/format";
 import { medianPriceAtomic, timeline } from "@/lib/merge";
+import { settlementsSubtitle } from "@/lib/copy";
 import { isSimulated, settlementStatus } from "@/lib/types";
 import { Breakdown } from "./breakdown";
 import { Badge, Card } from "./card";
@@ -102,7 +103,7 @@ export function Dashboard({ payoutsUrl, gatewayUrl }: { payoutsUrl: string; gate
             <Card
               className="lg:col-span-2"
               title="Live settlements"
-              subtitle="Newest first. Links open the transaction on the explorer."
+              subtitle={settlementsSubtitle(simulatedInView, stats.recent.length)}
               action={
                 simulatedInView > 0 ? (
                   <Badge tone="warn" title="Rows in this list that went through the local simulated facilitator. No on-chain transaction exists for them.">

@@ -625,6 +625,16 @@ async fn admin_api_requires_its_token_and_streams_payments() {
         .await
         .unwrap();
     assert_eq!(stream.status(), 200);
+    // The first frame is a comment sent right away, before any payment exists.
+    let hello = tokio::time::timeout(std::time::Duration::from_secs(2), stream.chunk())
+        .await
+        .expect("initial SSE frame within 2s")
+        .unwrap()
+        .unwrap();
+    assert!(
+        String::from_utf8_lossy(&hello).starts_with(": connected"),
+        "{hello:?}"
+    );
     let payment = h.pay_for("/api/quote", SOLANA_DEVNET, |_| {}).await;
     assert_eq!(h.get("/api/quote", Some(&payment)).await.status(), 200);
 
