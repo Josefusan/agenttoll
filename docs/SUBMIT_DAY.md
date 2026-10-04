@@ -15,6 +15,8 @@ Nothing here is done by an agent. Agents do not record videos, do not touch your
 5. Re-check the five why-now facts listed under "Pre-submit checklist" in `docs/COLOSSEUM_SUBMISSION.md`. If one changed, edit the doc, then the form.
 6. Confirm the public gateway URL. The live demo runs on a Cloudflare quick tunnel; on 2026-10-04 the gateway was `https://years-cow-stations-dubai.trycloudflare.com` and the dashboard was `https://commonwealth-dam-wheat-constructed.trycloudflare.com`. Quick-tunnel URLs change on every tunnel restart and nothing restarts pm2 after a reboot, so re-read them from `~/Hackathons/AgentToll-LIVE.txt` on the VPS (and run `pm2 resurrect` first if the host rebooted). Update the "Project website" answer in `docs/COLOSSEUM_SUBMISSION.md` to match. Open the URL in a private window and run `curl -A 'Claude-User/1.0' <url>/api/quote` (expect 402; ClaudeBot and GPTBot get a Cloudflare 403 on quick tunnels, see `deploy/README.md`). If it does not load, leave the Project website field empty. Every payment behind it is simulated.
 
+   For a permanent hostname instead of a quick tunnel, see `docs/launch/STABLE_URL.md` (recommended: a named Cloudflare tunnel, no sudo).
+
 ## Funding day (optional: the only path to a real settlement)
 
 Everything in the demo is simulated until both devnet wallets hold USDC. To make the first real
@@ -60,6 +62,8 @@ Rules for both:
 ## 2. Fill the form (colosseum.com, your account)
 
 Open https://colosseum.com/arena/projects/agenttoll-1. If you are asked to join Crypto World's Fair first, join it and accept the Official Rules checkbox.
+
+Regenerate the copy-paste page with `python3 scripts/build-submission-page.py` before pasting; it reads `docs/COLOSSEUM_SUBMISSION.md` and shows every answer with its character count, and its counts match System-1.
 
 | Form field | What to enter | Source |
 |---|---|---|

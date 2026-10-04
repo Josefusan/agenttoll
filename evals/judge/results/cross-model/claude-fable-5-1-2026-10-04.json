@@ -1,0 +1,213 @@
+{
+  "generated_at": "2026-10-04T20:12:28+00:00",
+  "commit": "c21f33a",
+  "model": "claude-fable-5-1",
+  "resolved_models": [
+    "claude-fable-5-1"
+  ],
+  "system1_in_packet": false,
+  "judges_requested": 3,
+  "judges_ok": 1,
+  "lenses": [
+    "You are a Colosseum team reviewer who funds startups. Weigh product quality and innovation hardest.",
+    "You are a Solana track judge and protocol engineer. Weigh Solana fit and technical depth hardest.",
+    "You are an auditor whose only job is to find claims the packet cannot back up. Weigh honesty hardest."
+  ],
+  "packet_files": [
+    "README.md",
+    "docs/COLOSSEUM_SUBMISSION.md",
+    "docs/launch/DEMO_VIDEO.md",
+    "docs/launch/JUDGE_FAQ.md",
+    "docs/launch/PITCH_VIDEO.md",
+    "docs/launch/POSTS.md",
+    "docs/launch/RECORDING_RUNBOOK.md",
+    "docs/USE_CASES.md",
+    "evals/results/latest.md",
+    "git ls-files"
+  ],
+  "packet_chars": 141226,
+  "aggregate": {
+    "per_criterion": {
+      "product_quality": {
+        "name": "Product quality",
+        "weight": 20,
+        "median": 7.0,
+        "scores": [
+          7.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 3,
+        "quotes_verified": 3
+      },
+      "innovation": {
+        "name": "Innovation potential",
+        "weight": 15,
+        "median": 7.0,
+        "scores": [
+          7.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 3,
+        "quotes_verified": 3
+      },
+      "solana_fit": {
+        "name": "Solana track fit",
+        "weight": 15,
+        "median": 7.0,
+        "scores": [
+          7.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 3,
+        "quotes_verified": 3
+      },
+      "technical_depth": {
+        "name": "Technical depth",
+        "weight": 15,
+        "median": 8.0,
+        "scores": [
+          8.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 3,
+        "quotes_verified": 3
+      },
+      "demo_clarity": {
+        "name": "Demo clarity",
+        "weight": 15,
+        "median": 7.0,
+        "scores": [
+          7.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 3,
+        "quotes_verified": 3
+      },
+      "why_now": {
+        "name": "Why now and market",
+        "weight": 10,
+        "median": 7.0,
+        "scores": [
+          7.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 3,
+        "quotes_verified": 3
+      },
+      "honesty": {
+        "name": "Honesty of claims",
+        "weight": 10,
+        "median": 7.0,
+        "scores": [
+          7.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 3,
+        "quotes_verified": 3
+      }
+    },
+    "weighted_total": 71.5,
+    "total_by_judge": [
+      71.5
+    ],
+    "total_spread": 0.0,
+    "mean_criterion_spread": 0.0,
+    "disputed": []
+  },
+  "judges": [
+    {
+      "scores": {
+        "product_quality": {
+          "score": 7,
+          "evidence": [
+            "119/119 passed, 0 skipped, 0 failed",
+            "The first run compiles the workspace, about 590 crates (`cargo tree -e normal,build` on the four demo packages): 14 minutes on a shared 4-core server",
+            "Dashboard | 9 unit tests (SSE proxy, simulated copy), typecheck, lint, build, Playwright checks"
+          ],
+          "reason": "Core flow, failure handling (settle timeout, origin 5xx, facilitator down) and a one-command demo are backed by eval evidence lines, but the payment leg of the main path is simulated, the Worker is undeployed, and a 14-minute first build is a real rough edge."
+        },
+        "innovation": {
+          "score": 7,
+          "evidence": [
+            "Per-tool prices; `initialize` and `tools/list` stay free; native x402 payments inside MCP calls",
+            "Cloudflare announced an x402 monetization gateway in July, but it is waitlist-only and tied to its network. Founders need something open-source they can self-host on any stack",
+            "a report of the agent traffic you are not billing yet"
+          ],
+          "reason": "Open, self-hosted, per-MCP-tool x402 pricing plus a capped agent wallet is a sharp wedge with a plausible first distribution channel, but x402 paywall proxies are a crowded pattern and nothing here is defensible beyond execution."
+        },
+        "solana_fit": {
+          "score": 7,
+          "evidence": [
+            "The facilitator is the transaction `feePayer`, and AgentToll reads it from the facilitator's `/supported` at startup instead of hardcoding it",
+            "PayAI on Solana devnet (`invalid_exact_svm_transaction_simulation_failed`)",
+            "A real devnet settlement with an explorer link | Not yet: no wallet is funded as of 2026-10-04"
+          ],
+          "reason": "Solana is quoted first, uses SPL USDC and fee-payer sponsorship, and the gateway reached the real PayAI /verify, but no devnet transaction exists and the design is deliberately chain-agnostic, so nothing is Solana-only."
+        },
+        "technical_depth": {
+          "score": 8,
+          "evidence": [
+            "A replay guard keys on the canonical JSON of the signed payload and holds it for 120 s, so a re-encoded header is still a replay",
+            "MCP-10 | A payment for one tool cannot be spent on another tool of the same price (resource fragment binding) | PASS",
+            "parity tests prove the Worker and the Rust gateway return byte-identical quotes"
+          ],
+          "reason": "Settlement ordering, replay protection, resource and tool binding, path canonicalization, batch-sum pricing, spend caps and Rust/WASM parity are all stated and backed by named eval cases, though the claimed adversarial critic reviews leave no recorded findings in the packet."
+        },
+        "demo_clarity": {
+          "score": 7,
+          "evidence": [
+            "## Judges: 60 seconds",
+            "Status: DRAFT for Joseph to record. Nothing in this script may be said on camera unless it is true on the day of recording.",
+            "These URLs are Cloudflare quick tunnels and change when a tunnel restarts."
+          ],
+          "reason": "Three curl lines, a one-command local demo, a tight 3:00 shot list and a rehearsed runbook with real output make the story clear, but no video is recorded, every payment is simulated, and the public URL is volatile."
+        },
+        "why_now": {
+          "score": 7,
+          "evidence": [
+            "Solana took the top spot for x402 agent payments, with about $3.3M USDC settled in one week.",
+            "Cloudflare opened a waitlist for an x402 monetization gateway on 2026-07-01, for Cloudflare customers only.",
+            "Not validated yet: no customers, no revenue, no pilot."
+          ],
+          "reason": "Dated, KB-tagged facts and a named first channel (Website Factory) give a credible timing story, but the knowledge base itself is not in the packet and there is zero demand evidence beyond a competitor's waitlist."
+        },
+        "honesty": {
+          "score": 7,
+          "evidence": [
+            "Every payment in the demo and the evals is **simulated** until a devnet wallet is funded. Nothing here has touched a chain.",
+            "Proof we can show: `curl -i http://localhost:8402/api/quote` returns 402 with the decoded quote; `agenttoll-buyer http://localhost:8402/api/quote` prints the body and the devnet signature; the explorer link resolves.",
+            "the gateway appends \"$0.005 per call via x402\" to tool descriptions in `tools/list` so an agent can plan spend before calling (skills/paid-mcp-tools). Planned, not built."
+          ],
+          "reason": "README, submission truth table, FAQ and eval results label simulation consistently and include self-audit artifacts, but USE_CASES.md is stale: it offers an unlabelled devnet signature and explorer link as proof, calls price advertising not built while the evals pass MCP-02, and names a `wallet_status` tool that does not match pay-mcp's `spend_status`."
+        }
+      },
+      "biggest_weakness": "No payment anywhere in the packet has touched a chain; every settlement is a SIMULATED- id from a mock facilitator, so the Solana story rests on a rejected handshake rather than a transaction.",
+      "top_improvements": [
+        "Fund the two devnet wallets from faucet.circle.com, run `agenttoll-buyer` against PayAI, and commit the Solana Explorer link plus the raw output to docs/assets so the demo and README can show one real settlement.",
+        "Bring docs/USE_CASES.md in line with the truth table: label the case 1 and case 6 'Proof' lines as simulated or not built, delete 'Planned, not built' for tools/list price advertising, and rename `wallet_status` to `spend_status`.",
+        "Record the 3:00 variant B video now and replace the quick tunnel with a stable URL (named Cloudflare tunnel or a domain on the VPS), and publish prebuilt release binaries so judges skip the 14-minute first compile."
+      ],
+      "_meta": {
+        "judge": 1,
+        "attempt": 1,
+        "cost_usd": 2.4891199999999998,
+        "duration_ms": 63167,
+        "model_ids": [
+          "claude-fable-5-1"
+        ]
+      }
+    },
+    {
+      "_error": "ValueError: missing biggest_weakness",
+      "_meta": {
+        "judge": 2
+      }
+    },
+    {
+      "_error": "JSONDecodeError: Expecting ',' delimiter: line 1 column 5009 (char 5008)",
+      "_meta": {
+        "judge": 3
+      }
+    }
+  ]
+}

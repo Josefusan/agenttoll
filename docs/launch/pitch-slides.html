@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentToll pitch slides</title>
+<style>
+  /* Brand colours taken from brand/icon.svg and brand/logo-square.svg:
+     background radial #1B1640 -> #0E0C24 -> #07060F; head gradient #8B5CF6 -> #3B82F6 -> #2DD4BF;
+     coin #FDE68A -> #FBBF24 -> #D97706; glow violet #6D28D9; hazard #FBBF24 on #0B0A1A. */
+  :root{
+    --bg0:#1B1640; --bg1:#0E0C24; --bg2:#07060F;
+    --violet:#8B5CF6; --blue:#3B82F6; --teal:#2DD4BF;
+    --gold:#FBBF24; --glow:#6D28D9; --ink:#0B0A1A;
+    --text:#F5F4FF; --muted:#A9A6C9; --src:#8C89B0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg2); color:var(--text);
+    font-family:"Inter","Helvetica Neue",Helvetica,Arial,system-ui,-apple-system,sans-serif;}
+  body{overflow:hidden;}
+  .slide{
+    position:absolute; top:0; left:0; width:1920px; height:1080px;
+    display:none; flex-direction:column; justify-content:center;
+    padding:120px 160px;
+    background:
+      radial-gradient(1200px 800px at 50% 30%, var(--bg0) 0%, var(--bg1) 62%, var(--bg2) 100%);
+  }
+  .slide.active{display:flex;}
+  h1{font-size:104px; line-height:1.04; font-weight:800; letter-spacing:-0.02em;}
+  h2{font-size:80px; line-height:1.06; font-weight:800; letter-spacing:-0.02em; margin-bottom:64px;}
+  .accent{background:linear-gradient(90deg,var(--violet),var(--blue),var(--teal));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .sub{font-size:40px; line-height:1.4; color:var(--muted); margin-top:36px; max-width:1500px;}
+  .lead{font-size:56px; line-height:1.25; font-weight:700; max-width:1560px;}
+  ul{list-style:none;}
+  li{font-size:40px; line-height:1.35; margin-bottom:40px; max-width:1600px; position:relative; padding-left:48px;}
+  li:before{content:""; position:absolute; left:0; top:20px; width:18px; height:18px; border-radius:50%;
+    background:linear-gradient(135deg,var(--violet),var(--teal));}
+  .src{display:block; font-size:24px; color:var(--src); margin-top:10px; letter-spacing:0.02em;}
+  .rows{display:grid; grid-template-columns:520px 1fr; column-gap:48px; row-gap:36px;}
+  .rows .k{font-size:42px; font-weight:700;}
+  .rows .v{font-size:34px; color:var(--muted); line-height:1.35;}
+  .plan-badge{display:inline-block; vertical-align:middle; margin-left:28px; font-size:34px; font-weight:800;
+    color:var(--ink); background:var(--gold); border-radius:14px; padding:12px 26px; letter-spacing:0.08em;}
+  .plan-head{font-size:40px; color:var(--gold); font-weight:700; margin-bottom:44px;}
+  .num{counter-reset:n; }
+  .num li{padding-left:88px;}
+  .num li:before{content:counter(n); counter-increment:n; top:0; left:0; width:56px; height:56px;
+    display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; color:var(--ink);
+    background:linear-gradient(135deg,var(--violet),var(--teal));}
+  .kicker{font-size:32px; letter-spacing:0.24em; text-transform:uppercase; color:var(--teal);
+    font-weight:700; margin-bottom:40px;}
+  .repo{font-size:44px; color:var(--teal); font-weight:700; margin-top:48px; letter-spacing:0.01em;}
+  .dot{color:var(--teal);}
+  .note{font-size:30px; color:var(--src); margin-top:56px;}
+  .page{position:absolute; right:72px; bottom:56px; font-size:28px; color:var(--src);}
+</style>
+</head>
+<body>
+
+<section class="slide" id="s1">
+  <div class="kicker">Colosseum Crypto World's Fair</div>
+  <h1><span class="accent">AgentToll</span></h1>
+  <div class="sub">Agents already use your product. Now you can bill them.</div>
+  <div class="repo">github.com/Josefusan/agenttoll</div>
+  <div class="page">1 / 7</div>
+</section>
+
+<section class="slide" id="s2">
+  <h2>Why now</h2>
+  <ul>
+    <li>Solana took the top spot for x402 agent payments: about $3.3M USDC settled in one week.
+      <span class="src">KB-MKT-01, solanacompass.com</span></li>
+    <li>PayAI opened x402 batch settlement on Solana in public preview on 2026-09-30.
+      <span class="src">KB-SOL-03</span></li>
+    <li>Cloudflare opened a waitlist for an x402 Monetization Gateway on 2026-07-01, for Cloudflare customers only.
+      <span class="src">KB-MKT-01</span></li>
+    <li>Coinbase's own Payments MCP already pays x402 on Solana, so agent wallets exist today.
+      <span class="src">KB-PAY-06</span></li>
+  </ul>
+  <div class="page">2 / 7</div>
+</section>
+
+<section class="slide" id="s3">
+  <h2>Who buys</h2>
+  <div class="rows">
+    <div class="k">API or data founder</div>
+    <div class="v">A price per call any agent can pay in seconds, no signup, no key issuing</div>
+    <div class="k">Publisher or docs site</div>
+    <div class="v">Agents pay to read, people read free, plus a report of the agent traffic they are not billing yet</div>
+    <div class="k">MCP server author</div>
+    <div class="v">A price per tool; <code>initialize</code> and <code>tools/list</code> stay free</div>
+    <div class="k">Agency</div>
+    <div class="v">Agent revenue as a line item on every client site, funds to the client's own address</div>
+  </div>
+  <div class="note">Buyer types, not customers.</div>
+  <div class="page">3 / 7</div>
+</section>
+
+<section class="slide" id="s4">
+  <h2>Distribution</h2>
+  <div class="lead"><span class="accent">Website Factory ships the sites. AgentToll rides along.</span></div>
+  <div class="sub">Gateway on the agency VPS or the Worker edition, in front of the client's Vercel origin.
+    <b>pay_to = the client's address.</b></div>
+  <div class="page">4 / 7</div>
+</section>
+
+<section class="slide" id="s5">
+  <h2>Business model <span class="plan-badge">PLAN</span></h2>
+  <div class="plan-head">PLAN. Open-source core stays free. No take rate in the gateway.</div>
+  <ul class="num">
+    <li>Hosted AgentToll: we run gateway and dashboard; flat monthly tier plus a fee on settled volume,
+      billed off-chain. <b>pay_to</b> stays the founder's.</li>
+    <li>Payout destinations: the founder's own off-ramp account as <b>pay_to</b>, with a threshold sweeper.</li>
+    <li>Agency bundle: AgentToll on every Website Factory site, dashboard per client, line item on the retainer.</li>
+    <li>Pro dashboard: multi-site, exports, alerts, the unbilled-traffic report.</li>
+  </ul>
+  <div class="page">5 / 7</div>
+</section>
+
+<section class="slide" id="s6">
+  <h2>What the accelerator money builds</h2>
+  <ul class="num">
+    <li>Hosted AgentToll: multi-tenant gateway, Postgres ledger, one dashboard per site.</li>
+    <li>Batch settlement: x402 payment channels on Solana mainnet for sub-cent, high-frequency traffic.</li>
+    <li>Off-ramp partners: payout destinations created in the founder's own account, non-custodial,
+      operated by Clark Technology Ventures.</li>
+    <li>More chains: the gateway has no chain-specific money logic, the facilitator does the chain work.</li>
+  </ul>
+  <div class="page">6 / 7</div>
+</section>
+
+<section class="slide" id="s7">
+  <h2>Close and ask</h2>
+  <div class="lead">Agents already use your product. <span class="accent">Now you can bill them.</span></div>
+  <div class="sub">Everything you saw is open source and runs with one command, no wallet needed.</div>
+  <div class="repo">github.com/Josefusan/agenttoll</div>
+  <div class="page">7 / 7</div>
+</section>
+
+<script>
+  var slides = [].slice.call(document.querySelectorAll('.slide'));
+  var i = 0;
+  function show(n){
+    if (isNaN(n)) n = 0;
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === i); });
+    document.title = 'AgentToll pitch slide ' + (i + 1);
+  }
+  function fromHash(){
+    var n = parseInt((location.hash || '').replace('#',''), 10);
+    show(isNaN(n) ? 0 : n - 1);
+  }
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown'){ show(i + 1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp'){ show(i - 1); e.preventDefault(); }
+    else if (e.key === 'Home'){ show(0); }
+    else if (e.key === 'End'){ show(slides.length - 1); }
+  });
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+</script>
+</body>
+</html>

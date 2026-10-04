@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentToll submission form answers</title>
+<style>
+  :root { --bg:#f6f6fb; --card:#ffffff; --ink:#17142b; --muted:#5b5878; --line:#e2e0ee; --accent:#6D28D9; --ok:#0f7a52; --over:#c02626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0E0C24; --card:#171436; --ink:#F5F4FF; --muted:#A9A6C9; --line:#2b2750; --accent:#2DD4BF; --ok:#34D399; --over:#FB7185; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.5 "Inter","Helvetica Neue",Arial,system-ui,-apple-system,sans-serif; }
+  main { max-width:980px; margin:0 auto; padding:40px 24px 96px; }
+  h1 { font-size:30px; margin:0 0 6px; }
+  .lede { color:var(--muted); margin:0 0 28px; }
+  h2 { font-size:20px; margin:40px 0 14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin:0 0 16px; }
+  .card.dim { opacity:.92; }
+  .head { display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
+  .name { font-weight:700; }
+  .count { margin-left:auto; font-variant-numeric:tabular-nums; color:var(--muted); font-size:14px; }
+  .count.ok { color:var(--ok); }
+  .count.over { color:var(--over); font-weight:800; }
+  button { border:1px solid var(--line); background:transparent; color:var(--accent);
+    font:inherit; font-weight:700; font-size:14px; padding:6px 14px; border-radius:999px; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button.done { color:var(--ok); border-color:var(--ok); }
+  textarea { width:100%; border:1px solid var(--line); border-radius:10px; background:var(--bg);
+    color:var(--ink); font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; padding:12px; resize:vertical; }
+  .empty { color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>AgentToll submission form answers</h1>
+  <p class="lede">Generated from <code>docs/COLOSSEUM_SUBMISSION.md</code>. Counts use the same regex as
+    <code>evals/judge/system1.py</code> (<code>check_form_limits</code>). Paste with the Copy button.</p>
+
+  <h2>Form fields</h2>
+    <article class="card">
+      <div class="head">
+        <span class="name">Brief description</span>
+        <span class="count ok">497/500</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="6">AgentToll is an open-source paywall proxy that charges AI agents per request while people browse free. Put it in front of a site, API or MCP server, set a price per route or per MCP tool in one YAML file, and agents pay per call in USDC over x402 on Solana (Base as a second rail). No API keys, signups or invoices. Settlement happens only after your origin succeeds, and funds go straight to the wallet you name; AgentToll never holds them. Agents already use your product. Now you can bill them.</textarea>
+    </article>
+    <article class="card">
+      <div class="head">
+        <span class="name">What are you building, and who is it for?</span>
+        <span class="count ok">991/1000</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="6">AgentToll is a reverse proxy that turns AI agent traffic into revenue. It sits in front of any website, API or MCP server. People pass through free and untouched. Agents, crawlers and MCP clients get an HTTP 402 with an x402 v2 quote, pay per request in USDC, and get the response in the same round trip. No API keys, signups or invoices.
+
+Built: a Rust gateway (per-route and per-MCP-tool prices in one YAML file, x402 v2 over HTTP and the MCP-native transport, settlement only after the origin succeeds, replay guard, discovery at /.well-known/agenttoll.json), a founder dashboard with a live feed and a report of agent traffic you are not billing yet, pay-mcp (a wallet for Claude with hard per-call and per-day caps), a buyer CLI, a Cloudflare Worker edition sharing the Rust core via WASM with parity tests, and a one-command demo.
+
+For indie founders, API and data providers, MCP server authors, publishers, and agencies like our own Website Factory, whose pages agents crawl for free.</textarea>
+    </article>
+    <article class="card">
+      <div class="head">
+        <span class="name">Why did you decide to build this, and why build it now?</span>
+        <span class="count ok">992/1000</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="6">We run Website Factory, an AI landing-page service. The sites we ship are read by crawlers such as GPTBot and ClaudeBot, and by agent browsers. That traffic costs bandwidth, gives nothing back, and the only options were to block it or eat it. x402 gives a third option: let agents pay.
+
+Now is the moment because the pieces just landed. x402 v2 has HTTP and MCP transports and TypeScript and Rust SDKs. Solana took the top spot for x402 agent payments, with about $3.3M USDC settled in one week. PayAI opened Solana batch settlement in public preview on Sep 30, 2026, a mainnet path for sub-cent traffic. Agents already hold wallets: Coinbase&#x27;s own Payments MCP pays x402 on Solana. Cloudflare announced an x402 monetization gateway in July, but it is waitlist-only and tied to its network. Founders need something open-source they can self-host on any stack, multi-chain, with revenue landing in a wallet they own. Every month without it, agent traffic grows and founders capture none of it.</textarea>
+    </article>
+    <article class="card">
+      <div class="head">
+        <span class="name">What technologies are you using or integrating with?</span>
+        <span class="count ok">496/500</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="6">Rust gateway: axum, hyper, reqwest, rusqlite (SQLite ledger), hand-written x402 v2 types, direct facilitator calls. Buyer CLI: x402-reqwest, x402-chain-solana, x402-chain-eip155 (x402-rs 2.0.2). pay-mcp: @modelcontextprotocol/sdk, @x402/fetch, @x402/svm, @x402/evm, @x402/core. Worker edition: Cloudflare Workers, wasm-bindgen, D1. Dashboard: Next.js, Tailwind v4, Recharts, SSE. Facilitators: PayAI (Solana devnet), x402.org (Base Sepolia). Dev: Claude Code subagents and a critic agent, Docker.</textarea>
+    </article>
+    <article class="card">
+      <div class="head">
+        <span class="name">How does your product use these chains?</span>
+        <span class="count ok">475/500</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="6">Solana is the primary rail: agents pay per request in USDC (SPL) with the x402 v2 exact scheme, verified and settled through a facilitator whose fee payer sponsors the fee, so agents only hold USDC. Earnings land in one Solana USDC account the seller controls. Only real settlements link to Solana Explorer; simulated payments are labelled. Base (Sepolia today) is the second rail for EVM agents, paying USDC via EIP-3009 under the same rules. Devnet and testnet only so far.</textarea>
+    </article>
+    <article class="card">
+      <div class="head">
+        <span class="name">Did anyone not listed on the team do meaningful work?</span>
+        <span class="count ok">357/600</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="6">No. AgentToll is built by Joseph Clark as a solo builder. I used AI coding agents (Claude Code with specialist subagents, plus an independent adversarial critic agent that reviews every pull request before it is merged) and open-source libraries, including the x402 specifications and SDKs (x402-foundation/x402) and x402-rs, which are credited in the repo.</textarea>
+    </article>
+    <article class="card">
+      <div class="head">
+        <span class="name">Anything else judges should know?</span>
+        <span class="count ok">486/500</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="6">Open source (MIT), self-hostable, non-custodial. Honest status: devnet and testnet only. The one-command demo settles through a simulated facilitator and labels every payment simulated. Both real facilitators (PayAI on Solana, x402.org on Base) were reached and rejected our unfunded wallets; handshakes documented. Tests: 93 Rust, 69 pay-mcp, 70 Worker (21 parity). First commit 2026-10-02; Website Factory is a separate, earlier product. Next: dogfood on Website Factory client sites.</textarea>
+    </article>
+
+  <h2>Not auto-counted</h2>
+    <article class="card dim">
+      <div class="head">
+        <span class="name">Project name</span>
+        <span class="count">9 chars (no limit parsed)</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="5">AgentToll</textarea>
+    </article>
+    <article class="card dim">
+      <div class="head">
+        <span class="name">Project website</span>
+        <span class="count">600 chars (no limit parsed)</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="5">https://years-cow-stations-dubai.trycloudflare.com
+
+Not part of the answer: this is the quick-tunnel gateway URL read from `~/Hackathons/AgentToll-LIVE.txt` on 2026-10-04. Quick-tunnel URLs change whenever the tunnel restarts and nothing restarts it after a reboot. Re-read the URL on submit day (`docs/SUBMIT_DAY.md` step 6) and open it in a private window. If it does not load, leave the field empty. Every payment behind it is simulated, and Cloudflare answers ClaudeBot and GPTBot user agents on a quick tunnel with a 403, so test it with `curl -A &#x27;Claude-User/1.0&#x27; &lt;url&gt;/api/quote` (expect 402).</textarea>
+    </article>
+    <article class="card dim">
+      <div class="head">
+        <span class="name">Category</span>
+        <span class="count">24 chars (no limit parsed)</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="5">Developer Infrastructure</textarea>
+    </article>
+    <article class="card dim">
+      <div class="head">
+        <span class="name">Go-to-market, demand validation and distribution plan</span>
+        <span class="count">882 chars (no limit parsed)</span>
+        <button type="button">Copy</button>
+      </div>
+      <textarea readonly rows="5">Demand signal: Cloudflare opened a waitlist for an x402 monetization gateway on 2026-07-01, for Cloudflare customers only. AgentToll is the open, self-hosted version. Not validated yet: no customers, no revenue, no pilot.
+
+Distribution: Website Factory ships landing pages to small businesses. The plan is to run the gateway in front of those sites with pay_to set to the client&#x27;s own address (plan, not live). Next: MCP server authors and API sellers through the repo, the x402 and Solana developer communities, and a daily proof post from the build log.
+
+Business model (plan): the open-source core stays free and non-custodial. A hosted edition (flat tier plus a fee on settled volume, billed off-chain), payout destinations through off-ramp partners in the founder&#x27;s own account, an agency bundle for Website Factory sites, and a pro dashboard for sellers with real volume.
+
+---</textarea>
+    </article>
+</main>
+<script>
+  document.querySelectorAll('.card').forEach(function (c) {
+    var btn = c.querySelector('button');
+    var ta = c.querySelector('textarea');
+    if (!btn || !ta) return;
+    btn.addEventListener('click', function () {
+      var done = function () {
+        btn.textContent = 'Copied'; btn.classList.add('done');
+        setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 1400);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ta.value).then(done, function () { ta.select(); document.execCommand('copy'); done(); });
+      } else { ta.select(); document.execCommand('copy'); done(); }
+    });
+  });
+</script>
+</body>
+</html>
