@@ -1,6 +1,6 @@
 # Judge FAQ
 
-Ten questions a Colosseum or Solana track judge is likely to ask, with the answers as they are true on 2026-10-03. Each answer points at the code or document that backs it. If anything changes before submission, update the answer, not the tone.
+Ten questions a Colosseum or Solana track judge is likely to ask, with the answers as they are true on 2026-10-04. Each answer points at the code or document that backs it. If anything changes before submission, update the answer, not the tone.
 
 ## 1. How do you know a payment is good before you serve the content?
 
@@ -35,7 +35,7 @@ No, and the submission says so. Everything runs on Solana devnet and Base Sepoli
 
 ## 7. What exactly is simulated in the demo?
 
-The settlement. The one-command demo (`bash scripts/demo-local.sh`) runs a simulated facilitator from `demo/mock-facilitator`. It answers `/verify` and `/settle` like a real one but touches no chain; every settlement id starts with `SIMULATED-`, and the gateway, dashboard, buyer CLI and `pay-mcp` all label it as simulated and show no explorer link. Everything else is real: detection, pricing, the x402 v2 headers and payloads, the MCP-native challenge, the ledger, the SSE feed, the caps. As of 2026-10-03 no devnet wallet is funded, so the recorded demo may show simulated settlements; the video says so on screen. The real devnet path (PayAI facilitator, Circle devnet USDC faucet) is documented in the README and the code reaches PayAI's `/verify` today; it was rejected only because the key was unfunded.
+The settlement. The one-command demo (`bash scripts/demo-local.sh`) runs a simulated facilitator from `demo/mock-facilitator`. It answers `/verify` and `/settle` like a real one but touches no chain; every settlement id starts with `SIMULATED-`, and the gateway, dashboard, buyer CLI and `pay-mcp` all label it as simulated and show no explorer link. Everything else is real: detection, pricing, the x402 v2 headers and payloads, the MCP-native challenge, the ledger, the SSE feed, the caps. No real settlement exists yet on either rail: as of 2026-10-04 no devnet wallet is funded, so the recorded demo shows simulated settlements and the video says so on screen. The gateway and buyer do speak the real x402 protocol to the real facilitators, and both were rejected as expected on an unfunded wallet — PayAI on Solana devnet (`invalid_exact_svm_transaction_simulation_failed`) and x402.org on Base Sepolia (`invalid_exact_evm_insufficient_balance`). The commands, the redacted output and the proof that each reason is the real facilitator's (the local mock cannot produce it) are in `docs/assets/real-facilitator-handshake.md`. The first real settlement is blocked only on funding the two devnet wallets, and `scripts/real-payment-preflight.sh` is ready to confirm readiness in one command.
 
 ## 8. How do you tell humans from agents, and can a human ever be charged by mistake?
 
@@ -43,7 +43,7 @@ Default mode is `agents-only`, biased to human. Only self-declared or verified a
 
 ## 9. Why Solana first, and what does Base add?
 
-Solana leads x402 agent payments by volume (about $3.3M USDC settled in one week, KB-MKT-01), has a mainnet path for sub-cent batch settlement through PayAI's payment channels (public preview 2026-09-30, KB-SOL-03), and the facilitator sponsors the network fee so an agent only needs USDC. Base is the second network block in the same config: Base Sepolia USDC with the x402.org testnet facilitator, EIP-3009 payloads, supported by the buyer CLI and `pay-mcp`. The gateway has no chain-specific money logic; the facilitator does the chain work, so adding a rail is a config block plus facilitator support. The Base rail is configured and tested against mocks; it has not been exercised with a funded wallet.
+Solana leads x402 agent payments by volume (about $3.3M USDC settled in one week, KB-MKT-01), has a mainnet path for sub-cent batch settlement through PayAI's payment channels (public preview 2026-09-30, KB-SOL-03), and the facilitator sponsors the network fee so an agent only needs USDC. Base is the second network block in the same config: Base Sepolia USDC with the x402.org testnet facilitator, EIP-3009 payloads, supported by the buyer CLI and `pay-mcp`. The gateway has no chain-specific money logic; the facilitator does the chain work, so adding a rail is a config block plus facilitator support. The Base rail is configured and tested against mocks, and the buyer has spoken the real x402 protocol to the real x402.org testnet facilitator on Base Sepolia, which rejected the unfunded payment as expected (`invalid_exact_evm_insufficient_balance`); the Solana twin against PayAI is in the same record, `docs/assets/real-facilitator-handshake.md`. Neither rail has a real settlement yet — the first is blocked only on funding the two devnet wallets, and `scripts/real-payment-preflight.sh` confirms readiness.
 
 ## 10. What is the business, and who pays you?
 
