@@ -149,6 +149,8 @@ Prices are quoted strings (`"0.002"`); the money path is integer-only. The full 
 2. Fund **both** addresses with devnet USDC at [faucet.circle.com](https://faucet.circle.com) (Solana Devnet). Funding `pay_to` also creates its USDC account. No SOL is needed; the facilitator pays fees.
 3. Use `agenttoll.example.yaml` (facilitator `https://facilitator.payai.network`), then run `agenttoll-buyer <url>`. It prints the Solana Explorer link for the settlement.
 
+Before any funding, [docs/assets/real-facilitator-handshake.md](docs/assets/real-facilitator-handshake.md) records this same path against the real PayAI facilitator on devnet with an unfunded throwaway wallet: the facilitator rejects the payment, so no transaction exists, and the rejection is the evidence that the wire format and verify path are real.
+
 ## Getting paid out
 
 Earnings land in the `pay_to` address you choose: a self-custody wallet, a stablecoin business account, or an off-ramp deposit address that converts USDC to dollars in your bank. AgentToll stays non-custodial. Native off-ramp partner integrations are on the roadmap. See [docs/PAYOUTS.md](docs/PAYOUTS.md).
