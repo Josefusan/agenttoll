@@ -1,0 +1,86 @@
+/* Full product demo: components that only this walkthrough needs. Brand tokens come from engine.css. */
+
+/* source footnote under a window: where the pixels came from */
+.src-note { position: absolute; font: 500 13px/1.55 var(--mono); letter-spacing: 0.04em; color: var(--dim); white-space: nowrap; }
+.src-note b { color: var(--muted); font-weight: 600; }
+
+/* editor-style file viewer */
+.code .body { position: absolute; left: 0; right: 0; top: 44px; bottom: 0; overflow: hidden; }
+.code .scroll { position: absolute; left: 0; right: 0; top: 0; padding: 18px 0 18px 0; }
+.code .ln { position: relative; display: flex; font: 400 var(--fs, 17px)/var(--lh, 1.5) var(--mono); color: var(--t-text); white-space: pre; height: calc(var(--fs, 17px) * var(--lh, 1.5)); }
+.code .ln .no { flex: none; width: 64px; padding-right: 22px; text-align: right; color: #45426A; }
+.code .ln .tx { flex: 1; }
+.code .band { position: absolute; left: 0; right: 0; border-left: 3px solid var(--teal); background: linear-gradient(90deg, rgba(45,212,191,0.16), rgba(45,212,191,0.04)); }
+.code .band.gold { border-left-color: var(--gold); background: linear-gradient(90deg, rgba(251,191,36,0.20), rgba(251,191,36,0.05)); }
+.y-key { color: #A5B4FC; } .y-str { color: #5EEAD4; } .y-com { color: #6E6B92; font-style: italic; } .y-dash { color: var(--muted); } .y-val { color: #F5F4FF; }
+.y-price { color: var(--gold); font-weight: 700; }
+
+/* page stack inside a browser view: several real screenshots cross-faded by t */
+.pstack { position: relative; overflow: hidden; }
+.pstack > img, .pstack > video { position: absolute; left: 0; top: 0; display: block; max-width: none; }
+.pload { position: absolute; left: 0; top: 0; height: 3px; width: 100%; background: var(--grad); transform-origin: 0 50%; z-index: 3; }
+
+/* highlight ring + callout chip (film annotations, never part of a capture) */
+.ring { position: absolute; border-radius: 12px; border: 2.5px solid var(--teal); box-shadow: 0 0 0 4px rgba(45,212,191,0.14), 0 0 28px rgba(45,212,191,0.45); pointer-events: none; }
+.ring.gold { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(251,191,36,0.16), 0 0 28px rgba(251,191,36,0.5); }
+.ring.red { border-color: #F87171; box-shadow: 0 0 0 4px rgba(248,113,113,0.16), 0 0 28px rgba(248,113,113,0.5); }
+.callout { position: absolute; padding: 9px 14px; border-radius: 10px; white-space: nowrap; font: 600 17px/1 var(--mono); color: var(--text);
+  background: rgba(9,8,22,0.95); box-shadow: 0 0 0 1.5px var(--teal) inset, 0 12px 28px -8px rgba(0,0,0,0.7); }
+.callout.gold { box-shadow: 0 0 0 1.5px var(--gold) inset, 0 12px 28px -8px rgba(0,0,0,0.7); color: var(--gold-hi); }
+.callout.red { box-shadow: 0 0 0 1.5px #F87171 inset, 0 12px 28px -8px rgba(0,0,0,0.7); color: #FECACA; }
+
+/* x402 flow strip */
+.flow { position: absolute; display: flex; gap: 0; align-items: center; }
+.flow .st { position: relative; display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 20px 0 14px; border-radius: 14px; white-space: nowrap;
+  font: 600 17px/1 var(--mono); color: var(--muted); background: rgba(16,14,36,0.92); box-shadow: 0 0 0 1px rgba(255,255,255,0.09); }
+.flow .st .n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font: 700 14px/1 var(--sans); color: var(--ink); background: #3A3760; }
+.flow .st.on { color: var(--text); box-shadow: 0 0 0 1.5px var(--teal), 0 0 24px rgba(45,212,191,0.28); }
+.flow .st.on .n { background: var(--teal); }
+.flow .st.gold.on { box-shadow: 0 0 0 1.5px var(--gold), 0 0 24px rgba(251,191,36,0.3); }
+.flow .st.gold.on .n { background: var(--gold); }
+.flow .wire { position: relative; width: 34px; height: 2px; background: rgba(255,255,255,0.14); }
+.flow .wire i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; background: var(--teal); transform-origin: 0 50%; }
+.flow-cap { position: absolute; font: 500 14px/1 var(--mono); letter-spacing: 0.12em; color: var(--dim); text-transform: uppercase; white-space: nowrap; }
+
+/* pay-mcp caps card */
+.capcard { position: absolute; border-radius: 18px; padding: 26px 28px; background: rgba(13,12,30,0.9);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 32px 64px -24px rgba(0,0,0,0.6); }
+.capcard .hd { font: 700 24px/1.2 var(--sans); color: var(--text); letter-spacing: -0.01em; }
+.capcard .sub { margin-top: 8px; font: 500 14px/1.3 var(--mono); color: var(--dim); }
+.capcard .row { position: relative; display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: rgba(255,255,255,0.035); }
+.capcard .row .k { font: 500 17px/1 var(--mono); color: var(--muted); }
+.capcard .row .v { font: 700 30px/1 var(--sans); color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.capcard .row .v.gold { color: var(--gold); }
+.capcard .row .hot { position: absolute; inset: 0; border-radius: 12px; box-shadow: 0 0 0 2px #F87171 inset, 0 0 26px rgba(248,113,113,0.35); }
+.capcard .stamp { margin-top: 16px; padding: 12px 14px; border-radius: 12px; font: 600 16px/1.35 var(--mono); color: #FECACA; background: rgba(248,113,113,0.10); box-shadow: 0 0 0 1px rgba(248,113,113,0.5) inset; white-space: normal; }
+
+/* info card (Worker edition, handshakes) */
+.info { position: absolute; border-radius: 18px; padding: 28px 30px; background: rgba(13,12,30,0.9);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 32px 64px -24px rgba(0,0,0,0.6); }
+.info .tag { font: 600 13px/1 var(--mono); letter-spacing: 0.18em; color: var(--teal); }
+.info .hd { margin-top: 12px; font: 800 34px/1.12 var(--sans); letter-spacing: -0.02em; color: var(--text); }
+.info ul { list-style: none; margin-top: 18px; }
+.info li { position: relative; padding-left: 26px; margin-top: 12px; font: 400 21px/1.4 var(--sans); color: var(--muted); }
+.info li::before { content: ""; position: absolute; left: 4px; top: 11px; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+.info li.warn::before { background: var(--gold); }
+.info code { font: 500 0.88em/1 var(--mono); color: var(--text); }
+
+/* phone frame */
+.phone { position: absolute; border-radius: 58px; padding: 14px; background: linear-gradient(160deg, #2A2748, #121026);
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,0.14) inset, 0 60px 120px -30px rgba(0,0,0,0.8), 0 20px 50px -20px rgba(40,20,120,0.6); }
+.phone .scr { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; background: #0B0E14; }
+.phone .scr img { position: absolute; left: 0; top: 0; display: block; }
+.phone .notch { position: absolute; left: 50%; top: 24px; width: 120px; height: 32px; margin-left: -60px; border-radius: 20px; background: #05040C; z-index: 2; }
+
+/* floating screenshot card */
+.shot { position: absolute; border-radius: 16px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 40px 90px -24px rgba(0,0,0,0.8); background: #0B0E14; }
+.shot img { display: block; }
+
+/* close */
+.closeline { position: absolute; font: 500 24px/1.4 var(--mono); color: var(--muted); white-space: nowrap; }
+.closeline b { color: var(--text); font-weight: 700; }
+.gold { color: var(--gold); }
+.c-gold { color: var(--gold); }
+.scrim { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background: rgba(5,4,12,0.62); }
+.mob-label { position: absolute; font: 500 16px/1.5 var(--mono); color: var(--muted); letter-spacing: 0.06em; white-space: nowrap; }
+.callout.sm { padding: 5px 10px; font-size: 15px; border-radius: 7px; }

@@ -1,0 +1,66 @@
+{
+  "film": "AgentToll full product demo (video/scenes/demo/index.html)",
+  "note": "Burned-in captions, no voiceover. Cue times are seconds from the start of their act; acts[].start is absolute. Every payment in this film is SIMULATED (local test facilitator, no funds moved). Words banned for the simulated variant by docs/launch/DEMO_VIDEO.md (on-chain, settled, live, real payment, transaction link, explorer, mainnet, revenue earned) are not used.",
+  "duration": 167.5,
+  "acts": [
+    { "id": "a1",  "start": 0,     "title": "Title" },
+    { "id": "a2",  "start": 4.8,   "title": "01 One config file + the stack" },
+    { "id": "a3",  "start": 19.8,  "title": "02 Same URL, two answers" },
+    { "id": "a4",  "start": 40.3,  "title": "03 A price list for agents" },
+    { "id": "a5",  "start": 49.3,  "title": "04 The buyer CLI pays" },
+    { "id": "a6",  "start": 66.8,  "title": "05 Claude pays, within caps" },
+    { "id": "a7",  "start": 90.8,  "title": "06 MCP servers sell per tool" },
+    { "id": "a8",  "start": 104.8, "title": "07 The founder's dashboard" },
+    { "id": "a9",  "start": 142.0, "title": "08 Same rules at the edge" },
+    { "id": "a10", "start": 151.0, "title": "09 Proof, real facilitators, close" }
+  ],
+  "cues": [
+    { "act": "a2", "at": 0.4,  "end": 3.0,  "text": "One YAML file configures the whole demo." },
+    { "act": "a2", "at": 3.1,  "end": 5.5,  "text": "Solana devnet USDC, paid to your own pay_to. Here the facilitator is SIMULATED.", "gold": ["SIMULATED."], "hl": ["pay_to."] },
+    { "act": "a2", "at": 5.6,  "end": 8.1,  "text": "GET /api/quote costs an agent $0.002. Everything under /* stays free.", "gold": ["$0.002."] },
+    { "act": "a2", "at": 8.2,  "end": 10.4, "text": "MCP tools carry their own prices: search_docs $0.005, generate_report $0.05.", "gold": ["$0.005,", "$0.05."] },
+    { "act": "a2", "at": 10.7, "end": 14.6, "text": "One command starts origin, gateway and the SIMULATED facilitator, ledger empty.", "gold": ["SIMULATED"] },
+
+    { "act": "a3", "at": 0.5,  "end": 4.3,  "text": "A person opens the site through the gateway: the normal page, free.", "hl": ["free."] },
+    { "act": "a3", "at": 4.5,  "end": 7.9,  "text": "Same gateway, /api/quote: the browser gets the JSON, with paid: false.", "hl": ["false."] },
+    { "act": "a3", "at": 8.1,  "end": 12.4, "text": "Claude-User asks for the same URL and gets 402 Payment Required.", "gold": ["402"] },
+    { "act": "a3", "at": 12.6, "end": 16.7, "text": "The PAYMENT-REQUIRED header decodes to an x402 v2 quote: 2000 atomic USDC, $0.002.", "gold": ["$0.002."] },
+    { "act": "a3", "at": 16.9, "end": 20.0, "text": "Network, asset and payTo: everything an agent needs to pay.", "hl": ["payTo:"] },
+
+    { "act": "a4", "at": 0.4,  "end": 4.4,  "text": "Agents can read every price first: /.well-known/agenttoll.json is free.", "hl": ["free."] },
+    { "act": "a4", "at": 4.6,  "end": 8.6,  "text": "Routes, MCP tools and networks, generated from the same YAML file." },
+
+    { "act": "a5", "at": 0.4,  "end": 4.6,  "text": "The buyer CLI asks, gets the 402, signs a devnet USDC transfer and retries." },
+    { "act": "a5", "at": 4.8,  "end": 8.4,  "text": "200 OK. The receipt comes back in the PAYMENT-RESPONSE header.", "hl": ["200", "OK."] },
+    { "act": "a5", "at": 8.6,  "end": 12.8, "text": "The dashboard gets the row: +$0.002, AgentToll-Buyer, Solana devnet, Simulated.", "gold": ["+$0.002,", "Simulated."] },
+    { "act": "a5", "at": 13.0, "end": 17.2, "text": "Same id on both sides: SIMULATED-…121d. No funds moved.", "gold": ["SIMULATED-…121d."] },
+
+    { "act": "a6", "at": 0.4,  "end": 4.0,  "text": "Claude gets a wallet through pay-mcp. First it reads the price." },
+    { "act": "a6", "at": 4.2,  "end": 8.4,  "text": "$0.002 is under both caps, so Claude pays. The receipt says simulated.", "gold": ["$0.002"] },
+    { "act": "a6", "at": 8.6,  "end": 12.8, "text": "Next, a $0.05 tool. Claude is told it may spend up to 10 cents.", "gold": ["$0.05"] },
+    { "act": "a6", "at": 13.0, "end": 17.2, "text": "The wallet refuses before signing: $0.05 is above the $0.01 per-call cap.", "hl": ["refuses"], "gold": ["$0.05", "$0.01"] },
+    { "act": "a6", "at": 17.4, "end": 20.8, "text": "Nothing was signed and nothing counted. Claude did not work around it." },
+    { "act": "a6", "at": 21.0, "end": 23.7, "text": "On the film stack the wallet gives the same refusal, word for word." },
+
+    { "act": "a7", "at": 0.4,  "end": 4.6,  "text": "MCP servers sell per tool. tools/list stays free and carries every price.", "hl": ["free"] },
+    { "act": "a7", "at": 4.8,  "end": 9.4,  "text": "An unpaid tools/call gets the MCP-native challenge: isError plus a quote, 5000 = $0.005.", "gold": ["$0.005."] },
+    { "act": "a7", "at": 9.6,  "end": 13.8, "text": "Paid through pay-mcp, the tool gets its own dashboard row: mcp search_docs.", "hl": ["search_docs."] },
+
+    { "act": "a8", "at": 0.4,  "end": 5.4,  "text": "Recorded from the running dashboard: the buyer CLI pays every 2 s, rows land.", "hl": ["every", "2", "s,"] },
+    { "act": "a8", "at": 5.6,  "end": 10.8, "text": "Each simulated payment updates the totals and the feed as it arrives." },
+    { "act": "a8", "at": 11.3, "end": 15.0, "text": "After 19 payments: $0.034, and the card says it outright: all of it simulated.", "gold": ["$0.034,"] },
+    { "act": "a8", "at": 15.2, "end": 18.8, "text": "By network: 100% Solana devnet. Base Sepolia, the backup rail, is not set up here." },
+    { "act": "a8", "at": 19.0, "end": 22.6, "text": "The feed: 19 of 19 simulated. No transaction exists, so there is nothing to link.", "gold": ["simulated."] },
+    { "act": "a8", "at": 22.8, "end": 26.4, "text": "Agent traffic you are not billing yet: crawlers on free pages, by name.", "hl": ["not", "billing", "yet:"] },
+    { "act": "a8", "at": 26.6, "end": 30.4, "text": "Cash out: spendable $0.00, because every payment was simulated.", "gold": ["$0.00,"] },
+    { "act": "a8", "at": 30.6, "end": 34.0, "text": "Funds go to your own pay_to. AgentToll holds nothing.", "hl": ["pay_to."] },
+    { "act": "a8", "at": 34.2, "end": 37.0, "text": "The same dashboard on a phone." },
+
+    { "act": "a9", "at": 0.4,  "end": 4.4,  "text": "The same core compiles to WebAssembly and runs as a Cloudflare Worker." },
+    { "act": "a9", "at": 4.6,  "end": 8.8,  "text": "21 parity tests check byte-identical quotes against the Rust gateway.", "hl": ["byte-identical"] },
+
+    { "act": "a10", "at": 0.4, "end": 5.0,  "text": "In the repo: 119 of 119 evals, 93 Rust tests, 69 pay-mcp tests, 70 Worker tests." },
+    { "act": "a10", "at": 5.4, "end": 8.0,  "text": "Wired to the real PayAI and x402.org facilitators.", "hl": ["PayAI", "x402.org"] },
+    { "act": "a10", "at": 8.1, "end": 11.0, "text": "Both rejected our unfunded wallets, as expected. Settlement waits on funding." }
+  ]
+}
