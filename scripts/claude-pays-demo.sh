@@ -31,13 +31,13 @@ P3="Use call_paid_tool to run the search_docs tool on the MCP server at $GW/mcp 
 run() { # $1 = prompt, $2 = output jsonl
   (cd "$W" && claude -p "$1" --model "$MODEL" --mcp-config "$W/mcp.json" --strict-mcp-config \
     --tools "" --allowedTools "mcp__agenttoll-pay" --no-session-persistence \
-    --output-format stream-json --verbose) > "$2"
+    --output-format stream-json --verbose < /dev/null) > "$2"
 }
 run "$P1" "$W/run1.jsonl"
 run "$P2" "$W/run2.jsonl"
 run "$P3" "$W/run3.jsonl"
 
-python3 "$ROOT/scripts/format-claude-transcript.py" --gateway "$GW" --model "$MODEL" \
+python3 "$ROOT/scripts/format-claude-transcript.py" --redact "$W/spend.json=\$SPEND_FILE" --redact "$KEYPAIR=\$KEYPAIR" --redact "$W=\$WORKDIR" --redact "$ROOT=\$REPO" --gateway "$GW" --model "$MODEL" \
   --prompt "$P1" --run "$W/run1.jsonl" --prompt "$P2" --run "$W/run2.jsonl" \
   --prompt "$P3" --run "$W/run3.jsonl" > "$OUT"
 echo "wrote $OUT"

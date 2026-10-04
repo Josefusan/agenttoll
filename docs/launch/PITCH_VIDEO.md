@@ -1,4 +1,4 @@
-# Pitch video script (3:00 max)
+# Pitch video script (2:00 to 3:00; aim for 2:30 to 2:50)
 
 Status: DRAFT for Joseph to record. Joseph on camera for the open and the close; slides or screen capture in between. Every number carries its knowledge-base id; re-check each one on the day of recording and again on submit day (`docs/KNOWLEDGE_BASE.md`).
 

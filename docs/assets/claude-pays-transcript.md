@@ -28,7 +28,7 @@ claude -p "<prompt>" --model sonnet --mcp-config mcp.json --strict-mcp-config \
   --output-format stream-json --verbose
 ```
 
-`--tools ""` removes every built-in tool, so pay-mcp is the only thing Claude can use. Below, tool calls and results are shown exactly as the CLI emitted them (results pretty-printed).
+`--tools ""` removes every built-in tool, so pay-mcp is the only thing Claude can use. Below, tool calls and results are shown as the CLI emitted them (results pretty-printed). The only edit is mechanical: the formatter replaces the spend-file, keypair, temp-directory and repo-root paths with `$SPEND_FILE`, `$KEYPAIR`, `$WORKDIR` and `$REPO`.
 
 ---
 

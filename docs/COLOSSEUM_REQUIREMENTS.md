@@ -54,7 +54,7 @@ Checked 2026-10-04 against the live Colosseum pages. This file maps each real re
 | 26 | Judging: Open-source, "Is this Project Submission open-source? How well does the Project Submission compose with other primitives" | S2 s8(e) | MIT, x402 v2 spec, x402-rs, PayAI facilitator, MCP, Cloudflare Workers. | gap | Same as row 11: `main` must hold the release. |
 | 27 | Judging: Business plan, "Is there a viable business that can be built" | S2 s8(f) | Plan section labelled PLAN in `docs/launch/PITCH_VIDEO.md`, `docs/launch/JUDGE_FAQ.md`. No revenue or customers claimed. | met | Keep "plan" labels. The FAQ factor "Traction" will score low. Do not invent traction. |
 | 28 | "Weekly updates ... aren't strictly required ... one-minute video" | S3 | None recorded. | Joseph-only | Optional. A one-minute update in the final week is low cost. |
-| 29 | Project website (form field, public) | S5 | Not a stated Colosseum requirement. Placeholder `<LIVE_GATEWAY_URL>` in `docs/COLOSSEUM_SUBMISSION.md`, to be filled by the deploy lane. | gap | Fill the placeholder with a working public URL, or leave the field empty. Never paste the placeholder text. |
+| 29 | Project website (form field, public) | S5 | Not a stated Colosseum requirement. A quick-tunnel gateway URL (2026-10-04) is filled in `docs/COLOSSEUM_SUBMISSION.md`. It changes on tunnel restart. | gap | Re-read the URL from `~/Hackathons/AgentToll-LIVE.txt` on submit day and open it in a private window, or leave the field empty. |
 | 30 | Deadline: "Submissions due October 12, 2026"; period ends "11:59pm PT" | S1, S2 s5 | `docs/KNOWLEDGE_BASE.md` KB-HACK-01. | met | Treat 2026-10-12 11:59pm PT as the hard stop. |
 | 31 | Interview: a small group "is invited to a 15-minute Zoom interview" | S3 | Prep in `docs/launch/JUDGE_FAQ.md`. | Joseph-only | Keep the week after the deadline free. |
 | 32 | Prize: "Each winning team may be required to set up a wallet address" | S2 s15(b) | n/a | Joseph-only | Have a wallet ready for a prize payout later. Not needed to submit. |
@@ -65,7 +65,7 @@ Checked 2026-10-04 against the live Colosseum pages. This file maps each real re
 1. **Merge PR #9 to `main`** (rows 11, 26). Joseph only. Judges see `main`.
 2. **Record both videos** (rows 12, 13). Joseph only. Pitch video is read first by judges.
 3. **No real devnet settlement yet** (rows 20, 21). Needs a funded devnet wallet. Joseph decides. All current copy is already honest about it.
-4. **Public gateway URL** (row 29). Another lane fills `<LIVE_GATEWAY_URL>`.
+4. **Public gateway URL** (row 29). The URL in `docs/COLOSSEUM_SUBMISSION.md` is a temporary quick tunnel; re-check it on submit day.
 5. **Confirm eligibility and prior-work facts** (rows 1, 2, 15). Joseph only.
 
 ## What changed on 2026-10-04

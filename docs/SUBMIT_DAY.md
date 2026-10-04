@@ -13,7 +13,7 @@ Nothing here is done by an agent. Agents do not record videos, do not touch your
 3. Run the secret scan from `docs/COLOSSEUM_REQUIREMENTS.md` section "Secret hygiene" (or `git log -p --all | grep -E "AGENTTOLL_ADMIN_TOKEN=[A-Za-z0-9]{20,}"`). Expect no output.
 4. Re-run the character counter at the bottom of `docs/COLOSSEUM_SUBMISSION.md`. Every line must read `OK`.
 5. Re-check the five why-now facts listed under "Pre-submit checklist" in `docs/COLOSSEUM_SUBMISSION.md`. If one changed, edit the doc, then the form.
-6. Confirm the public gateway URL (the deploy lane fills `<LIVE_GATEWAY_URL>` in the doc). Open it in a private window. If it does not load, leave the Project website field empty.
+6. Confirm the public gateway URL. The live demo runs on a Cloudflare quick tunnel; on 2026-10-04 the gateway was `https://years-cow-stations-dubai.trycloudflare.com` and the dashboard was `https://commonwealth-dam-wheat-constructed.trycloudflare.com`. Quick-tunnel URLs change on every tunnel restart and nothing restarts pm2 after a reboot, so re-read them from `~/Hackathons/AgentToll-LIVE.txt` on the VPS (and run `pm2 resurrect` first if the host rebooted). Update the "Project website" answer in `docs/COLOSSEUM_SUBMISSION.md` to match. Open the URL in a private window and run `curl -A 'Claude-User/1.0' <url>/api/quote` (expect 402; ClaudeBot and GPTBot get a Cloudflare 403 on quick tunnels, see `deploy/README.md`). If it does not load, leave the Project website field empty. Every payment behind it is simulated.
 
 ## 1. Record the videos (Joseph only)
 
@@ -36,7 +36,7 @@ Open https://colosseum.com/arena/projects/agenttoll-1. If you are asked to join 
 |---|---|---|
 | Project name | `AgentToll` | doc, "Project name" |
 | Brief description (500) | Paste as is | doc, "Brief description" |
-| Project website | The live gateway URL if it loads, else leave empty. Never paste `<LIVE_GATEWAY_URL>`. | doc, "Project website" |
+| Project website | The live gateway URL if it loads (re-read it today, it changes on tunnel restart), else leave empty. | doc, "Project website" |
 | What are you building, and who is it for? (1000) | Paste as is | doc |
 | Why build it, why now? (1000) | Paste as is | doc |
 | Technologies (500) | Paste as is | doc |

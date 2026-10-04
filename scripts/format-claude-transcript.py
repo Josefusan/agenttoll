@@ -6,11 +6,19 @@ Usage: format-claude-transcript.py --gateway URL --model M --prompt P --run FILE
 import argparse, json, sys
 
 ap = argparse.ArgumentParser()
+ap.add_argument("--redact", action="append", default=[], help="VALUE=PLACEHOLDER, replace a local path with a placeholder; repeatable")
 ap.add_argument("--gateway", required=True)
 ap.add_argument("--model", required=True)
 ap.add_argument("--prompt", action="append", required=True)
 ap.add_argument("--run", action="append", required=True)
 a = ap.parse_args()
+
+# Longest values first so a path inside another path is replaced whole.
+def redact(t):
+    pairs = [r.split("=", 1) for r in a.redact]
+    for val, ph in sorted(pairs, key=lambda p: len(p[0]), reverse=True):
+        t = t.replace(val.rstrip("/"), ph)
+    return t
 
 def tool_text(block):
     c = block.get("content")
@@ -43,7 +51,8 @@ w("```bash\nclaude -p \"<prompt>\" --model %s --mcp-config mcp.json --strict-mcp
   "  --tools \"\" --allowedTools \"mcp__agenttoll-pay\" --no-session-persistence \\\n"
   "  --output-format stream-json --verbose\n```\n" % a.model)
 w("`--tools \"\"` removes every built-in tool, so pay-mcp is the only thing Claude can use. "
-  "Below, tool calls and results are shown exactly as the CLI emitted them (results pretty-printed).\n")
+  "Below, tool calls and results are shown as the CLI emitted them (results pretty-printed). "
+  "The only edit is mechanical: the formatter replaces the spend-file, keypair, temp-directory and repo-root paths with `$SPEND_FILE`, `$KEYPAIR`, `$WORKDIR` and `$REPO`.\n")
 
 for i, (prompt, path) in enumerate(zip(a.prompt, a.run), 1):
     w("---\n\n## Run %d\n" % i)
@@ -67,16 +76,16 @@ for i, (prompt, path) in enumerate(zip(a.prompt, a.run), 1):
                 elif b["type"] == "tool_use":
                     n += 1
                     name = b["name"].replace("mcp__agenttoll-pay__", "")
-                    w("**Tool call %d: `%s`**\n\n```json\n%s\n```\n" % (n, name, json.dumps(b["input"], indent=2)))
+                    w("**Tool call %d: `%s`**\n\n```json\n%s\n```\n" % (n, name, redact(json.dumps(b["input"], indent=2))))
         elif t == "user":
             c = ev["message"].get("content")
             if isinstance(c, list):
                 for b in c:
                     if b.get("type") == "tool_result":
                         flag = " (error)" if b.get("is_error") else ""
-                        w("**Result%s**\n\n```json\n%s\n```\n" % (flag, pretty(tool_text(b))))
+                        w("**Result%s**\n\n```json\n%s\n```\n" % (flag, redact(pretty(tool_text(b)))))
         elif t == "result":
             turns, dur = ev.get("num_turns"), ev.get("duration_ms")
     if turns is not None:
         w("_Run %d: %s turns, %.1f s._\n" % (i, turns, (dur or 0) / 1000))
-print("\n".join(out))
+print(redact("\n".join(out)))
