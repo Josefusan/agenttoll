@@ -602,9 +602,15 @@ def build() -> None:
 
 
 def git_head() -> str:
+    """Short commit, with a -dirty suffix if tracked sources changed.
+    evals/results is excluded, because every run rewrites it."""
     try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
+        head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
                               text=True, check=True).stdout.strip()
+        status = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no", "--", ".",
+                                 ":(exclude)evals/results"], cwd=ROOT, capture_output=True,
+                                text=True, check=True).stdout.strip()
+        return head + ("-dirty" if status else "")
     except (OSError, subprocess.CalledProcessError):
         return "unknown"
 
@@ -619,7 +625,7 @@ def write_results(results: list[dict], meta: dict) -> None:
     lines = [
         "# AgentToll eval results",
         "",
-        f"Run: {meta['generated']} | commit {meta['commit']} | {passed}/{len(results)} passed",
+        f"Run: {meta['generated']} | commit {meta['commit']} | binaries {meta['bin_dir']} | {passed}/{len(results)} passed",
         "",
         "All payments in this run are SIMULATED (mock facilitator, `SIMULATED-` transaction ids). "
         "Nothing went on chain.",
@@ -673,6 +679,7 @@ def main() -> int:
         meta = {
             "generated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ"),
             "commit": git_head(),
+            "bin_dir": (str(stack.bin_dir.relative_to(ROOT)) if stack.bin_dir.is_relative_to(ROOT) else str(stack.bin_dir)),
             "gateway_version": discovery.get("agenttoll"),
             "ports": {"gateway": stack.gw_port, "admin": stack.admin_port,
                       "origin": stack.origin_port, "facilitator": stack.fac_port},
@@ -680,9 +687,12 @@ def main() -> int:
         }
     finally:
         stack.stop(keep=args.keep)
-    write_results(results, meta)
+    if args.only:
+        print("--only run: results files not written")
+    else:
+        write_results(results, meta)
     failed = [r for r in results if r["status"] != "pass"]
-    print(f"\n{len(results) - len(failed)}/{len(results)} passed; results in evals/results/latest.{{json,md}}")
+    print(f"\n{len(results) - len(failed)}/{len(results)} passed; results in evals/results/latest.{{json,md}}" if not args.only else "")
     return 1 if failed else 0
 
 

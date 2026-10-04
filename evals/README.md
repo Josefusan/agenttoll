@@ -57,7 +57,7 @@ The buyer CLI cases need a Solana RPC endpoint to read a recent blockhash. The d
   `agent` (alias from `vars.json`; `human-*` aliases add browser headers), `headers`, `json`, `body`,
   `base` (`gateway` default, `admin`, `facilitator`), `auth` (`bearer`, `wrong`, `empty`, `query`).
 - `pay`: build a `PAYMENT-SIGNATURE` from the challenge of an earlier step (`from`). Options:
-  `accept` (index in `accepts[]`), `tamper` (dotted overrides on `accepted`), `version`, `drop`
+  `accept` (an index in `accepts[]`, or a rail name `solana` or `base`; default `solana`), `tamper` (dotted overrides on `accepted`), `version`, `drop`
   (top-level keys to remove), `transport` (`header` or `mcp-meta`), `reuse` (resend the exact
   header of an earlier step, for replay), `raw` (literal header value).
 - `expect`: `status`, `headers`, `json` (response body), `challenge` (decoded `PAYMENT-REQUIRED`),
@@ -82,3 +82,5 @@ down), STAT (ledger and simulated-money reporting).
 
 Append to the list in the right `cases/NN-*.json` file with a unique id. Cases share one gateway
 and one ledger, so keep each case self-contained (fetch its own quote with `pay.from`).
+Exception: the STAT group reads the ledger totals that earlier PAY, MCP and REPLAY cases produce, so
+it needs the full run. `--only` runs do not write evals/results.
