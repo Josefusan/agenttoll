@@ -112,7 +112,7 @@ def check_test_counts():
     m = re.search(r"\((\d+) are parity tests", readme)
     claims["worker_parity"] = int(m.group(1)) if m else None
     sub = SUBMISSION.read_text(encoding="utf-8")
-    m = re.search(r"(\d+) Rust, (\d+) pay-mcp and (\d+) Worker tests \((\d+) parity\)", sub)
+    m = re.search(r"(\d+) Rust, (\d+) pay-mcp,? (?:and )?(\d+) Worker(?: tests)? \((\d+) parity\)", sub)
     sub_claims = dict(zip(["rust", "pay_mcp", "worker", "worker_parity"], map(int, m.groups()))) if m else {}
     lines, bad, unknown = [], [], []
     for k in ["rust", "pay_mcp", "worker", "worker_parity"]:
@@ -174,12 +174,18 @@ def check_simulated_labels():
     return (not bad, f"{checked} demo-payment lines checked, {len(bad)} without 'simulated' within 6 lines", bad)
 
 
+# A line that scopes the explorer/on-chain wording to real settlements ("the explorer link
+# appears only for a real settlement") is the correct disclosure, not an overclaim.
+REAL_ONLY = re.compile(r"\b(only|real)\b[^.;]{0,40}\breal\b[^.;]{0,15}\bsettle|\breal settlement", re.I)
+
+
 def check_no_onchain_simulated():
     bad = []
     pat = re.compile(r"on[- ]?chain|explorer", re.I)
     for rel in doc_files() + ["docs/USE_CASES.md", "docs/COLOSSEUM_SUBMISSION.md"]:
         for n, line in enumerate(read(rel).splitlines(), 1):
-            if re.search(r"simulat", line, re.I) and pat.search(line) and not NEGATION.search(line):
+            if (re.search(r"simulat", line, re.I) and pat.search(line) and not NEGATION.search(line)
+                    and not REAL_ONLY.search(line)):
                 bad.append(f"{rel}:{n} {line.strip()[:160]}")
     return (not bad, f"{len(bad)} line(s) pair 'simulated' with on-chain or explorer without a negation", bad)
 

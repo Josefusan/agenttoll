@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-04T06:44:32+00:00",
-  "commit": "0c54a00",
+  "generated_at": "2026-10-04T14:18:35+00:00",
+  "commit": "35a013b",
   "engine": "rules (Jev key missing)",
   "note": "engine=rules means Jev did not answer; the verdict is a deterministic rule. Jev never overrides a failing rule.",
   "summary": {
-    "pass": 4,
-    "fail": 2,
+    "pass": 6,
+    "fail": 0,
     "unknown": 0
   },
   "checks": [
@@ -17,11 +17,11 @@
       "details": [
         "497/500 Brief description",
         "991/1000 What are you building, and who is it for?",
-        "979/1000 Why did you decide to build this, and why build it now?",
+        "992/1000 Why did you decide to build this, and why build it now?",
         "496/500 What technologies are you using or integrating with?",
-        "495/500 How does your product use these chains?",
+        "499/500 How does your product use these chains?",
         "357/600 Did anyone not listed on the team do meaningful work?",
-        "486/500 Anything else judges should know?"
+        "471/500 Anything else judges should know?"
       ],
       "engine": "rules (Jev key missing)",
       "rule_verdict": "pass",
@@ -30,22 +30,16 @@
     {
       "id": "test_counts",
       "question": "Do the test counts in README and the submission match the captured test output?",
-      "verdict": "fail",
-      "summary": "6 mismatch(es)",
+      "verdict": "pass",
+      "summary": "all counts match captured output",
       "details": [
-        "rust: README says 87, captured output says 90",
-        "rust: COLOSSEUM_SUBMISSION says 87, captured output says 90",
-        "worker: README says 52, captured output says 70",
-        "worker: COLOSSEUM_SUBMISSION says 52, captured output says 70",
-        "worker_parity: README says 17, captured output says 21",
-        "worker_parity: COLOSSEUM_SUBMISSION says 17, captured output says 21",
-        "rust: README=87 submission=87 captured=90",
+        "rust: README=90 submission=90 captured=90",
         "pay_mcp: README=69 submission=69 captured=69",
-        "worker: README=52 submission=52 captured=70",
-        "worker_parity: README=17 submission=17 captured=21"
+        "worker: README=70 submission=70 captured=70",
+        "worker_parity: README=21 submission=21 captured=21"
       ],
       "engine": "rules (Jev key missing)",
-      "rule_verdict": "fail",
+      "rule_verdict": "pass",
       "jev_p_yes": null
     },
     {
@@ -61,15 +55,11 @@
     {
       "id": "simulated_labels",
       "question": "Does every place that shows a demo payment say simulated?",
-      "verdict": "fail",
-      "summary": "5 demo-payment lines checked, 3 without 'simulated' within 6 lines",
-      "details": [
-        "docs/USE_CASES.md:140 Prompt used in the demo: \"Use pay_and_fetch to get the latest quote from <url>. Tell me what you paid and link the transaction.\"",
-        "docs/USE_CASES.md:144 Proof: the headline demo shot. Claude asks, pays $0.002, answers with the data and the explorer link, and the dashboard ticks within a second.",
-        "docs/USE_CASES.md:205 1. **Case 5 buying from case 1 or 2: Claude pays $0.002 through `pay-mcp` and the dashboard ticks.** It is the full loop in one shot: human sees a normal page, "
-      ],
+      "verdict": "pass",
+      "summary": "3 demo-payment lines checked, 0 without 'simulated' within 6 lines",
+      "details": [],
       "engine": "rules (Jev key missing)",
-      "rule_verdict": "fail",
+      "rule_verdict": "pass",
       "jev_p_yes": null
     },
     {
@@ -86,7 +76,7 @@
       "id": "no_secrets",
       "question": "Are tracked files free of secrets?",
       "verdict": "pass",
-      "summary": "167 tracked text files scanned with 7 patterns, 0 hit(s)",
+      "summary": "213 tracked text files scanned with 7 patterns, 0 hit(s)",
       "details": [],
       "engine": "rules (Jev key missing)",
       "rule_verdict": "pass",
