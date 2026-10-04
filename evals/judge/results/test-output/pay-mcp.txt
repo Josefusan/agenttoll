@@ -1,27 +1,25 @@
 $ npx vitest run  (cwd demo/pay-mcp) exit=0
 
-[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m/home/joseph/Hackathons/AgentToll-d10/demo/pay-mcp[39m
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m/home/joseph/Hackathons/AgentToll-d11/demo/pay-mcp[39m
 
- [32m✓[39m test/quote.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 34[2mms[22m[39m
- [32m✓[39m test/payer.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 740[2mms[22m[39m
-   [32m✓[39m payAndFetch payment [2m(9)[22m
-     [33m[2m✓[22m[39m a dishonest seller cannot drain past the daily cap by rejecting[33m 315[2mms[22m[39m
- [32m✓[39m test/allowlist.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 131[2mms[22m[39m
- [32m✓[39m test/caps.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 12[2mms[22m[39m
- [32m✓[39m test/mcpNative.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 10[2mms[22m[39m
- [32m✓[39m test/money.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 20[2mms[22m[39m
- [32m✓[39m test/spend.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 2100[2mms[22m[39m
+ [32m✓[39m test/quote.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m test/allowlist.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m test/payer.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 403[2mms[22m[39m
+ [32m✓[39m test/caps.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m test/mcpNative.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m test/money.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m test/spend.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 1491[2mms[22m[39m
    [32m✓[39m two processes sharing one ledger [2m(2)[22m
-     [33m[2m✓[22m[39m loses no records[33m 1366[2mms[22m[39m
-     [33m[2m✓[22m[39m cannot both pass the daily cap[33m 619[2mms[22m[39m
- [32m✓[39m test/config.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+     [33m[2m✓[22m[39m loses no records[33m 850[2mms[22m[39m
+     [33m[2m✓[22m[39m cannot both pass the daily cap[33m 560[2mms[22m[39m
+ [32m✓[39m test/config.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 18[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m8 passed[39m[22m[90m (8)[39m
 [2m      Tests [22m [1m[32m69 passed[39m[22m[90m (69)[39m
-[2m   Start at [22m 21:13:27
-[2m   Duration [22m 3.61s[2m (tests 52%, import 26%, transform 20%, worker 2%)[22m
+[2m   Start at [22m 22:17:44
+[2m   Duration [22m 3.11s[2m (tests 42%, import 37%, transform 19%, worker 2%)[22m
 
-[2m    Isolate [22m [33m8 workers spawned[39m[2m · ~319ms startup each (spawn + environment, per file)[22m
-[2m            [22m [2mat least ~532ms faster with [22m[33misolate: false[39m[2m — reuses workers across files instead of one per file[22m
+[2m    Isolate [22m [33m8 workers spawned[39m[2m · ~243ms startup each (spawn + environment, per file)[22m
+[2m            [22m [2mat least ~405ms faster with [22m[33misolate: false[39m[2m — reuses workers across files instead of one per file[22m
 
 
