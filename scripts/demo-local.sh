@@ -4,14 +4,25 @@
 # payment is labelled SIMULATED. Ctrl-C (or the end of the script) stops everything.
 #   bash scripts/demo-local.sh          # run the scripted walkthrough and exit
 #   KEEP=1 bash scripts/demo-local.sh   # leave the stack running for the dashboard
+# Ports (defaults in brackets): GATEWAY_PORT [8402] ADMIN_PORT [8403] ORIGIN_PORT [4000]
+# FACILITATOR_PORT [4020]. Set CARGO_TARGET_DIR to reuse an existing build.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 export PATH="$HOME/.cargo/bin:$PATH"
 mkdir -p .demo
 
+GATEWAY_PORT="${GATEWAY_PORT:-8402}"; ADMIN_PORT="${ADMIN_PORT:-8403}"
+ORIGIN_PORT="${ORIGIN_PORT:-4000}"; FACILITATOR_PORT="${FACILITATOR_PORT:-4020}"
+
+echo "Building (first run compiles about 400 crates; later runs are instant)..."
 cargo build -q -p agenttoll-gateway -p agenttoll-demo-origin -p agenttoll-buyer -p agenttoll-mock-facilitator
-BIN="$ROOT/target/debug"
+BIN="${CARGO_TARGET_DIR:-$ROOT/target}/debug"
+
+# The shipped config uses the default ports; write a copy with yours.
+sed -e "s#127.0.0.1:4000#127.0.0.1:$ORIGIN_PORT#" -e "s#127.0.0.1:4020#127.0.0.1:$FACILITATOR_PORT#" \
+    -e "s#127.0.0.1:8402#127.0.0.1:$GATEWAY_PORT#" -e "s#127.0.0.1:8403#127.0.0.1:$ADMIN_PORT#" \
+    demo/agenttoll.demo.yaml > .demo/agenttoll.yaml
 
 [ -f .demo/payto.json ] || "$BIN/agenttoll-buyer" --new-solana-keypair .demo/payto.json > .demo/payto.pub
 [ -f .demo/buyer.json ] || "$BIN/agenttoll-buyer" --new-solana-keypair .demo/buyer.json > .demo/buyer.pub
@@ -22,13 +33,13 @@ pids=()
 cleanup() { for p in "${pids[@]}"; do kill "$p" 2>/dev/null || true; done; }
 trap cleanup EXIT INT TERM
 
-ORIGIN_LISTEN=127.0.0.1:4000 "$BIN/agenttoll-demo-origin" > .demo/origin.log 2>&1 & pids+=($!)
-MOCK_FACILITATOR_LISTEN=127.0.0.1:4020 "$BIN/agenttoll-mock-facilitator" > .demo/facilitator.log 2>&1 & pids+=($!)
+ORIGIN_LISTEN=127.0.0.1:$ORIGIN_PORT "$BIN/agenttoll-demo-origin" > .demo/origin.log 2>&1 & pids+=($!)
+MOCK_FACILITATOR_LISTEN=127.0.0.1:$FACILITATOR_PORT "$BIN/agenttoll-mock-facilitator" > .demo/facilitator.log 2>&1 & pids+=($!)
 sleep 1
-"$BIN/agenttoll-gateway" --config demo/agenttoll.demo.yaml > .demo/gateway.log 2>&1 & pids+=($!)
-for _ in $(seq 50); do curl -fs -o /dev/null http://127.0.0.1:8402/ 2>/dev/null && break; sleep 0.2; done
+"$BIN/agenttoll-gateway" --config .demo/agenttoll.yaml > .demo/gateway.log 2>&1 & pids+=($!)
+for _ in $(seq 50); do curl -fs -o /dev/null http://127.0.0.1:$GATEWAY_PORT/ 2>/dev/null && break; sleep 0.2; done
 
-GW=http://127.0.0.1:8402
+GW=http://127.0.0.1:$GATEWAY_PORT
 step() { printf '\n\033[1;36m== %s\033[0m\n' "$*"; }
 
 step "1. A human opens the site: free"
@@ -57,7 +68,7 @@ for _ in 1 2 3; do curl -s -o /dev/null -A "Mozilla/5.0 (compatible; ClaudeBot/1
 sleep 0.5
 
 step "8. The founder's ledger (admin API)"
-curl -s -H "Authorization: Bearer $AGENTTOLL_ADMIN_TOKEN" http://127.0.0.1:8403/admin/stats > .demo/stats.json
+curl -s -H "Authorization: Bearer $AGENTTOLL_ADMIN_TOKEN" http://127.0.0.1:$ADMIN_PORT/admin/stats > .demo/stats.json
 python3 - <<'PY'
 import json
 s = json.load(open(".demo/stats.json"))
@@ -67,10 +78,10 @@ for e in s["recent"][:3]:
     print(" ", e["route"], e["agent_name"], e["tx_signature"], e["status"], "(simulated)" if e["simulated"] else "")
 for u in s["unbilled"]:
     n = u["requests"]
-    print(f"  not billing yet: {u[agent]} ({u[reason]}) {n} request{ if n == 1 else s}")
+    print(f"  not billing yet: {u['agent']} ({u['reason']}) {n} request{'' if n == 1 else 's'}")
 PY
 
 if [ -n "${KEEP:-}" ]; then
-  step "Stack is running. Dashboard: AGENTTOLL_ADMIN_URL=http://127.0.0.1:8403 AGENTTOLL_ADMIN_TOKEN=$AGENTTOLL_ADMIN_TOKEN pnpm --dir apps/dashboard dev"
+  step "Stack is running. Dashboard: AGENTTOLL_ADMIN_URL=http://127.0.0.1:$ADMIN_PORT AGENTTOLL_ADMIN_TOKEN=$AGENTTOLL_ADMIN_TOKEN pnpm --dir apps/dashboard dev"
   wait
 fi
