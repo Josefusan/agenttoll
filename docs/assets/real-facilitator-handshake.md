@@ -88,3 +88,79 @@ the facilitator at startup (KB-X402-04), so the quote proves the real `/supporte
   the AgentToll quote, and the AgentToll verify path speaks the real facilitator `/verify` API and
   surfaces its `invalidReason`. A funded wallet is the only missing piece, and it is deliberately
   out of scope for this task.
+
+## Base Sepolia
+
+Real x402.org testnet facilitator on Base Sepolia, unfunded throwaway wallet. The payment was rejected as expected, so no transaction exists. This shows the wire format and verify path against the real facilitator, not a settlement.
+
+Date: 2026-10-04. Same gateway build as above, with a base-only config copied from the `eip155:84532`
+block of `agenttoll.example.yaml`.
+
+Throwaway EVM keys, outside every repo, never funded (mode 600, never printed):
+
+```
+python3 -c "import secrets;print('0x'+secrets.token_hex(32))" > ~/agenttoll-scratch/throwaway-evm-buyer.key
+python3 -c "import secrets;print('0x'+secrets.token_hex(32))" > ~/agenttoll-scratch/throwaway-evm-payto.key
+# buyer 0x6CAdd3692c29fAda4698844a8cAa22EfE7f8E02e ; payTo 0x3DDfb063ECA1dAFc7259EeE4a36D38f6769edfBa
+```
+
+A throwaway gateway on loopback (admin token a fresh random mode-600 file and never printed),
+pointed at the demo origin and the real x402.org testnet facilitator, `network: eip155:84532`, asset
+`0x036CbD53842c5426634e7929541eC2318f3dCF7e`, `pay_to` the throwaway address above:
+
+```
+tmux new-session -d -s at18402b "cd ~/agenttoll-scratch && \
+  AGENTTOLL_ADMIN_TOKEN=$(cat admin-token-base) RUST_LOG=debug \
+  ~/Hackathons/AgentToll-d8/target/release/agenttoll-gateway \
+  --config ~/agenttoll-scratch/agenttoll.handshake-base.yaml"
+
+BUYER_EVM_PRIVATE_KEY=$(cat ~/agenttoll-scratch/throwaway-evm-buyer.key) \
+  agenttoll-buyer --network base http://127.0.0.1:18402/api/quote
+```
+
+What came back (buyer exit code 1):
+
+```
+buyer 0x6CAdd3692c29fAda4698844a8cAa22EfE7f8E02e on Base Sepolia
+status: 402 Payment Required
+body:   {"x402Version":2,"error":"invalid_exact_evm_insufficient_balance",
+         "resource":{"url":"http://127.0.0.1:18402/api/quote","description":"Live price quote"},
+         "accepts":[{"scheme":"exact","network":"eip155:84532","amount":"2000",
+                     "asset":"0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+                     "payTo":"0x3DDfb063ECA1dAFc7259EeE4a36D38f6769edfBa",
+                     "maxTimeoutSeconds":60,"extra":{"name":"USDC","version":"2"}}]}
+Error: request failed with 402 Payment Required and no payment receipt
+```
+
+Gateway log at `debug` (outbound to the real facilitator):
+
+```
+DEBUG reqwest::connect: starting new connection 'Some("x402.org")'
+DEBUG hyper_util::client::legacy::pool: pooling idle connection for ("https", x402.org)
+```
+
+`GET https://x402.org/facilitator/supported` (same day, HTTP 200) lists
+`{x402Version: 2, scheme: exact, network: eip155:84532}`, and its `signers.eip155` is
+`0xd407e409E34E0b9afb99EcCeb609bDbcD5e7f1bf`.
+
+### Why the reason is the real facilitator
+
+`crates/agenttoll-gateway/src/pay.rs` refuses with the facilitator's own string:
+
+```rust
+if !verified.is_valid {
+    gw.replay.release(&replay_key);
+    return refuse(verified.invalid_reason.as_deref().unwrap_or("payment is invalid"));
+}
+```
+
+The local test facilitator (`demo/mock-facilitator`) cannot produce it: its only verify reasons are
+`invalid_x402_version`, `invalid_payload`, `invalid_payment_requirements` and `mock_verify_failure`
+(shape checks plus a test knob). `invalid_exact_evm_insufficient_balance` is not one of them, so it
+came from the real x402.org facilitator.
+
+### Cause
+
+The facilitator returned `invalid_exact_evm_insufficient_balance`: the unfunded buyer holds no Base
+Sepolia USDC, so the EIP-3009 authorization cannot be simulated. This page states the cause only as
+far as the reason code goes. No transaction was signed onto the chain and no signature exists.
