@@ -4,6 +4,17 @@
 
 **Charge AI agents per request. Keep humans free.**
 
+## Judges: 60 seconds
+
+```bash
+GW=https://years-cow-stations-dubai.trycloudflare.com   # Cloudflare quick tunnel; changes on restart
+curl -s -o /dev/null -w 'human:  %{http_code}\n' -A 'Mozilla/5.0 Chrome/141' $GW/api/quote           # 200, free
+curl -s -D - -o /dev/null -A 'Claude-User/1.0' $GW/api/quote | grep -iE '^HTTP|^payment-required'   # 402 + price quote
+curl -s $GW/.well-known/agenttoll.json                                                               # the price list
+```
+
+Payments in the live demo are **SIMULATED** - no funds moved, nothing on chain; the real-facilitator rejection is recorded in [docs/assets/real-facilitator-handshake.md](docs/assets/real-facilitator-handshake.md). These URLs are Cloudflare quick tunnels and change when a tunnel restarts.
+
 <p align="center"><img src="docs/assets/live-feed.gif" alt="AgentToll revenue dashboard: the Live settlements feed receiving USDC payments from the buyer CLI, each row tagged Solana devnet and Simulated" width="100%"></p>
 
 <p align="center"><img src="docs/assets/dashboard-1440.png" alt="AgentToll revenue dashboard: revenue from agents, paid requests, unbilled agent requests, revenue over time, by route, by agent, live settlements and the agent traffic you are not billing yet" width="100%"></p>
@@ -94,6 +105,14 @@ Dashboard ◀── SSE: +$0.002 · ClaudeBot · GET /api/quote · Solana devnet
 
 Full design: [ARCHITECTURE.md](ARCHITECTURE.md). Every design decision with its reason: [docs/DECISIONS.md](docs/DECISIONS.md).
 
+## Why Solana
+
+- **Sub-cent economics.** A per-call price like the live `$0.002` quote (KB-AMT-01: `2000` atomic USDC) only clears where the transaction fee is a fraction of the price. The facilitator sponsors the fee (KB-X402-07, KB-SOL-02), so the agent's only cost is the USDC and the founder keeps the amount.
+- **One transfer, no middleman.** An x402 exact payment on Solana is a single SPL `TransferChecked` from the agent to the founder's token account, co-signed by the facilitator at `/settle` (KB-X402-07). There is no batch job or bank rail in between.
+- **Agents hold only USDC.** The facilitator is the transaction `feePayer`, and AgentToll reads it from the facilitator's `/supported` at startup instead of hardcoding it (KB-X402-07, KB-X402-04), so an agent needs no SOL.
+- **Solana is quoted first.** Every `402` lists Solana devnet in `accepts[0]` and Base Sepolia second, and the gateway carries no chain-specific money logic (KB-X402-06), so a second rail is a config block.
+- **PayAI is supported.** `https://facilitator.payai.network` serves x402 v2 `exact` on `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` with no API key on devnet (KB-X402-04), and this repo records a handshake against it.
+
 ## Money rules
 
 - **Humans never pay.** In the default `agents-only` mode only agents that identify themselves (AI crawler user agents, MCP clients, anyone presenting a payment) are charged; guesses (curl, headless browsers) are logged, not billed. Cryptographic Web Bot Auth verification is on the roadmap, not built.
@@ -148,6 +167,8 @@ Prices are quoted strings (`"0.002"`); the money path is integer-only. The full 
 1. Create two devnet wallets: `agenttoll-buyer --new-solana-keypair buyer.json` and the same for `payto.json`. Each command prints the address.
 2. Fund **both** addresses with devnet USDC at [faucet.circle.com](https://faucet.circle.com) (Solana Devnet). Funding `pay_to` also creates its USDC account. No SOL is needed; the facilitator pays fees.
 3. Use `agenttoll.example.yaml` (facilitator `https://facilitator.payai.network`), then run `agenttoll-buyer <url>`. It prints the Solana Explorer link for the settlement.
+
+Before any funding, [docs/assets/real-facilitator-handshake.md](docs/assets/real-facilitator-handshake.md) records this same path against the real PayAI facilitator on devnet with an unfunded throwaway wallet: the facilitator rejects the payment, so no transaction exists, and the rejection is the evidence that the wire format and verify path are real.
 
 ## Getting paid out
 
