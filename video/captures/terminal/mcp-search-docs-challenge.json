@@ -1,0 +1,16 @@
+{
+  "id": "mcp-search-docs-challenge",
+  "what": "MCP tools/call search_docs without payment: MCP-native x402 challenge (isError + accepts)",
+  "command": "curl -s http://127.0.0.1:8502/mcp -H 'content-type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"search_docs\",\"arguments\":{\"query\":\"x402\"}}}' | python3 -m json.tool",
+  "cwd": "$REPO",
+  "path_prepend": "$CARGO_TARGET_DIR/debug (prebuilt agenttoll-* binaries)",
+  "exit": 0,
+  "duration_ms": 76.8,
+  "started_utc": "2026-10-04T22:18:14.420+00:00",
+  "stdout": "{\n    \"id\": 2,\n    \"jsonrpc\": \"2.0\",\n    \"result\": {\n        \"content\": [\n            {\n                \"text\": \"{\\\"x402Version\\\":2,\\\"error\\\":\\\"payment required: retry with params._meta[\\\\\\\"x402/payment\\\\\\\"]\\\",\\\"resource\\\":{\\\"url\\\":\\\"http://127.0.0.1:8502/mcp#mcp:search_docs\\\",\\\"description\\\":\\\"mcp:search_docs\\\"},\\\"accepts\\\":[{\\\"scheme\\\":\\\"exact\\\",\\\"network\\\":\\\"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\\\",\\\"amount\\\":\\\"5000\\\",\\\"asset\\\":\\\"4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU\\\",\\\"payTo\\\":\\\"G3r9m7Ejj1Tn1UdxFFBrJRw52X6V7Qgz2RbrorJtmoUt\\\",\\\"maxTimeoutSeconds\\\":60,\\\"extra\\\":{\\\"feePayer\\\":\\\"GLoU3e1PVTmNNM5PJYJsr3FuiZGyqft7PqFck8gyBt1A\\\"}}]}\",\n                \"type\": \"text\"\n            }\n        ],\n        \"isError\": true,\n        \"structuredContent\": {\n            \"accepts\": [\n                {\n                    \"amount\": \"5000\",\n                    \"asset\": \"4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU\",\n                    \"extra\": {\n                        \"feePayer\": \"GLoU3e1PVTmNNM5PJYJsr3FuiZGyqft7PqFck8gyBt1A\"\n                    },\n                    \"maxTimeoutSeconds\": 60,\n                    \"network\": \"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\",\n                    \"payTo\": \"G3r9m7Ejj1Tn1UdxFFBrJRw52X6V7Qgz2RbrorJtmoUt\",\n                    \"scheme\": \"exact\"\n                }\n            ],\n            \"error\": \"payment required: retry with params._meta[\\\"x402/payment\\\"]\",\n            \"resource\": {\n                \"description\": \"mcp:search_docs\",\n                \"url\": \"http://127.0.0.1:8502/mcp#mcp:search_docs\"\n            },\n            \"x402Version\": 2\n        }\n    }\n}\n",
+  "stderr": "",
+  "stdout_sha256": "8179b85371401252bd0647cde1ec60e4968917caffae5cc27c0dc5aad55acefe",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "redactions": [],
+  "simulated": false
+}

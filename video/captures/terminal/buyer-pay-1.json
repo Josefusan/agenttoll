@@ -1,0 +1,16 @@
+{
+  "id": "buyer-pay-1",
+  "what": "The buyer CLI pays $0.002 for /api/quote (SIMULATED settlement): status, body, receipt",
+  "command": "BUYER_SOLANA_KEYPAIR=.demo/buyer.json agenttoll-buyer http://127.0.0.1:8502/api/quote",
+  "cwd": "$REPO",
+  "path_prepend": "$CARGO_TARGET_DIR/debug (prebuilt agenttoll-* binaries)",
+  "exit": 0,
+  "duration_ms": 554.4,
+  "started_utc": "2026-10-04T22:18:48.360+00:00",
+  "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152328,\"paid\":true,\"price\":145.28,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-21303ad4f4fb24815f5d121d\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n",
+  "stderr": "buyer 9MXtsuUyy9UF3NNTD9BDkXyFj9CDUMrYYXvPyr1DbbRh on Solana devnet\n",
+  "stdout_sha256": "5f6c24f8c1dacf40d21f06ca72a794f6d1d280c4fb6cefe72d1b9803a81fdb32",
+  "stderr_sha256": "51fd29ed7f9318155d2b4d3bd40c9ea4a656ab15a622cb28f3295a91158779ea",
+  "redactions": [],
+  "simulated": true
+}

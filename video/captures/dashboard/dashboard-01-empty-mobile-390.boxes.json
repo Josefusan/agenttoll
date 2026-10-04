@@ -1,0 +1,35 @@
+{
+  "state": "01-empty (mobile)",
+  "captured_utc": "2026-10-04T22:17:51.395Z",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "deviceScaleFactor": 3,
+  "coords": "CSS px at scroll 0; multiply by 3 for PNG pixels",
+  "page_height": 844,
+  "elements": {
+    "header": {
+      "x": 16,
+      "y": 0,
+      "width": 358,
+      "height": 78.5,
+      "text": "AgentToll\nRevenue\nAgents pay per request in USDC. Humans browse free.\nLive"
+    },
+    "live_indicator": {
+      "x": 310,
+      "y": 24.3,
+      "width": 64,
+      "height": 30,
+      "text": "Live"
+    },
+    "empty_state": {
+      "x": 16,
+      "y": 78.5,
+      "width": 358,
+      "height": 609.6,
+      "text": "NO AGENT PAYMENTS YET\nPoint an agent at your gateway and this page fills itself.\nHumans who open your site still get the normal page. An agent hitting a priced route gets a 402 with the USDC price, pays, and the settlement shows up here within a second.\n1\nSee the challenge an agent sees\ncurl -i -A \"ClaudeBot/1.0\" http://127.0.0.1:8502/api/quote\n2\nPay it with the demo buyer (devnet USDC)\ncargo run "
+    },
+    "live_feed_rows": 0
+  }
+}

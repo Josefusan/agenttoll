@@ -1,0 +1,46 @@
+{
+  "captured_utc": "2026-10-04T22:24:30.363Z",
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+  "viewport": "1920x1080 @2x",
+  "pages": [
+    {
+      "name": "home",
+      "url": "http://127.0.0.1:8502/",
+      "status": 200,
+      "response_headers": {
+        "content-length": "214",
+        "content-type": "text/html; charset=utf-8",
+        "date": "Sun, 04 Oct 2026 22:24:25 GMT"
+      },
+      "screenshot": "origin/origin-home.png",
+      "title": "Acme Data",
+      "text": "Acme Data\n\nHumans read this page for free.\n\nRead the blog"
+    },
+    {
+      "name": "api-quote",
+      "url": "http://127.0.0.1:8502/api/quote",
+      "status": 200,
+      "response_headers": {
+        "content-length": "80",
+        "content-type": "application/json",
+        "date": "Sun, 04 Oct 2026 22:24:27 GMT"
+      },
+      "screenshot": "origin/origin-api-quote.png",
+      "title": "",
+      "text": "{\"agent\":null,\"as_of\":1791152667,\"paid\":false,\"price\":142.67,\"symbol\":\"SOL/USD\"}"
+    },
+    {
+      "name": "blog-hello",
+      "url": "http://127.0.0.1:8502/blog/hello",
+      "status": 200,
+      "response_headers": {
+        "content-length": "172",
+        "content-type": "text/html; charset=utf-8",
+        "date": "Sun, 04 Oct 2026 22:24:28 GMT"
+      },
+      "screenshot": "origin/origin-blog-hello.png",
+      "title": "hello",
+      "text": "hello\n\nA blog post agents pay a tenth of a cent to read."
+    }
+  ]
+}
