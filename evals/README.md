@@ -19,7 +19,10 @@ python3 evals/run.py --keep          # keep logs and the ledger in the temp dir
 ```
 
 The run exits 1 if any case fails (2 if the stack cannot start). It writes
-`evals/results/latest.json` and `evals/results/latest.md` (case id, promise, pass or fail, evidence).
+`evals/results/latest.json` and `evals/results/latest.md` (case id, promise, pass, skip or fail, evidence).
+A case is SKIP only when the public devnet RPC is unreachable (see below). A skip is never counted as a pass and does not fail the run.
+
+`latest.md` names the commit the suite ran against. The commit that adds the results comes after it, because a commit cannot contain its own hash.
 
 Binaries come from `$EVAL_BIN_DIR`, else `$CARGO_TARGET_DIR/release`, else `target/release`,
 else `target/debug`. Ports are `EVAL_GATEWAY_PORT` (18402), `EVAL_ADMIN_PORT` (18403),
@@ -27,6 +30,15 @@ else `target/debug`. Ports are `EVAL_GATEWAY_PORT` (18402), `EVAL_ADMIN_PORT` (1
 
 The buyer CLI cases need a Solana RPC endpoint to read a recent blockhash. The default is
 `https://api.devnet.solana.com`; override with `EVAL_SOLANA_RPC`. Reading is free.
+If the buyer fails with a network error (timeout, refused connection, DNS), the case waits 2 seconds and
+runs the buyer once more, and only if the ledger did not move. If the retry fails the same way, PAY-03 or
+PAY-04 is reported as SKIP with the reason, not FAIL: an unreachable public RPC is not an AgentToll defect.
+Any other buyer failure is a FAIL. The other cases never touch the RPC.
+
+The mock facilitator has two fault knobs for the FAIL-02 and FAIL-03 cases. They are off unless
+`MOCK_FACILITATOR_FAULTS=1`, which only `run.py` sets. A payment whose `payload.mock` is `verify_fail`
+is rejected by `/verify`; `settle_timeout` makes `/settle` sleep (`MOCK_FACILITATOR_SLOW_MS`, 3000 by default)
+longer than the eval gateway's 1000 ms `timeouts.settle_ms`.
 
 ## Layout
 
@@ -37,6 +49,7 @@ The buyer CLI cases need a Solana RPC endpoint to read a recent blockhash. The d
 | `cases/vars.json` | User-agent strings by alias |
 | `cases/NN-*.json` | Case lists, run in file order |
 | `results/` | `latest.json`, `latest.md` from the last run |
+| `judge/` | LLM-as-judge and System-1 doc checks, see `judge/README.md` |
 
 ## Case format
 
@@ -76,11 +89,11 @@ HUM (humans and non-charged clients are free), AGT (declared agent classes get 4
 shape), DISC (price list), PAY (paid flow, buyer CLI, Base rail), REPLAY (replay and origin
 failure), TAMPER (tampered or malformed payments), BIND (payment bound to its resource),
 MCP, NORM (path bypass attempts), ADM (admin auth), LOG (unbilled traffic log), FAIL (facilitator
-down), STAT (ledger and simulated-money reporting).
+down, verify rejection, settle timeout), STAT (ledger and simulated-money reporting).
 
 ## Adding a case
 
 Append to the list in the right `cases/NN-*.json` file with a unique id. Cases share one gateway
 and one ledger, so keep each case self-contained (fetch its own quote with `pay.from`).
-Exception: the STAT group reads the ledger totals that earlier PAY, MCP and REPLAY cases produce, so
-it needs the full run. `--only` runs do not write evals/results.
+Exception: the STAT group reads the ledger totals that earlier PAY, MCP, REPLAY and FAIL-02 cases produce, so
+it needs the full run. FAIL-02 is the only case that leaves an unconfirmed row; STAT accounts for it. `--only` runs do not write evals/results.

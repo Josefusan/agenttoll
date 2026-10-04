@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-04 07:03:50Z",
-  "commit": "7e33580",
+  "generated": "2026-10-04 07:23:47Z",
+  "commit": "1cf19d8",
   "bin_dir": "target/debug",
   "gateway_version": "0.1.0",
   "ports": {
@@ -10,8 +10,9 @@
     "facilitator": 14020
   },
   "simulated_only": true,
-  "total": 117,
-  "passed": 117,
+  "total": 119,
+  "passed": 119,
+  "skipped": 0,
   "failed": 0,
   "cases": [
     {
@@ -22,7 +23,7 @@
       "evidence": [
         "GET /api/quote [human-chrome] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
       ],
-      "seconds": 0.01
+      "seconds": 0.007
     },
     {
       "id": "HUM-02",
@@ -32,7 +33,7 @@
       "evidence": [
         "GET /api/quote [human-safari-ios] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
       ],
-      "seconds": 0.005
+      "seconds": 0.004
     },
     {
       "id": "HUM-03",
@@ -42,7 +43,7 @@
       "evidence": [
         "GET /api/quote [human-firefox] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
       ],
-      "seconds": 0.005
+      "seconds": 0.003
     },
     {
       "id": "HUM-04",
@@ -52,7 +53,7 @@
       "evidence": [
         "GET /api/quote [human-edge] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
       ],
-      "seconds": 0.005
+      "seconds": 0.003
     },
     {
       "id": "HUM-05",
@@ -62,7 +63,7 @@
       "evidence": [
         "GET /api/quote [human-chrome-android] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
       ],
-      "seconds": 0.004
+      "seconds": 0.002
     },
     {
       "id": "HUM-06",
@@ -92,7 +93,7 @@
       "evidence": [
         "GET /api/quote [Googlebot] -> 200 | ok: status, header payment-required"
       ],
-      "seconds": 0.004
+      "seconds": 0.006
     },
     {
       "id": "HUM-09",
@@ -102,7 +103,7 @@
       "evidence": [
         "GET /api/quote [curl] -> 200 | ok: status, header payment-required"
       ],
-      "seconds": 0.008
+      "seconds": 0.006
     },
     {
       "id": "HUM-10",
@@ -112,7 +113,7 @@
       "evidence": [
         "GET /api/quote [python-requests] -> 200 | ok: status, header payment-required"
       ],
-      "seconds": 0.004
+      "seconds": 0.005
     },
     {
       "id": "HUM-11",
@@ -122,7 +123,7 @@
       "evidence": [
         "GET / [human-chrome] -> 200 | ok: status, header payment-required, header x-agenttoll-verdict"
       ],
-      "seconds": 0.005
+      "seconds": 0.006
     },
     {
       "id": "AGT-01",
@@ -132,7 +133,7 @@
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, header x-agenttoll-verdict, header content-type, json /x402Version, challenge /x402Version"
       ],
-      "seconds": 0.011
+      "seconds": 0.002
     },
     {
       "id": "AGT-02",
@@ -142,7 +143,7 @@
       "evidence": [
         "GET /api/quote [ClaudeBot] -> 402 verdict=ua:ClaudeBot quote=2000 | ok: status, header payment-required, header x-agenttoll-verdict, header content-type, json /x402Version, challenge /x402Version"
       ],
-      "seconds": 0.005
+      "seconds": 0.002
     },
     {
       "id": "AGT-03",
@@ -152,7 +153,7 @@
       "evidence": [
         "GET /api/quote [PerplexityBot] -> 402 verdict=ua:PerplexityBot quote=2000 | ok: status, header payment-required, header x-agenttoll-verdict, header content-type, json /x402Version, challenge /x402Version"
       ],
-      "seconds": 0.004
+      "seconds": 0.005
     },
     {
       "id": "AGT-04",
@@ -162,7 +163,7 @@
       "evidence": [
         "GET /api/quote [AgentToll-Buyer] -> 402 verdict=ua:AgentToll-Buyer quote=2000 | ok: status, header payment-required, header x-agenttoll-verdict, header content-type, json /x402Version, challenge /x402Version"
       ],
-      "seconds": 0.009
+      "seconds": 0.002
     },
     {
       "id": "AGT-05",
@@ -182,7 +183,7 @@
       "evidence": [
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, header x-agenttoll-verdict, header payment-required, json /result/isError"
       ],
-      "seconds": 0.002
+      "seconds": 0.004
     },
     {
       "id": "AGT-07",
@@ -192,7 +193,7 @@
       "evidence": [
         "GET /api/fail [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status, challenge /accepts/@solana/amount"
       ],
-      "seconds": 0.006
+      "seconds": 0.003
     },
     {
       "id": "AGT-08",
@@ -202,7 +203,7 @@
       "evidence": [
         "GET / [ClaudeBot] -> 200 | ok: status, header payment-required, body contains"
       ],
-      "seconds": 0.005
+      "seconds": 0.008
     },
     {
       "id": "AGT-09",
@@ -212,7 +213,7 @@
       "evidence": [
         "GET /.well-known/agenttoll.json [GPTBot] -> 200 | ok: status, header payment-required, json /x402Version"
       ],
-      "seconds": 0.005
+      "seconds": 0.002
     },
     {
       "id": "X402-01",
@@ -223,7 +224,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, json /x402Version, json /accepts/@solana/amount, challenge /x402Version, challenge /accepts/@solana/amount",
         "check challenge_deterministic: two consecutive challenges have identical accepts[]"
       ],
-      "seconds": 0.009
+      "seconds": 0.013
     },
     {
       "id": "X402-02",
@@ -233,7 +234,7 @@
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /x402Version, challenge /accepts/@solana/maxAmountRequired, challenge /accepts/@solana/amount"
       ],
-      "seconds": 0.003
+      "seconds": 0.002
     },
     {
       "id": "X402-03",
@@ -263,7 +264,7 @@
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@solana/amount, challenge /accepts/@base/amount"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "X402-06",
@@ -273,7 +274,7 @@
       "evidence": [
         "check price_math: /api/quote 0.002 USD -> 2000; /blog/agent-economy 0.001 USD -> 1000; /api/fail 0.001 USD -> 1000; mcp broken_tool 0.005 USD -> 5000; mcp generate_report 0.05 USD -> 50000; mcp search_docs 0.005 USD -> 5000"
       ],
-      "seconds": 0.014
+      "seconds": 0.016
     },
     {
       "id": "X402-07",
@@ -283,7 +284,7 @@
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@solana/asset, challenge /accepts/@base/asset"
       ],
-      "seconds": 0.001
+      "seconds": 0.003
     },
     {
       "id": "X402-08",
@@ -293,7 +294,7 @@
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@solana/payTo, challenge /accepts/@base/payTo"
       ],
-      "seconds": 0.002
+      "seconds": 0.008
     },
     {
       "id": "X402-09",
@@ -311,7 +312,7 @@
       "promise": "Solana quote carries extra.feePayer, equal to the facilitator's advertised fee payer",
       "status": "pass",
       "evidence": [
-        "check fee_payer_matches_facilitator: quote extra.feePayer == facilitator /supported feePayer (8XWfUr...)"
+        "check fee_payer_matches_facilitator: quote extra.feePayer == facilitator /supported feePayer (6XNvEE...)"
       ],
       "seconds": 0.005
     },
@@ -323,7 +324,7 @@
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@base/extra/name, challenge /accepts/@base/extra/version, challenge /accepts/@base/extra/feePayer"
       ],
-      "seconds": 0.002
+      "seconds": 0.004
     },
     {
       "id": "X402-12",
@@ -343,7 +344,7 @@
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, json /error"
       ],
-      "seconds": 0.003
+      "seconds": 0.002
     },
     {
       "id": "X402-14",
@@ -353,7 +354,7 @@
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/0/network, challenge /accepts/1/network"
       ],
-      "seconds": 0.004
+      "seconds": 0.002
     },
     {
       "id": "DISC-01",
@@ -363,7 +364,7 @@
       "evidence": [
         "GET /.well-known/agenttoll.json [human-chrome] -> 200 | ok: status, json /x402Version, json /detection, json /agenttoll"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "DISC-02",
@@ -373,7 +374,7 @@
       "evidence": [
         "GET /.well-known/agenttoll.json -> 200 | ok: status, json /routes/0/match, json /routes/0/priceUsd, json /routes/1/match, json /routes/1/priceUsd, json /routes/2/match, json /routes/2/priceUsd"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "DISC-03",
@@ -383,7 +384,7 @@
       "evidence": [
         "GET /.well-known/agenttoll.json -> 200 | ok: status, json /mcp/endpoint, json /mcp/tools/search_docs, json /mcp/tools/generate_report, json /mcp/paymentTransports/0, json /mcp/paymentTransports/1"
       ],
-      "seconds": 0.004
+      "seconds": 0.001
     },
     {
       "id": "DISC-04",
@@ -393,7 +394,7 @@
       "evidence": [
         "GET /.well-known/agenttoll.json -> 200 | ok: status, json /networks/@solana/network, json /networks/@solana/asset, json /networks/@solana/payTo, json /networks/@solana/scheme, json /networks/@base/network, body excludes"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "PAY-01",
@@ -402,9 +403,9 @@
       "status": "pass",
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
-        "GET /api/quote [GPTBot] -> 200 receipt.tx=SIMULATED-ba0d7e12ffa5dc61d5b4132d +payment(header) | ok: status, header payment-response, json /paid, json /agent, json /symbol, receipt /success, receipt /transaction, receipt /network, receipt /payer"
+        "GET /api/quote [GPTBot] -> 200 receipt.tx=SIMULATED-2fe701a3db2f459926737f3e +payment(header) | ok: status, header payment-response, json /paid, json /agent, json /symbol, receipt /success, receipt /transaction, receipt /network, receipt /payer"
       ],
-      "seconds": 0.015
+      "seconds": 0.016
     },
     {
       "id": "PAY-02",
@@ -413,9 +414,9 @@
       "status": "pass",
       "evidence": [
         "GET /blog/agent-economy [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
-        "GET /blog/agent-economy [GPTBot] -> 200 receipt.tx=SIMULATED-1aa931c175e4aa7f39f6ef2b +payment(header) | ok: status, receipt /success, receipt /amount, receipt /transaction, body contains"
+        "GET /blog/agent-economy [GPTBot] -> 200 receipt.tx=SIMULATED-ba62d95325a3d1c711570374 +payment(header) | ok: status, receipt /success, receipt /amount, receipt /transaction, body contains"
       ],
-      "seconds": 0.014
+      "seconds": 0.025
     },
     {
       "id": "PAY-03",
@@ -423,9 +424,9 @@
       "promise": "The shipped buyer CLI pays /api/quote end to end against the simulated facilitator (SIMULATED- tx, labelled simulated, ledger +2000)",
       "status": "pass",
       "evidence": [
-        "check buyer_paid_flow: buyer CLI: status 200, tx SIMULATED-40acad4fdbb624c9e0029d83, ledger +1 payment, +2000 atomic"
+        "check buyer_paid_flow: buyer CLI: status 200, tx SIMULATED-4fbcc9480e5a3d60a069dc5e, ledger +1 payment, +2000 atomic"
       ],
-      "seconds": 0.231
+      "seconds": 0.253
     },
     {
       "id": "PAY-04",
@@ -435,7 +436,7 @@
       "evidence": [
         "check buyer_cap_refusal: buyer exit 1, 'skipping quote' on stderr, ledger unchanged"
       ],
-      "seconds": 0.086
+      "seconds": 0.105
     },
     {
       "id": "PAY-05",
@@ -444,9 +445,9 @@
       "status": "pass",
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
-        "GET /api/quote [GPTBot] -> 200 receipt.tx=SIMULATED-e1625f8228a812d59c97037c +payment(header) | ok: status, json /paid, receipt /success, receipt /network, receipt /transaction"
+        "GET /api/quote [GPTBot] -> 200 receipt.tx=SIMULATED-ab1fcddb70300dd94a496f92 +payment(header) | ok: status, json /paid, receipt /success, receipt /network, receipt /transaction"
       ],
-      "seconds": 0.017
+      "seconds": 0.024
     },
     {
       "id": "PAY-06",
@@ -455,9 +456,9 @@
       "status": "pass",
       "evidence": [
         "GET /api/quote [ClaudeBot] -> 402 verdict=ua:ClaudeBot quote=2000 | ok: status",
-        "GET /api/quote [ClaudeBot] -> 200 receipt.tx=SIMULATED-a578d1fbf91951b885ed6210 +payment(header) | ok: status, json /agent, json /paid, receipt /success"
+        "GET /api/quote [ClaudeBot] -> 200 receipt.tx=SIMULATED-d2414d051cc42cb376bca8fa +payment(header) | ok: status, json /agent, json /paid, receipt /success"
       ],
-      "seconds": 0.022
+      "seconds": 0.02
     },
     {
       "id": "REPLAY-01",
@@ -466,10 +467,10 @@
       "status": "pass",
       "evidence": [
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
-        "GET /api/quote [GPTBot] -> 200 receipt.tx=SIMULATED-77a4492c75975fbf2867b3c5 +payment(header) | ok: status, receipt /success",
+        "GET /api/quote [GPTBot] -> 200 receipt.tx=SIMULATED-fa2fd44d268005396c62ef8f +payment(header) | ok: status, receipt /success",
         "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, json /error, body excludes"
       ],
-      "seconds": 0.028
+      "seconds": 0.036
     },
     {
       "id": "REPLAY-02",
@@ -478,10 +479,10 @@
       "status": "pass",
       "evidence": [
         "GET /blog/agent-economy [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
-        "GET /blog/agent-economy [GPTBot] -> 200 receipt.tx=SIMULATED-3df96bb2b674ed996f0360b6 +payment(header) | ok: status, receipt /success",
+        "GET /blog/agent-economy [GPTBot] -> 200 receipt.tx=SIMULATED-0752576fea0e9b998060b658 +payment(header) | ok: status, receipt /success",
         "GET /blog/other-post [GPTBot] -> 402 verdict=payment-header quote=1000 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.045
+      "seconds": 0.031
     },
     {
       "id": "REPLAY-03",
@@ -493,7 +494,7 @@
         "GET /api/fail [GPTBot] -> 500 +payment(header) | ok: status, header payment-response",
         "GET /api/fail [GPTBot] -> 500 +payment(header) | ok: status, header payment-response, json /error"
       ],
-      "seconds": 0.028
+      "seconds": 0.023
     },
     {
       "id": "REPLAY-04",
@@ -504,7 +505,7 @@
         "GET /api/fail [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
         "GET /api/fail [GPTBot] -> 500 +payment(header) | ok: status, header payment-response, header payment-required, json /error"
       ],
-      "seconds": 0.008
+      "seconds": 0.018
     },
     {
       "id": "TAMPER-01",
@@ -548,7 +549,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
         "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.003
+      "seconds": 0.006
     },
     {
       "id": "TAMPER-05",
@@ -559,7 +560,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
         "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, json /error, body excludes"
       ],
-      "seconds": 0.004
+      "seconds": 0.005
     },
     {
       "id": "TAMPER-06",
@@ -570,7 +571,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
         "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.003
+      "seconds": 0.007
     },
     {
       "id": "TAMPER-07",
@@ -581,7 +582,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
         "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.003
+      "seconds": 0.006
     },
     {
       "id": "TAMPER-08",
@@ -592,7 +593,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
         "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, json /error, body excludes"
       ],
-      "seconds": 0.003
+      "seconds": 0.006
     },
     {
       "id": "TAMPER-09",
@@ -603,7 +604,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
         "GET /api/quote [GPTBot] -> 400 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.004
+      "seconds": 0.007
     },
     {
       "id": "TAMPER-10",
@@ -614,7 +615,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
         "GET /api/quote [GPTBot] -> 400 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.003
+      "seconds": 0.008
     },
     {
       "id": "TAMPER-11",
@@ -624,7 +625,7 @@
       "evidence": [
         "GET /api/quote [GPTBot] -> 400 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.001
+      "seconds": 0.005
     },
     {
       "id": "TAMPER-12",
@@ -645,7 +646,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
         "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.003
+      "seconds": 0.01
     },
     {
       "id": "BIND-01",
@@ -656,7 +657,7 @@
         "GET /blog/post-a [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
         "GET /blog/post-b [GPTBot] -> 402 verdict=payment-header quote=1000 +payment(header) | ok: status, header payment-response, json /error, body excludes"
       ],
-      "seconds": 0.003
+      "seconds": 0.007
     },
     {
       "id": "BIND-02",
@@ -667,7 +668,7 @@
         "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
         "GET /blog/agent-economy [GPTBot] -> 402 verdict=payment-header quote=1000 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.004
+      "seconds": 0.007
     },
     {
       "id": "BIND-03",
@@ -678,7 +679,7 @@
         "GET /blog/agent-economy [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
         "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.004
+      "seconds": 0.006
     },
     {
       "id": "MCP-01",
@@ -688,7 +689,7 @@
       "evidence": [
         "POST /mcp [mcp-client] -> 200 | ok: status, header payment-required, header payment-response, json /result/serverInfo/name"
       ],
-      "seconds": 0.004
+      "seconds": 0.005
     },
     {
       "id": "MCP-02",
@@ -698,7 +699,7 @@
       "evidence": [
         "POST /mcp [mcp-client] -> 200 | ok: status, header payment-required, json /result/tools/0/name, json /result/tools/0/description, json /result/tools/1/description"
       ],
-      "seconds": 0.011
+      "seconds": 0.008
     },
     {
       "id": "MCP-03",
@@ -709,7 +710,7 @@
         "POST /mcp [mcp-client] -> 200 | ok: status, json /result/tools/2/name, json /result/tools/2/description",
         "POST /mcp [mcp-client] -> 200 | ok: status, header payment-required, json /result/content/0/text, json /result/isError"
       ],
-      "seconds": 0.012
+      "seconds": 0.011
     },
     {
       "id": "MCP-04",
@@ -719,7 +720,7 @@
       "evidence": [
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, header payment-required, header x-agenttoll-verdict, json /jsonrpc, json /id, json /result/isError, json /result/structuredContent/x402Version, json /result/structuredContent/accepts/@solana/amount, json /result/structuredContent/accepts/@solana/scheme, json /result/content/0/type"
       ],
-      "seconds": 0.005
+      "seconds": 0.004
     },
     {
       "id": "MCP-05",
@@ -729,7 +730,7 @@
       "evidence": [
         "check mcp_text_equals_structured: content[0].text == structuredContent == PAYMENT-REQUIRED header"
       ],
-      "seconds": 0.003
+      "seconds": 0.002
     },
     {
       "id": "MCP-06",
@@ -739,7 +740,7 @@
       "evidence": [
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=50000 | ok: status, json /result/structuredContent/resource/url, json /result/structuredContent/accepts/@solana/amount"
       ],
-      "seconds": 0.006
+      "seconds": 0.003
     },
     {
       "id": "MCP-07",
@@ -748,9 +749,9 @@
       "status": "pass",
       "evidence": [
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
-        "POST /mcp [mcp-client] -> 200 receipt.tx=SIMULATED-2628d544216ccf3fafe911ac +payment(mcp-meta) | ok: status, header payment-response, json /id, json /result/isError, json /result/content/0/text, receipt /success, receipt /transaction, body contains"
+        "POST /mcp [mcp-client] -> 200 receipt.tx=SIMULATED-af33369b18ea32aaa979c02c +payment(mcp-meta) | ok: status, header payment-response, json /id, json /result/isError, json /result/content/0/text, receipt /success, receipt /transaction, body contains"
       ],
-      "seconds": 0.016
+      "seconds": 0.022
     },
     {
       "id": "MCP-08",
@@ -759,9 +760,9 @@
       "status": "pass",
       "evidence": [
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=50000 | ok: status, json /result/isError",
-        "POST /mcp [mcp-client] -> 200 receipt.tx=SIMULATED-09b3a88c3d16df9630083656 +payment(header) | ok: status, json /result/content/0/text, receipt /success, receipt /amount, receipt /transaction"
+        "POST /mcp [mcp-client] -> 200 receipt.tx=SIMULATED-e9eafd1b937265e0f1eee939 +payment(header) | ok: status, json /result/content/0/text, receipt /success, receipt /amount, receipt /transaction"
       ],
-      "seconds": 0.02
+      "seconds": 0.042
     },
     {
       "id": "MCP-09",
@@ -772,7 +773,7 @@
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
         "POST /mcp [mcp-client] -> 200 +payment(mcp-meta) | ok: status, header payment-response, json /error/code, json /error/message, json /result"
       ],
-      "seconds": 0.01
+      "seconds": 0.03
     },
     {
       "id": "MCP-10",
@@ -783,7 +784,7 @@
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 +payment(mcp-meta) | ok: status, header payment-response, json /result/isError, json /result/structuredContent/error"
       ],
-      "seconds": 0.006
+      "seconds": 0.005
     },
     {
       "id": "MCP-11",
@@ -793,7 +794,7 @@
       "evidence": [
         "POST /mcp [mcp-client] -> 402 verdict=mcp-endpoint quote=55000 | ok: status, challenge /accepts/@solana/amount, challenge /resource/url"
       ],
-      "seconds": 0.004
+      "seconds": 0.002
     },
     {
       "id": "MCP-12",
@@ -803,7 +804,7 @@
       "evidence": [
         "POST /MCP [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError, json /result/structuredContent/accepts/@solana/amount"
       ],
-      "seconds": 0.003
+      "seconds": 0.002
     },
     {
       "id": "MCP-13",
@@ -812,10 +813,10 @@
       "status": "pass",
       "evidence": [
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
-        "POST /mcp [mcp-client] -> 200 receipt.tx=SIMULATED-03961d01319bffe7cc3974e0 +payment(header) | ok: status, receipt /success",
+        "POST /mcp [mcp-client] -> 200 receipt.tx=SIMULATED-0f15b23f499a57763b5d919d +payment(header) | ok: status, receipt /success",
         "POST /mcp [mcp-client] -> 402 verdict=payment-header quote=5000 +payment(header) | ok: status, header payment-response, json /error"
       ],
-      "seconds": 0.019
+      "seconds": 0.013
     },
     {
       "id": "MCP-14",
@@ -825,7 +826,7 @@
       "evidence": [
         "POST /mcp [mcp-client] -> 400 | ok: status, json /error/code"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "MCP-15",
@@ -836,7 +837,7 @@
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
         "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 +payment(mcp-meta) | ok: status, header payment-response, json /result/isError, json /result/structuredContent/x402Version, json /id"
       ],
-      "seconds": 0.005
+      "seconds": 0.004
     },
     {
       "id": "NORM-01",
@@ -846,7 +847,7 @@
       "evidence": [
         "GET /API/QUOTE [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "NORM-02",
@@ -866,7 +867,7 @@
       "evidence": [
         "GET /api/./quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "NORM-04",
@@ -886,7 +887,7 @@
       "evidence": [
         "GET /api/quote;x [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "NORM-06",
@@ -916,7 +917,7 @@
       "evidence": [
         "GET /api/%71uote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "NORM-09",
@@ -926,7 +927,7 @@
       "evidence": [
         "GET /api/quote%3Bx [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "NORM-10",
@@ -946,7 +947,7 @@
       "evidence": [
         "GET /api%5Cquote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "NORM-12",
@@ -986,7 +987,7 @@
       "evidence": [
         "GET /blog/../api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
       ],
-      "seconds": 0.006
+      "seconds": 0.001
     },
     {
       "id": "NORM-16",
@@ -1006,7 +1007,7 @@
       "evidence": [
         "GET //api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "ADM-01",
@@ -1016,7 +1017,7 @@
       "evidence": [
         "GET /admin/stats -> 401 | ok: status, body excludes"
       ],
-      "seconds": 0.003
+      "seconds": 0.001
     },
     {
       "id": "ADM-02",
@@ -1036,7 +1037,7 @@
       "evidence": [
         "GET /admin/stats -> 401 | ok: status"
       ],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "ADM-04",
@@ -1046,7 +1047,7 @@
       "evidence": [
         "GET /admin/stats -> 200 | ok: status, json /totals/revenue_atomic, json /totals/simulated_atomic, json /by_route, json /unbilled, json /recent"
       ],
-      "seconds": 0.004
+      "seconds": 0.003
     },
     {
       "id": "ADM-05",
@@ -1106,7 +1107,7 @@
       "evidence": [
         "GET /admin/stats [GPTBot] -> 404 | ok: status, body excludes"
       ],
-      "seconds": 0.002
+      "seconds": 0.003
     },
     {
       "id": "LOG-01",
@@ -1116,7 +1117,7 @@
       "evidence": [
         "check unbilled_crawlers: 4 Bytespider hits on /: served free, logged as unbilled (ua:Bytespider) = 4"
       ],
-      "seconds": 0.04
+      "seconds": 0.182
     },
     {
       "id": "LOG-02",
@@ -1126,7 +1127,7 @@
       "evidence": [
         "check human_not_logged: 6 human requests served free; unbilled_agent_requests stays 13"
       ],
-      "seconds": 0.869
+      "seconds": 0.829
     },
     {
       "id": "LOG-03",
@@ -1136,7 +1137,28 @@
       "evidence": [
         "check search_bot_logged: Googlebot on a priced blog route: 200 free, logged (count 1 -> 2)"
       ],
-      "seconds": 0.015
+      "seconds": 0.021
+    },
+    {
+      "id": "FAIL-02",
+      "group": "FAIL",
+      "promise": "If /settle outlasts the settle budget, the buyer is served the content, no receipt is returned, and the ledger records the payment as unconfirmed (SIMULATED facilitator)",
+      "status": "pass",
+      "evidence": [
+        "check settle_timeout_unconfirmed: settle timeout: 200 with content, no receipt, ledger row status=unconfirmed tx=unconfirmed:6bbe0267..., unconfirmed_atomic +2000, replay -> 402"
+      ],
+      "seconds": 1.037
+    },
+    {
+      "id": "FAIL-03",
+      "group": "FAIL",
+      "promise": "If the facilitator's /verify rejects the payment, the answer is 402 and the content is withheld; nothing is settled",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, json /error, body excludes"
+      ],
+      "seconds": 0.011
     },
     {
       "id": "FAIL-01",
@@ -1148,37 +1170,37 @@
         "check stop_facilitator: simulated facilitator stopped",
         "GET /api/quote [GPTBot] -> 502 +payment(header) | ok: status, header payment-response, body excludes"
       ],
-      "seconds": 0.011
+      "seconds": 0.013
     },
     {
       "id": "STAT-01",
       "group": "STAT",
-      "promise": "Ledger revenue and payment count equal exactly what the run saw settle; no refused or failed attempt was charged",
+      "promise": "Ledger revenue and payment count equal exactly what the run saw settle, plus the one unconfirmed payment from FAIL-02; no refused or failed attempt was charged",
       "status": "pass",
       "evidence": [
-        "check ledger_matches_observed: ledger revenue_atomic=72000 payments=10 == observed (72000, 10)"
+        "check ledger_matches_observed: ledger revenue_atomic=74000 payments=11 == observed settled (72000, 10) + unconfirmed (2000, 1)"
       ],
-      "seconds": 0.003
+      "seconds": 0.005
     },
     {
       "id": "STAT-02",
       "group": "STAT",
-      "promise": "Stats separate simulated money: simulated_atomic equals revenue here, unconfirmed is 0, real is 0",
+      "promise": "Stats separate simulated money: simulated_atomic equals what settled, unconfirmed_atomic equals only the FAIL-02 payment, real is 0",
       "status": "pass",
       "evidence": [
-        "check simulated_separated: simulated_atomic=72000 of revenue_atomic=72000; real (non-simulated)=0; unconfirmed=0"
+        "check simulated_separated: simulated_atomic=72000 + unconfirmed_atomic=2000 (only the settle-timeout case) = revenue_atomic=74000; real (neither)=0"
       ],
-      "seconds": 0.004
+      "seconds": 0.003
     },
     {
       "id": "STAT-03",
       "group": "STAT",
-      "promise": "Every ledger row is labelled simulated with a SIMULATED- tx id",
+      "promise": "Every settled ledger row is labelled simulated with a SIMULATED- tx id; the FAIL-02 row is unconfirmed and not flagged simulated",
       "status": "pass",
       "evidence": [
-        "check recent_all_labelled: 10 recent rows all simulated=true, SIMULATED- tx, status settled"
+        "check recent_all_labelled: 10 recent rows simulated=true, SIMULATED- tx, status settled; 1 unconfirmed (settle-timeout case only)"
       ],
-      "seconds": 0.006
+      "seconds": 0.007
     },
     {
       "id": "STAT-04",
@@ -1188,7 +1210,7 @@
       "evidence": [
         "check failures_not_in_ledger: by_route ['GET /api/quote', 'GET /blog/*', 'mcp:generate_report', 'mcp:search_docs'] has no GET /api/* (origin 500) or mcp:broken_tool (tool error)"
       ],
-      "seconds": 0.003
+      "seconds": 0.007
     },
     {
       "id": "STAT-05",
@@ -1196,9 +1218,9 @@
       "promise": "Revenue is reported per network and matches what settled on each rail",
       "status": "pass",
       "evidence": [
-        "check by_network_both: by_network {'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1': 70000, 'eip155:84532': 2000} matches observed per-network totals"
+        "check by_network_both: by_network {'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1': 72000, 'eip155:84532': 2000} matches observed per-network totals"
       ],
-      "seconds": 0.003
+      "seconds": 0.006
     },
     {
       "id": "STAT-06",
@@ -1218,7 +1240,7 @@
       "evidence": [
         "check agents_attributed: by_agent attributes revenue to ['AgentToll-Buyer', 'ClaudeBot', 'GPTBot', 'unknown']"
       ],
-      "seconds": 0.003
+      "seconds": 0.007
     }
   ]
 }

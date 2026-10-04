@@ -30,9 +30,27 @@ TEST_OUT = OUT / "test-output"
 JEV_OPS = Path(os.environ.get("JEV_OPS_DIR", str(Path.home() / "jev-ops")))
 SUBMISSION = ROOT / "docs/COLOSSEUM_SUBMISSION.md"
 
+# A negation counts only when it sits within a few words of the term it negates. "only", "if"
+# and "yet" are not negations ("the only database it needs" is a claim).
 NEGATION = re.compile(
     r"\b(not|no|never|nothing|without|none|isn't|aren't|don't|doesn't|removed|planned|"
-    r"unbuilt|yet|neither|nor|cannot|can't|refuse[sd]?|only|if)\b", re.I)
+    r"unbuilt|neither|nor|cannot|can't|refuse[sd]?)\b", re.I)
+WORDS_BEFORE, WORDS_AFTER = 6, 4
+
+
+def negated_near(line: str, start: int, end: int) -> bool:
+    """True when a real negation is within a few words before or after line[start:end]."""
+    words = re.findall(r"[\w']+", line[:start])[-WORDS_BEFORE:] + re.findall(r"[\w']+", line[end:])[:WORDS_AFTER]
+    return any(NEGATION.fullmatch(w) for w in words)
+
+
+def claim_matches(pattern: str, line: str) -> list[re.Match]:
+    """Matches of pattern in line that no nearby negation covers."""
+    return [m for m in re.finditer(pattern, line, re.I) if not negated_near(line, m.start(), m.end())]
+
+
+def forbidden_hits_in_line(terms: list[str], line: str) -> list[str]:
+    return [t for t in terms if claim_matches(GENERIC.get(t, re.escape(t)), line)]
 
 
 def git_files() -> list[str]:
@@ -133,10 +151,8 @@ def check_forbidden_claims():
     hits = []
     for rel in doc_files():
         for n, line in enumerate(read(rel).splitlines(), 1):
-            for t in terms:
-                pat = re.compile(GENERIC.get(t, re.escape(t)), re.I)
-                if pat.search(line) and not NEGATION.search(line):
-                    hits.append(f"{rel}:{n} [{t}] {line.strip()[:160]}")
+            for t in forbidden_hits_in_line(terms, line):
+                hits.append(f"{rel}:{n} [{t}] {line.strip()[:160]}")
     return (not hits, f"{len(terms)} forbidden terms ({', '.join(terms)}); {len(hits)} un-negated hit(s)", hits)
 
 
@@ -168,34 +184,48 @@ def check_no_onchain_simulated():
     return (not bad, f"{len(bad)} line(s) pair 'simulated' with on-chain or explorer without a negation", bad)
 
 
-SECRET_PATTERNS = {
-    "pem private key": r"-----BEGIN [A-Z ]*PRIVATE KEY-----",
-    "solana keypair json array": r"\[\s*(\d{1,3}\s*,\s*){63}\d{1,3}\s*\]",
-    "base58 secret key (87-88 chars)": r"(?<![1-9A-HJ-NP-Za-km-z])[1-9A-HJ-NP-Za-km-z]{87,88}(?![1-9A-HJ-NP-Za-km-z])",
-    "aws access key": r"\bAKIA[0-9A-Z]{16}\b",
-    "api key prefix": r"\b(sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|xox[abp]-[A-Za-z0-9-]{20,})\b",
-    "assigned secret": r"(?i)\b(ADMIN_TOKEN|TYPESAFE_API_KEY|BUYER_SOLANA_KEYPAIR|BUYER_EVM_PRIVATE_KEY|PRIVATE_KEY|SECRET_KEY)[ \t]*=[ \t]*['\"]?(?!\s|['\"]|<|/|~|\.|your|changeme|example|xxx|\$|\{)[A-Za-z0-9+/_\-]{16,}",
-    "hex private key (64)": r"(?i)\b(private[_ ]?key|secret)\b[^\n]{0,20}\b0x[0-9a-f]{64}\b",
+SECRET_PATTERNS = {  # secret-scan: pattern-definition
+    "pem private key": r"-----BEGIN [A-Z ]*PRIVATE KEY-----",  # secret-scan: pattern-definition
+    "solana keypair json array": r"\[\s*(\d{1,3}\s*,\s*){63}\d{1,3}\s*\]",  # secret-scan: pattern-definition
+    "base58 secret key (87-88 chars)": r"(?<![1-9A-HJ-NP-Za-km-z])[1-9A-HJ-NP-Za-km-z]{87,88}(?![1-9A-HJ-NP-Za-km-z])",  # secret-scan: pattern-definition
+    "aws access key": r"\bAKIA[0-9A-Z]{16}\b",  # secret-scan: pattern-definition
+    "api key prefix": r"\b(sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|xox[abp]-[A-Za-z0-9-]{20,})\b",  # secret-scan: pattern-definition
+    "assigned secret": r"(?i)\b(ADMIN_TOKEN|TYPESAFE_API_KEY|BUYER_SOLANA_KEYPAIR|BUYER_EVM_PRIVATE_KEY|PRIVATE_KEY|SECRET_KEY)[ \t]*=[ \t]*['\"]?(?!\s|['\"]|<|/|~|\.|your|changeme|example|xxx|\$|\{)[A-Za-z0-9+/_\-]{16,}",  # secret-scan: pattern-definition
+    "hex private key (64)": r"(?i)\b(private[_ ]?key|secret)\b[^\n]{0,20}\b0x[0-9a-f]{64}\b",  # secret-scan: pattern-definition
 }
 SKIP_EXT = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".wasm", ".woff", ".woff2", ".pdf", ".mp4"}
 SKIP_NAMES = {"Cargo.lock", "package-lock.json", "pnpm-lock.yaml"}
+
+
+# Only these two files may carry the marker. They hold the pattern definitions and the planted
+# selftest fixtures. Everything else under evals/judge/ (results, captured logs, docs) is scanned.
+MARKER = "secret-scan: pattern-definition"
+MARKER_FILES = {"evals/judge/system1.py", "evals/judge/selftest.py"}
+
+
+def scan_text(rel: str, text: str) -> list[str]:
+    """Secret hits in one file as 'path:line label'. Never includes the matched text."""
+    if rel in MARKER_FILES:
+        text = "\n".join("" if MARKER in line else line for line in text.split("\n"))
+    hits = []
+    for label, pat in SECRET_PATTERNS.items():
+        for m in re.finditer(pat, text):
+            hits.append(f"{rel}:{text.count(chr(10), 0, m.start()) + 1} {label}")
+    return hits
 
 
 def check_secrets():
     hits, scanned = [], 0
     for rel in git_files():
         p = Path(rel)
-        if p.suffix.lower() in SKIP_EXT or p.name in SKIP_NAMES or rel.startswith("evals/judge/"):
+        if p.suffix.lower() in SKIP_EXT or p.name in SKIP_NAMES:
             continue
         try:
             text = read(rel)
         except Exception:  # noqa: BLE001
             continue
         scanned += 1
-        for label, pat in SECRET_PATTERNS.items():
-            for m in re.finditer(pat, text):
-                ln = text.count("\n", 0, m.start()) + 1
-                hits.append(f"{rel}:{ln} {label}")  # never print the match
+        hits += scan_text(rel, text)
     return (not hits, f"{scanned} tracked text files scanned with {len(SECRET_PATTERNS)} patterns, {len(hits)} hit(s)", hits)
 
 
