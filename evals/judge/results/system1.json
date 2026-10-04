@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-04T14:32:59+00:00",
-  "commit": "b413cf3",
+  "generated_at": "2026-10-04T15:17:42+00:00",
+  "commit": "e88b792",
   "engine": "rules (Jev key missing)",
   "note": "engine=rules means Jev did not answer; the verdict is a deterministic rule. Jev never overrides a failing rule.",
   "summary": {
@@ -56,7 +56,7 @@
       "id": "simulated_labels",
       "question": "Does every place that shows a demo payment say simulated?",
       "verdict": "pass",
-      "summary": "3 demo-payment lines checked, 0 without 'simulated' within 6 lines",
+      "summary": "4 demo-payment lines checked, 0 without 'simulated' within 6 lines",
       "details": [],
       "engine": "rules (Jev key missing)",
       "rule_verdict": "pass",
@@ -76,7 +76,7 @@
       "id": "no_secrets",
       "question": "Are tracked files free of secrets?",
       "verdict": "pass",
-      "summary": "213 tracked text files scanned with 7 patterns, 0 hit(s)",
+      "summary": "214 tracked text files scanned with 7 patterns, 0 hit(s)",
       "details": [],
       "engine": "rules (Jev key missing)",
       "rule_verdict": "pass",
