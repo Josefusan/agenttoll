@@ -73,7 +73,7 @@ routes:
 
 Why x402 fits: a paywall for humans costs readers and SEO; a robots.txt block loses the agent audience entirely. Pricing only verified agents keeps both. USDC on Solana makes a $0.001 page viable; a card rail does not.
 
-Proof: open the page in a browser, normal site; `curl -A "ClaudeBot/1.0"` on the same URL, 402; the dashboard shows the unbilled count climbing from a real crawler log replay.
+Proof: open the page in a browser, normal site; `curl -A "ClaudeBot/1.0"` on the same URL, 402 (on localhost; through a trycloudflare quick tunnel use `-A 'Claude-User/1.0'`, see `deploy/README.md`); the dashboard shows the unbilled count climbing from a real crawler log replay.
 
 ### 3. Agency: every Website Factory client site earns from agent traffic
 
@@ -137,11 +137,11 @@ Flow:
 1. Install `demo/pay-mcp` via `.mcp.json`. Tools: `pay_and_fetch({ url, max_usd? })` and `wallet_status()`.
 2. On 402, the tool decodes `PAYMENT-REQUIRED`, picks the Solana devnet entry (Base Sepolia fallback), checks `amount <= min(max_usd, BUYER_MAX_USD_PER_CALL)` and the daily total against `BUYER_MAX_USD_PER_DAY`, signs with `BUYER_SOLANA_KEYPAIR`, retries, and returns `{ status, body, paid_usd, network, tx_signature, explorer_url }` (skills/claude-buyer-demo).
 
-Prompt used in the demo: "Use pay_and_fetch to get the latest quote from <url>. Tell me what you paid and link the transaction."
+Prompt used in the demo: "Use pay_and_fetch to get the latest quote from <url>. Tell me what you paid and link the transaction." (Variant B, simulated: the receipt id starts with `SIMULATED-`, there is no transaction to link, and the answer says so. The explorer link exists only for a real devnet settlement.)
 
 Why x402 fits: the agent needs no account at the seller; the human controls spend with two environment variables; every payment is a signed, inspectable receipt. Coinbase's own Payments MCP already pays x402 on Solana (KB-PAY-06), so this is the direction agent wallets are going, not a one-off.
 
-Proof: the headline demo shot. Claude asks, pays $0.002, answers with the data and the explorer link, and the dashboard ticks within a second.
+Proof: the headline demo shot. Claude asks, pays $0.002, answers with the data and the receipt, and the dashboard ticks within a second. Until a devnet wallet is funded the payment is simulated and the receipt is a `SIMULATED-` id; the explorer link appears only for a real settlement.
 
 ### 6. Autonomous research pipeline with receipts
 
@@ -202,7 +202,7 @@ No take rate is charged in the open-source gateway. Any hosted take rate would b
 
 ## Which two cases the demo video should feature
 
-1. **Case 5 buying from case 1 or 2: Claude pays $0.002 through `pay-mcp` and the dashboard ticks.** It is the full loop in one shot: human sees a normal page, Claude hits 402, pays within its caps, gets data, explorer link resolves. It is the Solana-track proof and the "nobody can argue with this" demo in WIN_PLAN.md.
+1. **Case 5 buying from case 1 or 2: Claude pays $0.002 through `pay-mcp` and the dashboard ticks.** It is the full loop in one shot: human sees a normal page, Claude hits 402, pays within its caps, gets data, and the receipt shows (simulated today; the explorer link resolves only for a real devnet settlement). It is the Solana-track proof and the "nobody can argue with this" demo in WIN_PLAN.md.
 2. **Case 4: per-tool MCP pricing.** `search_docs` at $0.005 and `generate_report` at $0.05 appear as separate rows while `tools/list` stays free. This is the innovation hook judges will not have seen in single-route x402 demos, and it is the clearest version of "MCP servers can sell."
 
 Case 3 (Website Factory) stays as the closing shot, as the current script already has it: it answers "path to users" in ten seconds. Cases 6 and 7 belong in the README and the pitch video, not the demo.

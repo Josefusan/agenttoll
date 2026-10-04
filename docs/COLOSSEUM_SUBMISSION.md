@@ -16,9 +16,9 @@ AgentToll
 AgentToll is an open-source paywall proxy that charges AI agents per request while people browse free. Put it in front of a site, API or MCP server, set a price per route or per MCP tool in one YAML file, and agents pay per call in USDC over x402 on Solana (Base as a second rail). No API keys, signups or invoices. Settlement happens only after your origin succeeds, and funds go straight to the wallet you name; AgentToll never holds them. Agents already use your product. Now you can bill them.
 
 **Project website** (public)
-<LIVE_GATEWAY_URL>
+https://years-cow-stations-dubai.trycloudflare.com
 
-Placeholder. The deploy lane replaces it with the public gateway URL. If no working public URL exists on submit day, leave this field empty. Never paste the placeholder into the form.
+Not part of the answer: this is the quick-tunnel gateway URL read from `~/Hackathons/AgentToll-LIVE.txt` on 2026-10-04. Quick-tunnel URLs change whenever the tunnel restarts and nothing restarts it after a reboot. Re-read the URL on submit day (`docs/SUBMIT_DAY.md` step 6) and open it in a private window. If it does not load, leave the field empty. Every payment behind it is simulated, and Cloudflare answers ClaudeBot and GPTBot user agents on a quick tunnel with a 403, so test it with `curl -A 'Claude-User/1.0' <url>/api/quote` (expect 402).
 
 **What are you building, and who is it for?** (limit 1000)
 AgentToll is a reverse proxy that turns AI agent traffic into revenue. It sits in front of any website, API or MCP server. People pass through free and untouched. Agents, crawlers and MCP clients get an HTTP 402 with an x402 v2 quote, pay per request in USDC, and get the response in the same round trip. No API keys, signups or invoices.
@@ -88,7 +88,8 @@ Business model (plan): the open-source core stays free and non-custodial. A host
 | A real devnet settlement with an explorer link | Not yet: no wallet is funded as of 2026-10-04 | README "Real devnet payments" |
 | Base Sepolia exercised with funds | Not yet: configured and mock-tested only | `agenttoll.example.yaml` |
 | Web Bot Auth signature verification | Not built: detector hook exists, gateway passes `None` | `crates/agenttoll-core/src/detector.rs` |
-| Public deployment in front of a Website Factory page | Not yet | ROADMAP D7 |
+| Public deployment (simulated payments, behind a Cloudflare quick tunnel) | Built on a Contabo VPS under pm2 for 2026-10-04; the URL is temporary and must be re-checked on submit day. Not in front of a Website Factory page. ClaudeBot and GPTBot user agents get a Cloudflare 403 there, `Claude-User/1.0` gets the 402 | `deploy/README.md`, `~/Hackathons/AgentToll-LIVE.txt` |
+| Black-box evals | 117 of 117 cases pass (`evals/results/latest.md`, run 2026-10-04, debug binaries, simulated payments). They do not cover Web Bot Auth, the Worker edition, the dashboard or pay-mcp | `evals/` |
 | Mainnet | Not attempted; needs Joseph's approval | `ARCHITECTURE.md` §2.1 |
 | Off-ramp or neobank integration | Not built by decision; `pay_to` is the payout destination | `docs/PAYOUTS.md` |
 

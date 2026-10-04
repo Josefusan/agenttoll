@@ -96,7 +96,7 @@ pm2 does not start itself on reboot without `pm2 startup`, which needs sudo. Aft
 
 ```bash
 GW=https://<gateway-tunnel>.trycloudflare.com
-curl -s -D - -o /dev/null -A "Mozilla/5.0 (compatible; ClaudeBot/1.0)" $GW/api/quote | grep -iE '^HTTP|^payment-required'   # 402
+curl -s -D - -o /dev/null -A 'Claude-User/1.0' $GW/api/quote | grep -iE '^HTTP|^payment-required'   # 402 (not ClaudeBot: see the caveat below)
 curl -s -o /dev/null -w '%{http_code}\n' -A "Mozilla/5.0 (Macintosh) Chrome/141" -H "Accept-Language: en" -H "Sec-Fetch-Mode: navigate" $GW/api/quote   # 200
 curl -s $GW/.well-known/agenttoll.json
 BUYER_SOLANA_KEYPAIR=/tmp/buyer.json target/release/agenttoll-buyer $GW/api/quote    # one SIMULATED paid request

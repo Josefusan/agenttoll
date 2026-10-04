@@ -8,7 +8,7 @@ Artifacts live in `docs/assets/` and are captured from the same session as the d
 
 | File | What it shows |
 |---|---|
-| `payment-required.png` | Terminal: browser UA gets 200, `ClaudeBot` UA gets `402 Payment Required` with the `payment-required` header and `x-agenttoll-verdict: ua:ClaudeBot` |
+| `payment-required.png` | Terminal: browser UA gets 200, `ClaudeBot` UA gets `402 Payment Required` with the `payment-required` header and `x-agenttoll-verdict: ua:ClaudeBot` (captured against the local stack on 127.0.0.1; on the public quick-tunnel URL Cloudflare answers ClaudeBot with a 403, so a live-URL shot must use `Claude-User/1.0`) |
 | `terminal-demo.png` | `bash scripts/demo-local.sh` output, steps 1 to 8 |
 | `dashboard-1440.png` | Founder dashboard at 1440 px: revenue, by route, by agent, by network, unbilled agent traffic |
 | `live-feed.gif` | A settlement row animating into the live feed |
@@ -182,7 +182,7 @@ Repo: github.com/Josefusan/agenttoll. If you run an API or an MCP server that ag
 
 ## Colosseum build log entries (one per shipped slice, short, factual)
 
-- D1: `agenttoll-core`: config, detector (36 cases), pricer, MCP body inspection. 29 tests.
+- D1: `agenttoll-core`: config, detector (37 table cases), pricer, MCP body inspection. 29 tests.
 - D2: Gateway pass-through and x402 v2 402 challenge. Fee payer read live from the facilitator's `/supported`.
 - D3: verify, forward, settle. SQLite ledger. Buyer CLI pays x402 URLs on Solana devnet or Base Sepolia.
 - D4: Admin API + SSE, founder dashboard, MCP-native x402, per-tool pricing, price advertising in `tools/list`, discovery document, simulated facilitator and one-command demo.
