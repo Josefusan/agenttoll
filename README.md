@@ -108,7 +108,7 @@ Full design: [ARCHITECTURE.md](ARCHITECTURE.md). Every design decision with its 
 ## Why Solana
 
 - **Sub-cent economics.** A per-call price like the live `$0.002` quote (KB-AMT-01: `2000` atomic USDC) only clears where the transaction fee is a fraction of the price. The facilitator sponsors the fee (KB-X402-07, KB-SOL-02), so the agent's only cost is the USDC and the founder keeps the amount.
-- **Settlement in about a second.** The x402 exact scheme is one transfer (KB-X402-07), and the dashboard renders a settlement within a second of it landing - no batch job or bank rail in between.
+- **One transfer, no middleman.** An x402 exact payment on Solana is a single SPL `TransferChecked` from the agent to the founder's token account, co-signed by the facilitator at `/settle` (KB-X402-07). There is no batch job or bank rail in between.
 - **Agents hold only USDC.** The facilitator is the transaction `feePayer`, and AgentToll reads it from the facilitator's `/supported` at startup instead of hardcoding it (KB-X402-07, KB-X402-04), so an agent needs no SOL.
 - **Solana is quoted first.** Every `402` lists Solana devnet in `accepts[0]` and Base Sepolia second, and the gateway carries no chain-specific money logic (KB-X402-06), so a second rail is a config block.
 - **PayAI is supported.** `https://facilitator.payai.network` serves x402 v2 `exact` on `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` with no API key on devnet (KB-X402-04), and this repo records a handshake against it.

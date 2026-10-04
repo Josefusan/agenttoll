@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-04T15:31:22+00:00",
-  "commit": "3b8b1e2",
+  "generated_at": "2026-10-04T16:22:40+00:00",
+  "commit": "393d64f",
   "engine": "rules (Jev key missing)",
   "note": "engine=rules means Jev did not answer; the verdict is a deterministic rule. Jev never overrides a failing rule.",
   "summary": {

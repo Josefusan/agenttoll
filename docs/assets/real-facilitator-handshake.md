@@ -76,9 +76,12 @@ the facilitator at startup (KB-X402-04), so the quote proves the real `/supporte
 ## Read this correctly
 
 - The facilitator was reached and it validated the transaction it was shown. It answered with
-  `isValid: false` and the reason `invalid_exact_svm_transaction_simulation_failed`: the unfunded
-  throwaway wallet cannot move 2000 atomic USDC, so the transfer simulation fails (no funded token
-  account). The gateway then re-issued the 402.
+  `isValid: false` and the reason `invalid_exact_svm_transaction_simulation_failed`. The gateway
+  then re-issued the 402. On 2026-10-04, `getTokenAccountsByOwner` on devnet showed no USDC token
+  account for either the throwaway buyer (`E1vu71Ys...`) or the payTo (`FFgkc6Zm...`). The source and
+  the destination account are both missing, and the exact scheme needs the destination one to exist
+  (KB-X402-07). The facilitator returns only the reason code, so this page does not say which
+  missing account failed the simulation first.
 - No transaction was signed onto the chain, no signature exists, and there is no explorer link.
   This is a rejection, not a settlement.
 - The value it proves is the wire format: the real facilitator `/supported` feePayer flows into
