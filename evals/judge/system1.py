@@ -176,7 +176,7 @@ def check_simulated_labels():
 
 # A line that scopes the explorer/on-chain wording to real settlements ("the explorer link
 # appears only for a real settlement") is the correct disclosure, not an overclaim.
-REAL_ONLY = re.compile(r"\b(only|real)\b[^.;]{0,40}\breal\b[^.;]{0,15}\bsettle|\breal settlement", re.I)
+REAL_ONLY = re.compile(r"\bonly\b[^.;]{0,40}\breal\b[^.;]{0,15}\bsettle", re.I)
 
 
 def check_no_onchain_simulated():

@@ -97,3 +97,7 @@ Any field the editor shows that is not in this table: answer it only from facts 
 | Confirm eligibility and prior-work facts | Personal facts |
 | Fund a devnet wallet (optional) | Funding is a Joseph decision |
 | Click Submit | Rule for this team |
+
+## Live feed behind a quick tunnel
+
+Cloudflare quick tunnels buffer server-sent events, so the public dashboard's live feed may stay silent. The dashboard reconciles with `/api/stats` every 5 seconds, so new payments still appear within about 5 seconds. Record the instant "dashboard ticks" shot on localhost (or behind a named tunnel), not on the quick-tunnel URL.

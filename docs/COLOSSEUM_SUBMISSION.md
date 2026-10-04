@@ -39,7 +39,7 @@ Rust gateway: axum, hyper, reqwest, rusqlite (SQLite ledger), hand-written x402 
 Solana, Base
 
 **How does your product use these chains?** (limit 500)
-Solana is the primary rail: agents pay per request in USDC (SPL) with the x402 v2 exact scheme, verified and settled through a facilitator whose fee payer sponsors the fee, so agents only hold USDC. Earnings land in one Solana USDC account the seller controls. Real settlement signatures link to Solana Explorer from the dashboard; simulated payments are labelled. Base (Sepolia today) is the second rail for EVM agents, paying USDC via EIP-3009 under the same rules. Devnet and testnet only so far.
+Solana is the primary rail: agents pay per request in USDC (SPL) with the x402 v2 exact scheme, verified and settled through a facilitator whose fee payer sponsors the fee, so agents only hold USDC. Earnings land in one Solana USDC account the seller controls. Only real settlements link to Solana Explorer; simulated payments are labelled. Base (Sepolia today) is the second rail for EVM agents, paying USDC via EIP-3009 under the same rules. Devnet and testnet only so far.
 
 **Category** (public)
 Developer Infrastructure
@@ -58,7 +58,7 @@ No
 No. AgentToll is built by Joseph Clark as a solo builder. I used AI coding agents (Claude Code with specialist subagents, plus an independent adversarial critic agent that reviews every pull request before it is merged) and open-source libraries, including the x402 specifications and SDKs (x402-foundation/x402) and x402-rs, which are credited in the repo.
 
 **Anything else judges should know?** (limit 500)
-Open source (MIT), self-hostable, non-custodial. Honest status: devnet and testnet only. The one-command demo settles through a simulated facilitator and labels every payment simulated. The real devnet path (PayAI facilitator, Circle devnet USDC) reaches the facilitator, but no wallet is funded yet. Tests: 90 Rust, 69 pay-mcp, 70 Worker (21 parity). First commit 2026-10-02; Website Factory is a separate, earlier product. Next: dogfood on Website Factory client sites.
+Open source (MIT), self-hostable, non-custodial. Honest status: devnet and testnet only. The one-command demo settles through a simulated facilitator and labels every payment simulated. The real devnet path (PayAI facilitator, Circle devnet USDC) reaches the facilitator, but no wallet is funded yet. Tests: 93 Rust, 69 pay-mcp, 70 Worker (21 parity). First commit 2026-10-02; Website Factory is a separate, earlier product. Next: dogfood on Website Factory client sites.
 
 **Go-to-market, demand validation and distribution plan** (the FAQ lists this as a required item; check the field name and limit in the editor, draft is under 1000 characters)
 Demand signal: Cloudflare opened a waitlist for an x402 monetization gateway on 2026-07-01, for Cloudflare customers only. AgentToll is the open, self-hosted version. Not validated yet: no customers, no revenue, no pilot.
@@ -89,7 +89,7 @@ Business model (plan): the open-source core stays free and non-custodial. A host
 | Base Sepolia exercised with funds | Not yet: configured and mock-tested only | `agenttoll.example.yaml` |
 | Web Bot Auth signature verification | Not built: detector hook exists, gateway passes `None` | `crates/agenttoll-core/src/detector.rs` |
 | Public deployment (simulated payments, behind a Cloudflare quick tunnel) | Built on a Contabo VPS under pm2 for 2026-10-04; the URL is temporary and must be re-checked on submit day. Not in front of a Website Factory page. ClaudeBot and GPTBot user agents get a Cloudflare 403 there, `Claude-User/1.0` gets the 402 | `deploy/README.md`, `~/Hackathons/AgentToll-LIVE.txt` |
-| Black-box evals | 117 of 117 cases pass (`evals/results/latest.md`, run 2026-10-04, debug binaries, simulated payments). They do not cover Web Bot Auth, the Worker edition, the dashboard or pay-mcp | `evals/` |
+| Black-box evals | 119 of 119 cases pass (`evals/results/latest.md`, run 2026-10-04, debug binaries, simulated payments). They do not cover Web Bot Auth, the Worker edition, the dashboard or pay-mcp | `evals/` |
 | Mainnet | Not attempted; needs Joseph's approval | `ARCHITECTURE.md` §2.1 |
 | Off-ramp or neobank integration | Not built by decision; `pay_to` is the payout destination | `docs/PAYOUTS.md` |
 

@@ -20,7 +20,7 @@ Built for the [Colosseum Crypto World's Fair](https://colosseum.com/worldsfair) 
 
 Every payment in the demo and the evals is **simulated** until a devnet wallet is funded. Nothing here has touched a chain.
 
-- **Evals:** [evals/results/latest.md](evals/results/latest.md) records 117 of 117 cases passing (run 2026-10-04, debug binaries, black-box HTTP against the real gateway). The file names the commit the binaries came from; the results were committed one commit later, because a results file cannot name its own commit. The suite does not cover Web Bot Auth, the Worker edition, the dashboard or pay-mcp. Run it yourself: `python3 evals/run.py --build`.
+- **Evals:** [evals/results/latest.md](evals/results/latest.md) records 119 of 119 cases passing (run 2026-10-04, debug binaries, black-box HTTP against the real gateway). The file names the commit the binaries came from; the results were committed one commit later, because a results file cannot name its own commit. The suite does not cover Web Bot Auth, the Worker edition, the dashboard or pay-mcp. Run it yourself: `python3 evals/run.py --build`.
 - **How the project grades itself:** [evals/judge/](evals/judge/) holds a seven-criterion rubric, fast rule checks and LLM judges. Its scores are model opinions and heuristics, not proof.
 - **Claude paying:** [docs/assets/claude-pays-transcript.md](docs/assets/claude-pays-transcript.md) is a full tool-call transcript of the headless Claude CLI finding a price, paying it within its caps, being refused on a $0.05 tool and paying for an MCP tool. Only local paths are redacted.
 - **Live demo:** a public simulated-payment deployment runs on a Cloudflare quick tunnel. The URL is in [docs/SUBMIT_DAY.md](docs/SUBMIT_DAY.md) and changes whenever the tunnel restarts, so it is not copied here. Cloudflare answers some AI crawler user agents on quick tunnels with its own 403, so use `Claude-User/1.0` there ([deploy/README.md](deploy/README.md)).
@@ -159,10 +159,10 @@ Hackathon build, devnet and testnet only. Test counts were re-run on 2026-10-04 
 
 | Part | Tests |
 |---|---|
-| Rust gateway + core + buyer + demo stack | 90 |
+| Rust gateway + core + buyer + demo stack | 93 |
 | pay-mcp | 69 |
 | Worker edition (21 are parity tests against the Rust gateway) | 70 |
-| Dashboard | typecheck, lint, build, Playwright checks |
+| Dashboard | 9 unit tests (SSE proxy, simulated copy), typecheck, lint, build, Playwright checks |
 
 Plan and progress: [docs/ROADMAP.md](docs/ROADMAP.md).
 

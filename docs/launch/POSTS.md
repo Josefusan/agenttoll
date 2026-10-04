@@ -30,7 +30,7 @@ ClaudeBot: 402 Payment Required, with an x402 v2 quote in the header: $0.002 in 
 
 Humans never see a paywall. Agents get a price. One YAML file.
 
-Rust gateway, 90 tests. Repo link in the next post.
+Rust gateway, 93 tests. Repo link in the next post.
 
 ### LinkedIn (DRAFT)
 

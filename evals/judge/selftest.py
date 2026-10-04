@@ -81,6 +81,17 @@ over = [m for m in re.finditer(r"\*\*([^*\n]+)\*\* \((?:public, )?limit (\d+)\)\
         if len(m.group(3).strip()) > int(m.group(2))]
 need(len(over) == 1, "planted over-limit field not detected by the form_limits pattern")
 
+# --- no_onchain_simulated: only lines that scope explorer links to real settlements are exempt
+def onchain_flag(line):
+    return bool(re.search(r"simulat", line, re.I) and re.search(r"on[- ]?chain|explorer", line, re.I)
+                and not s.NEGATION.search(line) and not s.REAL_ONLY.search(line))
+for bad in ["Simulated payments settle on-chain, exactly like a real settlement.",
+            "The simulated payment opens in the explorer.",
+            "Real settlement signatures and simulated ones both link to Solana Explorer."]:
+    need(onchain_flag(bad), f"on-chain overclaim not flagged: {bad!r}")
+need(not onchain_flag("The payment is simulated; the explorer link appears only for a real settlement."),
+     "correct real-settlement scoping was flagged")
+
 # --- judge.py: packet leaves system1.json out by default, model ids come from the envelope
 packet, used = j.build_packet(include_system1=False)
 need("evals/judge/results/system1.json" not in used, "system1.json is in the packet by default")

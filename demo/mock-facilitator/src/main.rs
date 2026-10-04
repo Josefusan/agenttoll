@@ -158,6 +158,18 @@ mod tests {
     use super::*;
 
     #[test]
+    fn fault_knobs_are_off_unless_enabled() {
+        // SAFETY: no other test in this binary reads or writes this variable.
+        unsafe { std::env::remove_var("MOCK_FACILITATOR_FAULTS") };
+        assert!(!faults_enabled());
+        unsafe { std::env::set_var("MOCK_FACILITATOR_FAULTS", "0") };
+        assert!(!faults_enabled());
+        unsafe { std::env::set_var("MOCK_FACILITATOR_FAULTS", "1") };
+        assert!(faults_enabled());
+        unsafe { std::env::remove_var("MOCK_FACILITATOR_FAULTS") };
+    }
+
+    #[test]
     fn shape_checks() {
         let good = json!({ "x402Version": 2, "paymentPayload": { "payload": {} }, "paymentRequirements": { "amount": "2000", "payTo": "p", "network": "n" } });
         assert_eq!(invalid_reason(&good), None);

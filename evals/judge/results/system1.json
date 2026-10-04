@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-04T14:18:35+00:00",
-  "commit": "35a013b",
+  "generated_at": "2026-10-04T14:32:59+00:00",
+  "commit": "b413cf3",
   "engine": "rules (Jev key missing)",
   "note": "engine=rules means Jev did not answer; the verdict is a deterministic rule. Jev never overrides a failing rule.",
   "summary": {
@@ -19,7 +19,7 @@
         "991/1000 What are you building, and who is it for?",
         "992/1000 Why did you decide to build this, and why build it now?",
         "496/500 What technologies are you using or integrating with?",
-        "499/500 How does your product use these chains?",
+        "475/500 How does your product use these chains?",
         "357/600 Did anyone not listed on the team do meaningful work?",
         "471/500 Anything else judges should know?"
       ],
@@ -33,7 +33,7 @@
       "verdict": "pass",
       "summary": "all counts match captured output",
       "details": [
-        "rust: README=90 submission=90 captured=90",
+        "rust: README=93 submission=93 captured=93",
         "pay_mcp: README=69 submission=69 captured=69",
         "worker: README=70 submission=70 captured=70",
         "worker_parity: README=21 submission=21 captured=21"

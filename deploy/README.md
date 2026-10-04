@@ -107,3 +107,7 @@ Make a throwaway buyer key with `agenttoll-buyer --new-solana-keypair /tmp/buyer
 ## Known caveat: Cloudflare blocks AI crawler user agents at its edge
 
 On a trycloudflare.com quick tunnel, Cloudflare answers some well known AI crawler user agents (ClaudeBot, GPTBot, PerplexityBot) with its own `403 Your request was blocked.` before the request reaches the gateway (response header `server: cloudflare`, no `PAYMENT-REQUIRED`). The same user agents get the expected 402 when sent straight to the gateway on 127.0.0.1:8402. Other agent user agents (`Claude-User/1.0`, `AgentToll-Buyer`) get the 402 through the tunnel. For a demo through a quick tunnel, use one of those. A named Cloudflare tunnel on your own zone with the AI bot block turned off, or Path A with a real host, does not have this limit.
+
+## Live feed behind a quick tunnel
+
+Cloudflare quick tunnels buffer server-sent events, so the public dashboard's live feed may stay silent. The dashboard reconciles with `/api/stats` every 5 seconds, so new payments still appear within about 5 seconds. Record the instant "dashboard ticks" shot on localhost (or behind a named tunnel), not on the quick-tunnel URL.
