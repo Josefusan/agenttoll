@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-04T15:17:42+00:00",
-  "commit": "e88b792",
+  "generated_at": "2026-10-04T15:31:22+00:00",
+  "commit": "3b8b1e2",
   "engine": "rules (Jev key missing)",
   "note": "engine=rules means Jev did not answer; the verdict is a deterministic rule. Jev never overrides a failing rule.",
   "summary": {
@@ -76,7 +76,7 @@
       "id": "no_secrets",
       "question": "Are tracked files free of secrets?",
       "verdict": "pass",
-      "summary": "214 tracked text files scanned with 7 patterns, 0 hit(s)",
+      "summary": "215 tracked text files scanned with 7 patterns, 0 hit(s)",
       "details": [],
       "engine": "rules (Jev key missing)",
       "rule_verdict": "pass",
