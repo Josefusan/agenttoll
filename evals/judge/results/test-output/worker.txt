@@ -1,33 +1,33 @@
 $ npx vitest run  (cwd workers/agenttoll-edge) exit=0
 
-[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m/home/joseph/Hackathons/AgentToll-d9/workers/agenttoll-edge[39m
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m/home/joseph/Hackathons/AgentToll-d10/workers/agenttoll-edge[39m
 
+ [32m✓[39m test/edge.test.ts [2m([22m[2m39 tests[22m[2m)[22m[33m 7775[2mms[22m[39m
+   [32m✓[39m challenge (D2 contract) [2m(6)[22m
+     [33m[2m✓[22m[39m human gets the page free[33m 375[2mms[22m[39m
+   [32m✓[39m settlement outcomes (D4) [2m(4)[22m
+     [33m[2m✓[22m[39m settle timeout serves the content and records it unconfirmed[33m 647[2mms[22m[39m
+   [32m✓[39m MCP-native transport (D4, KB-X402-05) [2m(17)[22m
+     [33m[2m✓[22m[39m a stalled /settle (headers sent, body never ends) is a timeout: served, unconfirmed[33m 638[2mms[22m[39m
+     [33m[2m✓[22m[39m a stalled /verify is a 502 and the payment is released[33m 631[2mms[22m[39m
 [90mstdout[2m | test/parity.test.ts[2m > [22m[2mRust gateway vs Worker parity
 [22m[39m[rust gateway]
-[2m2026-10-04T15:30:58.943030Z[0m [33m WARN[0m [2magenttoll_gateway[0m[2m:[0m public_url is unset: 402 quotes will build resource.url from the client's Host header
-[2m2026-10-04T15:30:59.101452Z[0m [33m WARN[0m [2magenttoll_gateway[0m[2m:[0m AGENTTOLL_ADMIN_TOKEN is unset: admin API (dashboard) off
-[2m2026-10-04T15:31:01.081203Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
-[2m2026-10-04T15:31:01.484060Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
-[2m2026-10-04T15:31:01.600508Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
-[2m2026-10-04T15:31:01.927692Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
+[2m2026-10-04T19:14:06.139700Z[0m [33m WARN[0m [2magenttoll_gateway[0m[2m:[0m public_url is unset: 402 quotes will build resource.url from the client's Host header
+[2m2026-10-04T19:14:06.257506Z[0m [33m WARN[0m [2magenttoll_gateway[0m[2m:[0m AGENTTOLL_ADMIN_TOKEN is unset: admin API (dashboard) off
+[2m2026-10-04T19:14:07.990097Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
+[2m2026-10-04T19:14:08.167971Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
+[2m2026-10-04T19:14:08.239717Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
+[2m2026-10-04T19:14:08.433180Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
 
 
- [32m✓[39m test/parity.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 4202[2mms[22m[39m
-   [32m✓[39m Rust gateway vs Worker parity [2m(21)[22m
-     [33m[2m✓[22m[39m settle decisions agree for SSE, wrong-id and plain MCP results[33m 649[2mms[22m[39m
- [32m✓[39m test/edge.test.ts [2m([22m[2m39 tests[22m[2m)[22m[33m 8055[2mms[22m[39m
-   [32m✓[39m settlement outcomes (D4) [2m(4)[22m
-     [33m[2m✓[22m[39m settle timeout serves the content and records it unconfirmed[33m 617[2mms[22m[39m
-   [32m✓[39m MCP-native transport (D4, KB-X402-05) [2m(17)[22m
-     [33m[2m✓[22m[39m a stalled /settle (headers sent, body never ends) is a timeout: served, unconfirmed[33m 604[2mms[22m[39m
-     [33m[2m✓[22m[39m a stalled /verify is a 502 and the payment is released[33m 605[2mms[22m[39m
- [32m✓[39m test/proxy.unit.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 90[2mms[22m[39m
- [32m✓[39m test/mcp.unit.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 73[2mms[22m[39m
+ [32m✓[39m test/parity.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 23114[2mms[22m[39m
+ [32m✓[39m test/mcp.unit.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 85[2mms[22m[39m
+ [32m✓[39m test/proxy.unit.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 98[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
 [2m      Tests [22m [1m[32m70 passed[39m[22m[90m (70)[39m
-[2m   Start at [22m 17:30:55
-[2m   Duration [22m 17.96s[2m (tests 73%, import 23%, transform 3%)[22m
+[2m   Start at [22m 21:13:32
+[2m   Duration [22m 36.98s[2m (tests 87%, import 11%, transform 2%)[22m
 
 
 [90mstderr[2m | test/proxy.unit.test.ts[2m > [22m[2mproxy header hygiene[2m > [22m[2mpreserve_host cannot override Host at the edge; the client host is still forwarded

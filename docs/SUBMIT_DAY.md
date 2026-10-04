@@ -15,6 +15,35 @@ Nothing here is done by an agent. Agents do not record videos, do not touch your
 5. Re-check the five why-now facts listed under "Pre-submit checklist" in `docs/COLOSSEUM_SUBMISSION.md`. If one changed, edit the doc, then the form.
 6. Confirm the public gateway URL. The live demo runs on a Cloudflare quick tunnel; on 2026-10-04 the gateway was `https://years-cow-stations-dubai.trycloudflare.com` and the dashboard was `https://commonwealth-dam-wheat-constructed.trycloudflare.com`. Quick-tunnel URLs change on every tunnel restart and nothing restarts pm2 after a reboot, so re-read them from `~/Hackathons/AgentToll-LIVE.txt` on the VPS (and run `pm2 resurrect` first if the host rebooted). Update the "Project website" answer in `docs/COLOSSEUM_SUBMISSION.md` to match. Open the URL in a private window and run `curl -A 'Claude-User/1.0' <url>/api/quote` (expect 402; ClaudeBot and GPTBot get a Cloudflare 403 on quick tunnels, see `deploy/README.md`). If it does not load, leave the Project website field empty. Every payment behind it is simulated.
 
+## Funding day (optional: the only path to a real settlement)
+
+Everything in the demo is simulated until both devnet wallets hold USDC. To make the first real
+settlement:
+
+1. Fund both addresses at [faucet.circle.com](https://faucet.circle.com) (Solana Devnet):
+   - buyer `8K5C7q93ANYbSz5M8Mho7Fra9WmBa58RAcMvycbxtB5D`
+   - payTo `FFgkc6ZmZHPrRwjyBFL56VP6u572g27TAyAdVqmBro7d`
+   No SOL is needed; the facilitator pays the fee.
+2. Run the preflight until it prints `READY`. It is read-only: it never reads a keypair file, never
+   signs and never sends a transaction. It checks both devnet USDC token accounts and the
+   facilitator's feePayer:
+
+   ```bash
+   bash scripts/real-payment-preflight.sh 8K5C7q93ANYbSz5M8Mho7Fra9WmBa58RAcMvycbxtB5D FFgkc6ZmZHPrRwjyBFL56VP6u572g27TAyAdVqmBro7d
+   ```
+
+3. Then run the buyer against a gateway configured with the real PayAI facilitator (`agenttoll.example.yaml`
+   keeps `facilitator: https://facilitator.payai.network`):
+
+   ```bash
+   agenttoll-buyer --network solana --solana-keypair ~/agenttoll-buyer.json <gateway-url>/api/quote
+   ```
+
+   It prints the Solana Explorer link for the settlement. Only after this succeeds may any doc or the
+   demo video say a payment settled on chain. Do not repoint the live d8 gateway to the real
+   facilitator to make this happen; run the funded wallets through a gateway built with
+   `agenttoll.example.yaml`.
+
 ## 1. Record the videos (Joseph only)
 
 | Item | Length rule | Script | Notes |
@@ -73,6 +102,7 @@ Any field the editor shows that is not in this table: answer it only from facts 
 
 ## 5. Last checks, then Submit
 
+- [ ] Run `bash scripts/refresh-live-urls.sh` on the VPS first (it checks every quick-tunnel URL in tracked files against `~/Hackathons/AgentToll-LIVE.txt` and prints `STALE`/`DEAD` for anything wrong; `--apply` rewrites the stale ones).
 - [ ] Every field filled. Both video links open in a private window.
 - [ ] Re-read the form once against the truth table. Anything you cannot defend in a 15-minute interview comes out.
 - [ ] Click **Submit** yourself.

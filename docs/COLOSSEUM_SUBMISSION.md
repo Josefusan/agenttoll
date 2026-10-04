@@ -58,7 +58,7 @@ No
 No. AgentToll is built by Joseph Clark as a solo builder. I used AI coding agents (Claude Code with specialist subagents, plus an independent adversarial critic agent that reviews every pull request before it is merged) and open-source libraries, including the x402 specifications and SDKs (x402-foundation/x402) and x402-rs, which are credited in the repo.
 
 **Anything else judges should know?** (limit 500)
-Open source (MIT), self-hostable, non-custodial. Honest status: devnet and testnet only. The one-command demo settles through a simulated facilitator and labels every payment simulated. The real devnet path (PayAI facilitator, Circle devnet USDC) reaches the facilitator, but no wallet is funded yet. Tests: 93 Rust, 69 pay-mcp, 70 Worker (21 parity). First commit 2026-10-02; Website Factory is a separate, earlier product. Next: dogfood on Website Factory client sites.
+Open source (MIT), self-hostable, non-custodial. Honest status: devnet and testnet only. The one-command demo settles through a simulated facilitator and labels every payment simulated. Both real facilitators (PayAI on Solana, x402.org on Base) were reached and rejected our unfunded wallets; handshakes documented. Tests: 93 Rust, 69 pay-mcp, 70 Worker (21 parity). First commit 2026-10-02; Website Factory is a separate, earlier product. Next: dogfood on Website Factory client sites.
 
 **Go-to-market, demand validation and distribution plan** (the FAQ lists this as a required item; check the field name and limit in the editor, draft is under 1000 characters)
 Demand signal: Cloudflare opened a waitlist for an x402 monetization gateway on 2026-07-01, for Cloudflare customers only. AgentToll is the open, self-hosted version. Not validated yet: no customers, no revenue, no pilot.

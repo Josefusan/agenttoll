@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-04T16:22:40+00:00",
-  "commit": "393d64f",
+  "generated_at": "2026-10-04T19:14:18+00:00",
+  "commit": "ec28e8b",
   "engine": "rules (Jev key missing)",
   "note": "engine=rules means Jev did not answer; the verdict is a deterministic rule. Jev never overrides a failing rule.",
   "summary": {
@@ -21,7 +21,7 @@
         "496/500 What technologies are you using or integrating with?",
         "475/500 How does your product use these chains?",
         "357/600 Did anyone not listed on the team do meaningful work?",
-        "471/500 Anything else judges should know?"
+        "486/500 Anything else judges should know?"
       ],
       "engine": "rules (Jev key missing)",
       "rule_verdict": "pass",
@@ -76,7 +76,7 @@
       "id": "no_secrets",
       "question": "Are tracked files free of secrets?",
       "verdict": "pass",
-      "summary": "215 tracked text files scanned with 7 patterns, 0 hit(s)",
+      "summary": "217 tracked text files scanned with 7 patterns, 0 hit(s)",
       "details": [],
       "engine": "rules (Jev key missing)",
       "rule_verdict": "pass",
