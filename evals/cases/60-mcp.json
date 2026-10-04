@@ -1,0 +1,754 @@
+[
+  {
+    "id": "MCP-01",
+    "promise": "MCP initialize is free and reaches the origin",
+    "steps": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+              "protocolVersion": "2025-06-18",
+              "capabilities": {},
+              "clientInfo": {
+                "name": "eval",
+                "version": "1"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            },
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/result/serverInfo/name": "acme-data"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-02",
+    "promise": "MCP tools/list is free and advertises each paid tool's price in its description",
+    "steps": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/list"
+          }
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/result/tools/0/name": "search_docs",
+            "/result/tools/0/description": {
+              "contains": "(Paid tool: $0.005 USDC per call via x402.)"
+            },
+            "/result/tools/1/description": {
+              "contains": "$0.05 USDC"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-03",
+    "promise": "Free tools are not decorated with a price and stay free to call",
+    "steps": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/list"
+          }
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/result/tools/2/name": "ping_free",
+            "/result/tools/2/description": "A free tool."
+          }
+        }
+      },
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 7,
+            "method": "tools/call",
+            "params": {
+              "name": "ping_free",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/result/content/0/text": "pong",
+            "/result/isError": false
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-04",
+    "promise": "tools/call without payment gets the MCP-native challenge: HTTP 200, result.isError true, structuredContent is a v2 PaymentRequired",
+    "steps": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 7,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "exists": true
+            },
+            "x-agenttoll-verdict": "mcp-endpoint"
+          },
+          "json": {
+            "/jsonrpc": "2.0",
+            "/id": 7,
+            "/result/isError": true,
+            "/result/structuredContent/x402Version": 2,
+            "/result/structuredContent/accepts/@solana/amount": "5000",
+            "/result/structuredContent/accepts/@solana/scheme": "exact",
+            "/result/content/0/type": "text"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-05",
+    "promise": "The MCP challenge text, structuredContent and PAYMENT-REQUIRED header all carry the same PaymentRequired",
+    "steps": [
+      {
+        "check": "mcp_text_equals_structured"
+      }
+    ]
+  },
+  {
+    "id": "MCP-06",
+    "promise": "The MCP quote is bound to the tool: resource.url ends with #mcp:<tool>",
+    "steps": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 7,
+            "method": "tools/call",
+            "params": {
+              "name": "generate_report",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/result/structuredContent/resource/url": {
+              "re": "/mcp#mcp:generate_report$"
+            },
+            "/result/structuredContent/accepts/@solana/amount": "50000"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-07",
+    "promise": "Paid tools/call (MCP-native, params._meta[x402/payment]) succeeds and the receipt is in the result and header",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 7,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/result/isError": true
+          }
+        }
+      },
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 7,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "pay": {
+          "from": "q",
+          "transport": "mcp-meta"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-response": {
+              "exists": true
+            }
+          },
+          "receipt": {
+            "/success": true,
+            "/transaction": {
+              "re": "^SIMULATED-"
+            }
+          },
+          "json": {
+            "/id": 7,
+            "/result/isError": false,
+            "/result/content/0/text": {
+              "contains": "results for"
+            }
+          },
+          "body_contains": "SIMULATED-"
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-08",
+    "promise": "Paid tools/call also works with the HTTP PAYMENT-SIGNATURE header on /mcp",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 8,
+            "method": "tools/call",
+            "params": {
+              "name": "generate_report",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/result/isError": true
+          }
+        }
+      },
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 8,
+            "method": "tools/call",
+            "params": {
+              "name": "generate_report",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "pay": {
+          "from": "q",
+          "transport": "header"
+        },
+        "expect": {
+          "status": 200,
+          "receipt": {
+            "/success": true,
+            "/amount": "50000",
+            "/transaction": {
+              "re": "^SIMULATED-"
+            }
+          },
+          "json": {
+            "/result/content/0/text": {
+              "contains": "SOL demand"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-09",
+    "promise": "An MCP tool that errors is NOT settled: the JSON-RPC error is returned and there is no PAYMENT-RESPONSE",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 9,
+            "method": "tools/call",
+            "params": {
+              "name": "broken_tool",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/result/isError": true
+          }
+        }
+      },
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 9,
+            "method": "tools/call",
+            "params": {
+              "name": "broken_tool",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "pay": {
+          "from": "q",
+          "transport": "mcp-meta"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/error/code": -32602,
+            "/error/message": {
+              "contains": "unknown tool"
+            },
+            "/result": {
+              "absent": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-10",
+    "promise": "A payment for one tool cannot be spent on another tool of the same price (resource fragment binding)",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 10,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/result/isError": true
+          }
+        }
+      },
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 11,
+            "method": "tools/call",
+            "params": {
+              "name": "broken_tool",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "pay": {
+          "from": "q",
+          "transport": "mcp-meta"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/result/isError": true,
+            "/result/structuredContent/error": {
+              "contains": "different resource"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-11",
+    "promise": "A batch of tool calls is priced as the sum, so batching cannot dodge the price (5000 + 50000 = 55000)",
+    "steps": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": [
+            {
+              "jsonrpc": "2.0",
+              "id": 1,
+              "method": "tools/call",
+              "params": {
+                "name": "search_docs",
+                "arguments": {
+                  "query": "x402"
+                }
+              }
+            },
+            {
+              "jsonrpc": "2.0",
+              "id": 2,
+              "method": "tools/call",
+              "params": {
+                "name": "generate_report",
+                "arguments": {
+                  "query": "x402"
+                }
+              }
+            }
+          ]
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/@solana/amount": "55000",
+            "/resource/url": {
+              "contains": "mcp:search_docs+generate_report"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-12",
+    "promise": "A paid-tool call on a mixed-case endpoint path (POST /MCP) is still challenged",
+    "steps": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/MCP",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 7,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/result/isError": true,
+            "/result/structuredContent/accepts/@solana/amount": "5000"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-13",
+    "promise": "An MCP payment cannot be replayed on a second tools/call",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 20,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/result/isError": true
+          }
+        }
+      },
+      {
+        "id": "first",
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 20,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "pay": {
+          "from": "q",
+          "transport": "header"
+        },
+        "expect": {
+          "status": 200,
+          "receipt": {
+            "/success": true
+          }
+        }
+      },
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 21,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "pay": {
+          "reuse": "first"
+        },
+        "expect": {
+          "status": 402,
+          "json": {
+            "/error": "duplicate_settlement"
+          },
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-14",
+    "promise": "A malformed MCP body is a 400 JSON-RPC parse error, not free passage",
+    "steps": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "body": "{not json"
+        },
+        "expect": {
+          "status": 400,
+          "json": {
+            "/error/code": -32700
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "MCP-15",
+    "promise": "A tampered amount on an MCP-native payment is refused with the MCP challenge shape",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 30,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/result/isError": true
+          }
+        }
+      },
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 31,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "pay": {
+          "from": "q",
+          "transport": "mcp-meta",
+          "tamper": {
+            "amount": "1"
+          }
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/result/isError": true,
+            "/result/structuredContent/x402Version": 2,
+            "/id": 31
+          }
+        }
+      }
+    ]
+  }
+]

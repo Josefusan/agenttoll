@@ -1,0 +1,269 @@
+[
+  {
+    "id": "X402-01",
+    "promise": "PAYMENT-REQUIRED header is base64 JSON and carries the same PaymentRequired as the 402 body",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "id": "q",
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/x402Version": 2,
+            "/accepts/@solana/amount": "2000"
+          },
+          "json": {
+            "/x402Version": 2,
+            "/accepts/@solana/amount": "2000"
+          }
+        }
+      },
+      {
+        "check": "challenge_deterministic"
+      }
+    ]
+  },
+  {
+    "id": "X402-02",
+    "promise": "x402Version is 2 and no v1 field (maxAmountRequired) is emitted",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/x402Version": 2,
+            "/accepts/@solana/maxAmountRequired": {
+              "absent": true
+            },
+            "/accepts/@solana/amount": {
+              "type": "str"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-03",
+    "promise": "Each accepts[] entry uses scheme exact",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/@solana/scheme": "exact",
+            "/accepts/@base/scheme": "exact"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-04",
+    "promise": "network is a CAIP-2 id; Solana devnet is the primary rail",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/@solana/network": "$solana_network",
+            "/accepts/@base/network": "$base_network"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-05",
+    "promise": "amount is atomic USDC: 0.002 USD quotes as \"2000\" (price * 1e6)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/@solana/amount": "2000",
+            "/accepts/@base/amount": "2000"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-06",
+    "promise": "Quotes for every priced route and MCP tool equal price_usd * 1e6, matching the published price list",
+    "steps": [
+      {
+        "check": "price_math"
+      }
+    ]
+  },
+  {
+    "id": "X402-07",
+    "promise": "asset is the devnet USDC mint on Solana and USDC on Base Sepolia",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/@solana/asset": "$solana_usdc",
+            "/accepts/@base/asset": "$base_usdc"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-08",
+    "promise": "payTo is the configured receiving address on each rail",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/@solana/payTo": "$payto",
+            "/accepts/@base/payTo": "$base_payto"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-09",
+    "promise": "maxTimeoutSeconds is a positive integer",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/@solana/maxTimeoutSeconds": {
+              "type": "int",
+              "gte": 1
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-10",
+    "promise": "Solana quote carries extra.feePayer, equal to the facilitator's advertised fee payer",
+    "steps": [
+      {
+        "check": "fee_payer_matches_facilitator"
+      }
+    ]
+  },
+  {
+    "id": "X402-11",
+    "promise": "Base quote carries the EIP-3009 USDC domain in extra (name USDC, version 2)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/@base/extra/name": "USDC",
+            "/accepts/@base/extra/version": "2",
+            "/accepts/@base/extra/feePayer": {
+              "absent": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-12",
+    "promise": "resource.url binds the quote to the requested URL on the public base URL",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/resource/url": {
+              "re": "^http://127\\.0\\.0\\.1:\\d+/api/quote$"
+            },
+            "/resource/description": "Live price quote"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-13",
+    "promise": "The 402 body explains what to do (error names the PAYMENT-SIGNATURE header)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "json": {
+            "/error": {
+              "contains": "PAYMENT-SIGNATURE"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "X402-14",
+    "promise": "Solana, the primary rail, is quoted first (accepts[0]) and Base Sepolia second",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/0/network": "$solana_network",
+            "/accepts/1/network": "$base_network"
+          }
+        }
+      }
+    ]
+  }
+]

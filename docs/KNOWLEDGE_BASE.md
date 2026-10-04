@@ -169,11 +169,17 @@ rules:
 - Source: https://suganthan.com/blog/x402-pay-per-crawl/
 
 ### KB-HACK-01: Colosseum Crypto World's Fair
-- Dates: 2026-09-14 to 2026-10-12. Final submission opens 2026-10-06 04:00 PDT.
-- Tracks: Solana, Ethereum, Hyperliquid, Base, Tempo, Arbitrum, Zcash, Robinhood Chain. Solana pool $100K (10 × $10K).
-- Grand prize $30K; 20 runner-ups × $15K; $5K Public Good and University prizes. Accelerator: $250K pre-seed, $2.5M total.
-- Judged on product quality and innovation potential, plus track judges.
-- Source: https://colosseum.com/worldsfair
+- Contest period: 6:00am PT 2026-09-14 to 11:59pm PT 2026-10-12. Winners announced by 2026-12-05 (Official Rules s5).
+- "Final submission opens 2026-10-06 04:00 PDT" is UNVERIFIED. It is not on any public page checked on 2026-10-04. The project editor needs Joseph's login.
+- Tracks: Solana $100K (10 products), Tempo $100K (10), Hyperliquid $100K (10), Zcash $100K (10), Ethereum L1 $25K (5), Base $25K (5), Arbitrum $25K (5), Robinhood Chain $25K (5). A track is defined only as "products that integrate with" the chain (s14). Track prizes are on top of the main awards.
+- Main awards: Grand $30K, Public Goods $5K, University $5K, next 20 standout teams $15K each, paid in CASH stablecoin. Page headline: $840,000 in prizes and $2.5M in seed funding. Accelerator: $250K pre-seed, 12 weeks in San Francisco.
+- Judging criteria (Rules s8, listed in this order): Functionality and code quality; Potential impact (TAM); Novelty; UX (blockchain used for good downstream UX); Open-source and composability; Business plan. The FAQ adds founder-market fit, insight, product and execution, market size, founder communication, viability and traction.
+- Submission items (FAQ): name and brief description; chains and tools; teammates and backgrounds; location; logo or graphic; GitHub link (open source encouraged, private allowed with access for hackathon@colosseum.com); a two-to-three-minute presentation video; a product-demo video of no more than three minutes; go-to-market, demand validation and distribution plan.
+- Eligibility: 18 or older, not in an excluded country (s3). "New startups that haven't raised significant outside capital" (FAQ). Pre-existing code allowed if disclosed in the form. Only work inside the contest period is judged. One team per person, one submission per team (s7).
+- Repo review looks for significant work during the hackathon, done by the team and not a third party (FAQ). No language or code-quality checks.
+- Weekly one-minute update videos are recommended, not required. Shortlist gets a 15-minute Zoom interview.
+- Sources: https://colosseum.com/worldsfair ; https://colosseum.com/legal/Crypto%20World's%20Fair%20Hackathon%20Rules.pdf ; https://colosseum.com/hackathon (FAQs).
+- checked: 2026-10-04. Full matrix: `docs/COLOSSEUM_REQUIREMENTS.md`.
 
 ### KB-AMT-01: Amount math
 - USDC has 6 decimals on Solana and Base. `atomic = round(usd * 1_000_000)`.

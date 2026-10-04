@@ -1,0 +1,86 @@
+{
+  "generated_at": "2026-10-04T14:32:59+00:00",
+  "commit": "b413cf3",
+  "engine": "rules (Jev key missing)",
+  "note": "engine=rules means Jev did not answer; the verdict is a deterministic rule. Jev never overrides a failing rule.",
+  "summary": {
+    "pass": 6,
+    "fail": 0,
+    "unknown": 0
+  },
+  "checks": [
+    {
+      "id": "form_limits",
+      "question": "Is every Colosseum form answer within its character limit?",
+      "verdict": "pass",
+      "summary": "7 fields parsed, 0 over limit",
+      "details": [
+        "497/500 Brief description",
+        "991/1000 What are you building, and who is it for?",
+        "992/1000 Why did you decide to build this, and why build it now?",
+        "496/500 What technologies are you using or integrating with?",
+        "475/500 How does your product use these chains?",
+        "357/600 Did anyone not listed on the team do meaningful work?",
+        "471/500 Anything else judges should know?"
+      ],
+      "engine": "rules (Jev key missing)",
+      "rule_verdict": "pass",
+      "jev_p_yes": null
+    },
+    {
+      "id": "test_counts",
+      "question": "Do the test counts in README and the submission match the captured test output?",
+      "verdict": "pass",
+      "summary": "all counts match captured output",
+      "details": [
+        "rust: README=93 submission=93 captured=93",
+        "pay_mcp: README=69 submission=69 captured=69",
+        "worker: README=70 submission=70 captured=70",
+        "worker_parity: README=21 submission=21 captured=21"
+      ],
+      "engine": "rules (Jev key missing)",
+      "rule_verdict": "pass",
+      "jev_p_yes": null
+    },
+    {
+      "id": "forbidden_claims",
+      "question": "Are all forbidden claims absent from README and launch docs?",
+      "verdict": "pass",
+      "summary": "10 forbidden terms (Supabase, shadcn/ui, Kora, Circle CCTP, x402-axum, Hono, Web Bot Auth verification, a live Worker, customers, revenue); 0 un-negated hit(s)",
+      "details": [],
+      "engine": "rules (Jev key missing)",
+      "rule_verdict": "pass",
+      "jev_p_yes": null
+    },
+    {
+      "id": "simulated_labels",
+      "question": "Does every place that shows a demo payment say simulated?",
+      "verdict": "pass",
+      "summary": "3 demo-payment lines checked, 0 without 'simulated' within 6 lines",
+      "details": [],
+      "engine": "rules (Jev key missing)",
+      "rule_verdict": "pass",
+      "jev_p_yes": null
+    },
+    {
+      "id": "no_onchain_simulated",
+      "question": "Is no simulated payment described as on-chain?",
+      "verdict": "pass",
+      "summary": "0 line(s) pair 'simulated' with on-chain or explorer without a negation",
+      "details": [],
+      "engine": "rules (Jev key missing)",
+      "rule_verdict": "pass",
+      "jev_p_yes": null
+    },
+    {
+      "id": "no_secrets",
+      "question": "Are tracked files free of secrets?",
+      "verdict": "pass",
+      "summary": "213 tracked text files scanned with 7 patterns, 0 hit(s)",
+      "details": [],
+      "engine": "rules (Jev key missing)",
+      "rule_verdict": "pass",
+      "jev_p_yes": null
+    }
+  ]
+}

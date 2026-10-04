@@ -13,3 +13,8 @@ dist/
 agenttoll.yaml
 .demo/
 id.json
+*keypair*.json
+buyer.json
+payto.json
+wallet*.json
+evals/__pycache__/

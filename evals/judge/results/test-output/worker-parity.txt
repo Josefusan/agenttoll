@@ -1,0 +1,24 @@
+$ npx vitest run test/parity.test.ts  (cwd workers/agenttoll-edge) exit=0
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90m/home/joseph/Hackathons/AgentToll-d8/workers/agenttoll-edge[39m
+
+[90mstdout[2m | test/parity.test.ts[2m > [22m[2mRust gateway vs Worker parity
+[22m[39m[rust gateway]
+[2m2026-10-04T14:31:22.935487Z[0m [33m WARN[0m [2magenttoll_gateway[0m[2m:[0m public_url is unset: 402 quotes will build resource.url from the client's Host header
+[2m2026-10-04T14:31:23.028541Z[0m [33m WARN[0m [2magenttoll_gateway[0m[2m:[0m AGENTTOLL_ADMIN_TOKEN is unset: admin API (dashboard) off
+[2m2026-10-04T14:31:24.665497Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
+[2m2026-10-04T14:31:24.870962Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
+[2m2026-10-04T14:31:24.943638Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
+[2m2026-10-04T14:31:25.138803Z[0m [33m WARN[0m [2magenttoll_gateway::pay[0m[2m:[0m MCP result could not be verified; payment not settled, content withheld
+
+
+ [32m✓[39m test/parity.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 3061[2mms[22m[39m
+   [32m✓[39m Rust gateway vs Worker parity [2m(21)[22m
+     [33m[2m✓[22m[39m settle decisions agree for SSE, wrong-id and plain MCP results[33m 343[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m21 passed[39m[22m[90m (21)[39m
+[2m   Start at [22m 16:31:19
+[2m   Duration [22m 5.61s[2m (tests 57%, import 36%, transform 7%)[22m
+
+

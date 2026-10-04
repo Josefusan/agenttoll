@@ -11,7 +11,9 @@ export type LoadState =
 
 export type FeedState = "connecting" | "live" | "reconnecting" | "offline";
 
-const RECONCILE_MS = 30_000;
+// Some proxies (Cloudflare quick tunnels) buffer SSE, so the feed may stay silent behind them;
+// a short reconcile keeps the dashboard current anyway.
+const RECONCILE_MS = 5_000;
 const FRESH_MS = 2_000;
 const BACKOFF_START_MS = 1_000;
 const BACKOFF_MAX_MS = 30_000;

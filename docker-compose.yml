@@ -2,6 +2,8 @@
 #   cp .env.example .env   # set AGENTTOLL_SOLANA_PAYTO, AGENTTOLL_ADMIN_TOKEN, AGENTTOLL_PUBLIC_URL
 #   docker compose up --build
 # Published ports bind to 127.0.0.1 unless GATEWAY_BIND / DASHBOARD_BIND say otherwise.
+# The dashboard host port is DASHBOARD_PORT (default 3000). Use 3402 on the shared VPS,
+# where port 3000 belongs to another project.
 # The dashboard has no login of its own: only publish it for a demo with demo data.
 services:
   origin:
@@ -43,7 +45,7 @@ services:
       AGENTTOLL_ADMIN_URL: http://gateway:8403
       AGENTTOLL_ADMIN_TOKEN: ${AGENTTOLL_ADMIN_TOKEN}
     ports:
-      - "${DASHBOARD_BIND:-127.0.0.1}:3000:3000"
+      - "${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-3000}:3000"
     restart: unless-stopped
 
 volumes:

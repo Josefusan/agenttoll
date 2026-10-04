@@ -1,0 +1,65 @@
+[
+  {
+    "id": "STAT-01",
+    "promise": "Ledger revenue and payment count equal exactly what the run saw settle, plus the one unconfirmed payment from FAIL-02; no refused or failed attempt was charged",
+    "steps": [
+      {
+        "check": "ledger_matches_observed"
+      }
+    ]
+  },
+  {
+    "id": "STAT-02",
+    "promise": "Stats separate simulated money: simulated_atomic equals what settled, unconfirmed_atomic equals only the FAIL-02 payment, real is 0",
+    "steps": [
+      {
+        "check": "simulated_separated"
+      }
+    ]
+  },
+  {
+    "id": "STAT-03",
+    "promise": "Every settled ledger row is labelled simulated with a SIMULATED- tx id; the FAIL-02 row is unconfirmed and not flagged simulated",
+    "steps": [
+      {
+        "check": "recent_all_labelled"
+      }
+    ]
+  },
+  {
+    "id": "STAT-04",
+    "promise": "Routes whose paid attempts failed (origin 5xx, MCP tool error) have no revenue",
+    "steps": [
+      {
+        "check": "failures_not_in_ledger"
+      }
+    ]
+  },
+  {
+    "id": "STAT-05",
+    "promise": "Revenue is reported per network and matches what settled on each rail",
+    "steps": [
+      {
+        "check": "by_network_both"
+      }
+    ]
+  },
+  {
+    "id": "STAT-06",
+    "promise": "MCP revenue is recorded per tool",
+    "steps": [
+      {
+        "check": "mcp_tool_recorded"
+      }
+    ]
+  },
+  {
+    "id": "STAT-07",
+    "promise": "Revenue is attributed to the agents that paid (GPTBot, AgentToll-Buyer)",
+    "steps": [
+      {
+        "check": "agents_attributed"
+      }
+    ]
+  }
+]

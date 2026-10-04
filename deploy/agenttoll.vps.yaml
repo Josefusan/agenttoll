@@ -1,0 +1,36 @@
+# Gateway config for the no-sudo VPS demo (pm2 + Cloudflare quick tunnel).
+# Every payment is SIMULATED: the facilitator is demo/mock-facilitator and nothing touches
+# a chain. Secrets and the public URL come from the env file (~/agenttoll-live.env).
+origin: http://127.0.0.1:4000
+listen: "${AGENTTOLL_LISTEN}"              # set by deploy/pm2.config.cjs (default 127.0.0.1:8402)
+admin_listen: "${AGENTTOLL_ADMIN_LISTEN}"  # set by pm2 (default 127.0.0.1:8403); never exposed through a tunnel
+public_url: "${AGENTTOLL_PUBLIC_URL}"  # the gateway tunnel URL, so quotes carry the right resource URL
+detection: agents-only
+
+networks:
+  solana:
+    network: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"   # devnet (KB-SOL-01)
+    asset: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU" # devnet USDC (KB-SOL-01)
+    pay_to: "${AGENTTOLL_SOLANA_PAYTO}"
+    facilitator: "http://127.0.0.1:4020"                  # SIMULATED
+
+routes:
+  - match: "GET /api/quote"
+    price_usd: "0.002"
+    description: "Live price quote"
+  - match: "GET /api/*"
+    price_usd: "0.001"
+  - match: "GET /blog/*"
+    price_usd: "0.001"
+  - match: "/*"
+    price_usd: "0"
+
+mcp:
+  endpoint: /mcp
+  advertise_prices: true
+  tools:
+    search_docs: "0.005"
+    generate_report: "0.05"
+
+ledger:
+  url: "sqlite://${AGENTTOLL_DATA_DIR}/agenttoll.db"

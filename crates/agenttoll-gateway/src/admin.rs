@@ -24,6 +24,10 @@ struct AdminState {
     token: String,
 }
 
+/// Seconds between SSE keepalive comments on `/admin/events`. Short enough to stay under
+/// typical proxy idle timeouts.
+const KEEP_ALIVE_SECS: u64 = 10;
+
 /// Shortest admin token accepted.
 pub const MIN_TOKEN_LEN: usize = 24;
 
@@ -88,14 +92,21 @@ async fn events(
     State(state): State<AdminState>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     // A lagging subscriber skips missed events; the dashboard re-reads /admin/stats anyway.
-    let stream = BroadcastStream::new(state.ledger.subscribe()).filter_map(|event| {
+    let live = BroadcastStream::new(state.ledger.subscribe()).filter_map(|event| {
         let event = event.ok()?;
         Some(Ok(Event::default()
             .event("revenue")
             .json_data(&event)
             .ok()?))
     });
-    Sse::new(stream).keep_alive(KeepAlive::new().interval(Duration::from_secs(15)))
+    // First frame goes out at once, so proxies and tunnels that hold a response until the
+    // first body bytes (the dashboard through a quick tunnel) open the stream immediately.
+    let hello = tokio_stream::once(Ok(Event::default().comment("connected")));
+    Sse::new(hello.chain(live)).keep_alive(
+        KeepAlive::new()
+            .interval(Duration::from_secs(KEEP_ALIVE_SECS))
+            .text("keepalive"),
+    )
 }
 
 #[cfg(test)]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "FAIL-02",
+    "promise": "If /settle outlasts the settle budget, the buyer is served the content, no receipt is returned, and the ledger records the payment as unconfirmed (SIMULATED facilitator)",
+    "steps": [
+      {
+        "check": "settle_timeout_unconfirmed"
+      }
+    ]
+  },
+  {
+    "id": "FAIL-03",
+    "promise": "If the facilitator's /verify rejects the payment, the answer is 402 and the content is withheld; nothing is settled",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "payload": {
+            "transaction": "EVAL-verify-failure",
+            "mock": "verify_fail"
+          }
+        },
+        "expect": {
+          "status": 402,
+          "json": {
+            "/error": "mock_verify_failure"
+          },
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  }
+]

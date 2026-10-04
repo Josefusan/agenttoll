@@ -16,6 +16,15 @@ AgentToll is an open-source paywall proxy. Put it in front of a site, an API or 
 
 Built for the [Colosseum Crypto World's Fair](https://colosseum.com/worldsfair) (Sep 14 to Oct 12, 2026). Tracks: **Solana** (primary), **Base**.
 
+## Proof
+
+Every payment in the demo and the evals is **simulated** until a devnet wallet is funded. Nothing here has touched a chain.
+
+- **Evals:** [evals/results/latest.md](evals/results/latest.md) records 119 of 119 cases passing (run 2026-10-04, debug binaries, black-box HTTP against the real gateway). The file names the commit the binaries came from; the results were committed one commit later, because a results file cannot name its own commit. The suite does not cover Web Bot Auth, the Worker edition, the dashboard or pay-mcp. Run it yourself: `python3 evals/run.py --build`.
+- **How the project grades itself:** [evals/judge/](evals/judge/) holds a seven-criterion rubric, fast rule checks and LLM judges. Its scores are model opinions and heuristics, not proof.
+- **Claude paying:** [docs/assets/claude-pays-transcript.md](docs/assets/claude-pays-transcript.md) is a full tool-call transcript of the headless Claude CLI finding a price, paying it within its caps, being refused on a $0.05 tool and paying for an MCP tool. Only local paths are redacted.
+- **Live demo:** a public simulated-payment deployment runs on a Cloudflare quick tunnel. The URL is in [docs/SUBMIT_DAY.md](docs/SUBMIT_DAY.md) and changes whenever the tunnel restarts, so it is not copied here. Cloudflare answers some AI crawler user agents on quick tunnels with its own 403, so use `Claude-User/1.0` there ([deploy/README.md](deploy/README.md)).
+
 ## Who it is for
 
 | You are | AgentToll gives you |
@@ -29,9 +38,13 @@ Seven worked cases with configs and proofs: [docs/USE_CASES.md](docs/USE_CASES.m
 
 ## Try it in one command (no wallet, no funds)
 
+You need a Rust toolchain (`rustup`, stable), `curl` and `python3`. No Docker, no wallet, no keys. The first run compiles the workspace, about 590 crates (`cargo tree -e normal,build` on the four demo packages): 14 minutes on a shared 4-core server limited to 2 build jobs (measured 2026-10-04), faster on a laptop. Later runs start in seconds.
+
 ```bash
 bash scripts/demo-local.sh
 ```
+
+Ports are 8402 (gateway), 8403 (admin), 4000 (origin) and 4020 (simulated facilitator). If one is taken, set `GATEWAY_PORT`, `ADMIN_PORT`, `ORIGIN_PORT` or `FACILITATOR_PORT`.
 
 The script builds the stack and walks through it:
 
@@ -46,14 +59,16 @@ The script builds the stack and walks through it:
 
 The demo settles through a **simulated facilitator** (`demo/mock-facilitator`). Every simulated payment carries a `SIMULATED-` id and is labelled as simulated by the gateway, dashboard, buyer and pay-mcp. Nothing touches a chain and nothing is ever shown as on-chain. To take real devnet payments, see [Real devnet payments](#real-devnet-payments).
 
-Keep the stack running and open the dashboard:
+Keep the stack running and open the dashboard (`STACK_ONLY=1` instead starts the stack, deletes the old demo ledger so it starts empty, and skips the walkthrough):
 
 ```bash
 KEEP=1 bash scripts/demo-local.sh
-# in another shell, with the token the script prints:
+# in another shell (the script writes the admin token to .demo/admin-token, mode 600, and never prints it):
 cd apps/dashboard && pnpm install
-AGENTTOLL_ADMIN_URL=http://127.0.0.1:8403 AGENTTOLL_ADMIN_TOKEN=<token> pnpm dev
+AGENTTOLL_ADMIN_URL=http://127.0.0.1:8403 AGENTTOLL_ADMIN_TOKEN=$(cat ../../.demo/admin-token) pnpm dev
 ```
+
+See Claude pay: with the stack running (`STACK_ONLY=1`), build `demo/pay-mcp` and run `bash scripts/claude-pays-demo.sh`. The headless Claude CLI finds a price, pays it within its caps, gets refused on a $0.05 tool and pays for an MCP tool. Transcript with every tool call: [docs/assets/claude-pays-transcript.md](docs/assets/claude-pays-transcript.md). All payments are simulated.
 
 Or run everything in containers: `cp .env.example .env`, fill in the three `AGENTTOLL_*` values, then `docker compose up --build`.
 
@@ -140,14 +155,14 @@ Earnings land in the `pay_to` address you choose: a self-custody wallet, a stabl
 
 ## Status
 
-Hackathon build, devnet and testnet only. Each part is built as a separate pull request and reviewed by an independent adversarial critic agent before merge:
+Hackathon build, devnet and testnet only. Test counts were re-run on 2026-10-04 at commit 0c54a00 (`cargo test --release --workspace`, `npm test` in `demo/pay-mcp` and `workers/agenttoll-edge`). Each part is built as a separate pull request and reviewed by an independent adversarial critic agent before merge:
 
 | Part | Tests |
 |---|---|
-| Rust gateway + core + buyer + demo stack | 87 |
+| Rust gateway + core + buyer + demo stack | 93 |
 | pay-mcp | 69 |
-| Worker edition (17 are parity tests against the Rust gateway) | 52 |
-| Dashboard | typecheck, lint, build, Playwright checks |
+| Worker edition (21 are parity tests against the Rust gateway) | 70 |
+| Dashboard | 9 unit tests (SSE proxy, simulated copy), typecheck, lint, build, Playwright checks |
 
 Plan and progress: [docs/ROADMAP.md](docs/ROADMAP.md).
 

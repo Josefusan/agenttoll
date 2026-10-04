@@ -1,0 +1,366 @@
+{
+  "generated_at": "2026-10-04T14:20:18+00:00",
+  "commit": "b413cf3",
+  "model": "sonnet",
+  "resolved_models": [
+    "claude-sonnet-5-5"
+  ],
+  "system1_in_packet": false,
+  "judges_requested": 3,
+  "judges_ok": 3,
+  "lenses": [
+    "You are a Colosseum team reviewer who funds startups. Weigh product quality and innovation hardest.",
+    "You are a Solana track judge and protocol engineer. Weigh Solana fit and technical depth hardest.",
+    "You are an auditor whose only job is to find claims the packet cannot back up. Weigh honesty hardest."
+  ],
+  "packet_files": [
+    "README.md",
+    "docs/COLOSSEUM_SUBMISSION.md",
+    "docs/launch/DEMO_VIDEO.md",
+    "docs/launch/JUDGE_FAQ.md",
+    "docs/launch/PITCH_VIDEO.md",
+    "docs/launch/POSTS.md",
+    "docs/USE_CASES.md",
+    "evals/results/latest.md",
+    "git ls-files"
+  ],
+  "packet_chars": 126143,
+  "aggregate": {
+    "per_criterion": {
+      "product_quality": {
+        "name": "Product quality",
+        "weight": 20,
+        "median": 7.0,
+        "scores": [
+          7.0,
+          7.0,
+          6.0
+        ],
+        "spread": 1.0,
+        "quotes_total": 7,
+        "quotes_verified": 7
+      },
+      "innovation": {
+        "name": "Innovation potential",
+        "weight": 15,
+        "median": 7.0,
+        "scores": [
+          7.0,
+          7.0,
+          6.0
+        ],
+        "spread": 1.0,
+        "quotes_total": 6,
+        "quotes_verified": 6
+      },
+      "solana_fit": {
+        "name": "Solana track fit",
+        "weight": 15,
+        "median": 6.0,
+        "scores": [
+          6.0,
+          6.0,
+          6.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 7,
+        "quotes_verified": 7
+      },
+      "technical_depth": {
+        "name": "Technical depth",
+        "weight": 15,
+        "median": 8.0,
+        "scores": [
+          8.0,
+          8.0,
+          8.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 9,
+        "quotes_verified": 9
+      },
+      "demo_clarity": {
+        "name": "Demo clarity",
+        "weight": 15,
+        "median": 6.0,
+        "scores": [
+          6.0,
+          6.0,
+          6.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 7,
+        "quotes_verified": 7
+      },
+      "why_now": {
+        "name": "Why now and market",
+        "weight": 10,
+        "median": 6.0,
+        "scores": [
+          6.0,
+          6.0,
+          6.0
+        ],
+        "spread": 0.0,
+        "quotes_total": 6,
+        "quotes_verified": 6
+      },
+      "honesty": {
+        "name": "Honesty of claims",
+        "weight": 10,
+        "median": 8.0,
+        "scores": [
+          8.0,
+          8.0,
+          6.0
+        ],
+        "spread": 2.0,
+        "quotes_total": 7,
+        "quotes_verified": 7
+      }
+    },
+    "weighted_total": 68.5,
+    "total_by_judge": [
+      68.5,
+      68.5,
+      63.0
+    ],
+    "total_spread": 5.5,
+    "mean_criterion_spread": 0.57,
+    "disputed": []
+  },
+  "judges": [
+    {
+      "scores": {
+        "product_quality": {
+          "score": 7,
+          "evidence": [
+            "117 of 117 cases passing (run 2026-10-04, debug binaries, black-box HTTP against the real gateway)",
+            "| Rust gateway + core + buyer + demo stack | 90 |"
+          ],
+          "reason": "Complete core flow with failure handling, tests tied to counts, one-command demo and dashboard, but every payment is simulated, no public real deployment, and the evals file shows 119/119 while README says 117/117 with 'commit 35a013b-dirty'."
+        },
+        "innovation": {
+          "score": 7,
+          "evidence": [
+            "Cloudflare announced an x402 monetization gateway in July, but it is waitlist-only and tied to its network.",
+            "per-tool prices; `initialize` and `tools/list` stay free; native x402 payments inside MCP calls"
+          ],
+          "reason": "Open, self-hosted, per-route and per-MCP-tool paywall plus a capped Claude wallet is a sharp wedge, though x402 gateways are an emerging, copyable pattern with no moat shown."
+        },
+        "solana_fit": {
+          "score": 6,
+          "evidence": [
+            "Every payment in the demo and the evals is **simulated** until a devnet wallet is funded. Nothing here has touched a chain.",
+            "reaches PayAI devnet `/verify` live (rejected only because the key is unfunded)"
+          ],
+          "reason": "Solana is the primary rail with USDC SPL, fee-payer sponsorship and a PayAI facilitator path, but no real devnet transaction or Explorer link exists."
+        },
+        "technical_depth": {
+          "score": 8,
+          "evidence": [
+            "A payment for one blog post cannot be spent on another post of the same price (resource binding)",
+            "Path bypass attempt is still charged: percent-encoded dot segment (%2e) (/api/%2e/quote)",
+            "21 are parity tests against the Rust gateway"
+          ],
+          "reason": "Settlement ordering, replay guard, resource and tool binding, path canonicalization, batch pricing, and Rust/WASM Worker parity are handled and tested; lacks external security review or performance measurements."
+        },
+        "demo_clarity": {
+          "score": 6,
+          "evidence": [
+            "Status: DRAFT for Joseph to record.",
+            "Both captures come from the real local stack (`bash scripts/demo-local.sh`). The payments shown are simulated settlements"
+          ],
+          "reason": "Detailed 3:00 script, one-command demo, GIF and a Claude transcript exist, but the videos are not recorded, the live URL is a temporary tunnel, and nothing shows a real transaction."
+        },
+        "why_now": {
+          "score": 6,
+          "evidence": [
+            "Solana took the top spot for x402 agent payments: about $3.3M USDC settled in one week.",
+            "Not validated yet: no customers, no revenue, no pilot."
+          ],
+          "reason": "Dated, KB-cited market facts and a named first path (Website Factory), but no demand evidence and the sources are described as needing re-checks."
+        },
+        "honesty": {
+          "score": 8,
+          "evidence": [
+            "Nothing touches a chain and nothing is ever shown as on-chain.",
+            "Do not claim in any field: Supabase, shadcn/ui, Kora, Circle CCTP, x402-axum, Hono, Web Bot Auth verification, a live Worker, customers, revenue."
+          ],
+          "reason": "Truth table of built versus not built, simulated labelled everywhere and the eval scope limits are stated; minor deduction for the 117 vs 119 count mismatch and docs that still reference unbuilt features in places."
+        }
+      },
+      "biggest_weakness": "No real on-chain devnet transaction exists anywhere, so the core payment claim on Solana is shown only through a simulated facilitator.",
+      "top_improvements": [
+        "Fund two devnet wallets with Circle faucet USDC, run the buyer against PayAI, and publish the Solana Explorer link plus the settlement signature in the README and demo.",
+        "Record and upload the 3:00 demo and pitch videos, and put a stable public URL (named tunnel or VPS domain) in front of a real Website Factory page.",
+        "Land one real pilot or design partner (an MCP author or API seller) with a gateway deployment, and reconcile eval counts (117 vs 119, dirty commit) with a clean committed rerun."
+      ],
+      "_meta": {
+        "judge": 1,
+        "attempt": 1,
+        "cost_usd": 0.245976,
+        "duration_ms": 11006,
+        "model_ids": [
+          "claude-sonnet-5-5"
+        ]
+      }
+    },
+    {
+      "scores": {
+        "product_quality": {
+          "score": 7,
+          "evidence": [
+            "117 of 117 cases passing (run 2026-10-04, debug binaries, black-box HTTP against the real gateway)",
+            "| Rust gateway + core + buyer + demo stack | 90 |"
+          ],
+          "reason": "Complete core flow with failure handling (settle timeout, facilitator down, origin 5xx), tests with counts, a one-command demo and dashboard; but all payments are simulated, nothing is deployed in production, and the README's 117 count disagrees with the results file header's 119/119 and 'commit 35a013b-dirty' versus the README's 0c54a00."
+        },
+        "innovation": {
+          "score": 7,
+          "evidence": [
+            "Agents already use your product. Now you can bill them.",
+            "per-tool prices; `initialize` and `tools/list` stay free; native x402 payments inside MCP calls"
+          ],
+          "reason": "An open, self-hosted, non-custodial x402 paywall with per-MCP-tool pricing and a 'not billing yet' report is a sharp wedge, though x402 gateways and Cloudflare's competing product exist and there is no stated moat."
+        },
+        "solana_fit": {
+          "score": 6,
+          "evidence": [
+            "Every payment in the demo and the evals is **simulated** until a devnet wallet is funded. Nothing here has touched a chain.",
+            "A real devnet settlement with an explorer link | Not yet: no wallet is funded as of 2026-10-04"
+          ],
+          "reason": "Solana is the primary rail (USDC SPL, facilitator fee-payer sponsorship, PayAI facilitator, CAIP-2 ids) and exercised in tests, and the code reaches PayAI /verify, but no real devnet transaction or Explorer link exists."
+        },
+        "technical_depth": {
+          "score": 8,
+          "evidence": [
+            "TAMPER-01 | Tampered amount (2000 -> 1) is refused: the gateway compares against its own quote",
+            "NORM-08 | Path bypass attempt is still charged: percent-encoded letter (%71)",
+            "parity tests prove the Worker and the Rust gateway return byte-identical quotes"
+          ],
+          "reason": "Replay guard, resource and tool binding, path-canonicalization bypass tests, settle-after-origin ordering, an unconfirmed-settlement state, batch pricing and Rust/WASM parity are handled and tested, though there is no formal security analysis and the Worker replay guard is per isolate."
+        },
+        "demo_clarity": {
+          "score": 6,
+          "evidence": [
+            "Variant B: simulated",
+            "Status: DRAFT for Joseph to record."
+          ],
+          "reason": "There is a tight timed 3:00 shot list, a one-command demo, a dashboard GIF, and a Claude-pays transcript with honest labels, but the videos are not recorded, the demo is simulated, and the live URL is a temporary quick tunnel."
+        },
+        "why_now": {
+          "score": 6,
+          "evidence": [
+            "Solana took the top spot for x402 agent payments, with about $3.3M USDC settled in one week.",
+            "Not validated yet: no customers, no revenue, no pilot."
+          ],
+          "reason": "Dated, KB-cited market facts and a named first channel (Website Factory) exist, but the sources are secondary, unverified from the packet itself, and there is zero demand evidence."
+        },
+        "honesty": {
+          "score": 8,
+          "evidence": [
+            "The demo settles through a **simulated facilitator** (`demo/mock-facilitator`). Every simulated payment carries a `SIMULATED-` id",
+            "Do not claim in any field: Supabase, shadcn/ui, Kora, Circle CCTP, x402-axum, Hono, Web Bot Auth verification, a live Worker, customers, revenue."
+          ],
+          "reason": "Strong truth table, consistent simulated labelling and evals that are scoped openly, with minor deductions for the README's 117/commit 0c54a00 versus results file 119/119 at 35a013b-dirty and for stale items (use-case doc lists 'wallet_status' and 'Planned, not built' for built features)."
+        }
+      },
+      "biggest_weakness": "No real Solana transaction has ever occurred: every payment, demo and eval is simulated, so the Solana-native claims are unproven end to end.",
+      "top_improvements": [
+        "Fund two devnet wallets with Circle devnet USDC, run a real payment through PayAI, and commit the Explorer link plus the buyer CLI output (and record demo Variant A with it).",
+        "Record and publish the demo and pitch videos, and run a stable public deployment (named Cloudflare tunnel or VPS domain) with the dashboard publicly viewable.",
+        "Reconcile stale numbers and docs (117 vs 119 evals, commit hashes, USE_CASES tool names and 'planned' labels) and add evidence of real demand, such as one pilot Website Factory site running the gateway."
+      ],
+      "_meta": {
+        "judge": 2,
+        "attempt": 1,
+        "cost_usd": 0.24792599999999998,
+        "duration_ms": 12209,
+        "model_ids": [
+          "claude-sonnet-5-5"
+        ]
+      }
+    },
+    {
+      "scores": {
+        "product_quality": {
+          "score": 6,
+          "evidence": [
+            "The demo settles through a **simulated facilitator** (`demo/mock-facilitator`).",
+            "| Rust gateway + core + buyer + demo stack | 90 |",
+            "Hackathon build, devnet and testnet only."
+          ],
+          "reason": "Main path works with substantial tests, a one-command demo and a dashboard, but every payment is simulated, nothing is deployed for real, and the Worker edition is undeployed."
+        },
+        "innovation": {
+          "score": 6,
+          "evidence": [
+            "AgentToll is an open-source paywall proxy. Put it in front of a site, an API or an MCP server, set a price per route or per MCP tool",
+            "Cloudflare opened a waitlist for an x402 Monetization Gateway on 2026-07-01, for Cloudflare customers only"
+          ],
+          "reason": "Per-MCP-tool pricing and an open, self-hosted, non-custodial angle are a useful niche wedge, but x402 paywall proxies are a known pattern and there is no clear moat."
+        },
+        "solana_fit": {
+          "score": 6,
+          "evidence": [
+            "A real devnet settlement with an explorer link | Not yet: no wallet is funded as of 2026-10-04",
+            "reaches PayAI devnet `/verify` live (rejected only because the key is unfunded)",
+            "Every payment in the demo and the evals is **simulated** until a devnet wallet is funded."
+          ],
+          "reason": "Solana is the primary rail, with a devnet USDC config and a PayAI facilitator call that was rejected for lack of funds, but no real devnet transaction is shown."
+        },
+        "technical_depth": {
+          "score": 8,
+          "evidence": [
+            "Tampered amount (2000 -> 1) is refused: the gateway compares against its own quote",
+            "A payment for one tool cannot be spent on another tool of the same price (resource fragment binding)",
+            "21 are parity tests against the Rust gateway"
+          ],
+          "reason": "Replay protection, resource binding, settle-after-origin ordering, path-normalization bypasses and Rust/WASM Worker parity are handled and backed by black-box evals, though there is no formal analysis and the eval does not cover pay-mcp or the Worker."
+        },
+        "demo_clarity": {
+          "score": 6,
+          "evidence": [
+            "Status: DRAFT for Joseph to record.",
+            "`SIMULATED settlement, no funds moved`",
+            "bash scripts/demo-local.sh"
+          ],
+          "reason": "There is a one-command demo, a detailed 3:00 script and honest labels, but no recorded video is in the packet, the payments are simulated, and the first build takes about 14 minutes."
+        },
+        "why_now": {
+          "score": 6,
+          "evidence": [
+            "Solana took the top spot for x402 agent payments, with about $3.3M USDC settled in one week.",
+            "Not validated yet: no customers, no revenue, no pilot."
+          ],
+          "reason": "Dated, cited-by-ID facts and a named first channel (Website Factory) exist, but sources are secondary, the packet doesn't show them, and there is no demand evidence."
+        },
+        "honesty": {
+          "score": 6,
+          "evidence": [
+            "Run: 2026-10-04 14:18:34Z | commit 35a013b-dirty | binaries target/debug | 119/119 passed",
+            "[evals/results/latest.md](evals/results/latest.md) records 117 of 117 cases passing",
+            "Test counts were re-run on 2026-10-04 at commit 0c54a00"
+          ],
+          "reason": "The simulated/real labelling and truth table are very good, but the README, video script and submission say 117/117 while latest.md shows 119/119 on a 'dirty' commit, and the test-count commit differs from the eval commit, so the headline numbers are inconsistent."
+        }
+      },
+      "biggest_weakness": "No real on-chain devnet transaction exists anywhere, so the core Solana payment claim rests entirely on simulated settlement, and the headline eval count (117) contradicts the packet's own results file (119).",
+      "top_improvements": [
+        "Fund two devnet wallets, run a real PayAI-facilitated payment, and publish the Explorer link plus the gateway log of the settlement in the README and demo.",
+        "Reconcile the eval numbers (117 vs 119, dirty commit) by re-running on a clean commit and updating every doc from the generated results file automatically.",
+        "Record and link the 3-minute demo video and deploy a stable public URL, since a trycloudflare tunnel that 403s common crawler user agents is fragile for judges."
+      ],
+      "_meta": {
+        "judge": 3,
+        "attempt": 1,
+        "cost_usd": 0.43354,
+        "duration_ms": 16616,
+        "model_ids": [
+          "claude-sonnet-5-5"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+$ cargo test --workspace  (cwd .) exit=0
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 30 tests
+test config::tests::expansion_handles_text_around_vars ... ok
+test config::tests::minimal_config_defaults ... ok
+test config::tests::rejects_invalid_configs ... ok
+test config::tests::missing_env_is_an_error ... ok
+test detector::tests::detection_table ... ok
+test detector::tests::no_browser_is_ever_charged_in_agents_only ... ok
+test detector::tests::search_bots_charged_only_when_opted_in ... ok
+test mcp::tests::batch_collects_every_call ... ok
+test mcp::tests::call_without_name_is_still_a_call ... ok
+test mcp::tests::client_responses_are_free ... ok
+test mcp::tests::discovery_is_free ... ok
+test config::tests::solana_is_quoted_first_even_though_base_sorts_first_by_name ... ok
+test mcp::tests::malformed_bodies_are_rejected ... ok
+test mcp::tests::single_tool_call ... ok
+test money::tests::deserialize_rejects_bare_numbers ... ok
+test money::tests::displays_trimmed_usd ... ok
+test money::tests::parses_edge_forms ... ok
+test money::tests::parses_kb_amt_examples ... ok
+test money::tests::rejects_bad_input ... ok
+test money::tests::round_trips ... ok
+test path::tests::canonicalizes ... ok
+test config::tests::env_values_cannot_inject_yaml ... ok
+test config::tests::example_config_parses ... ok
+test pricer::tests::methods_are_case_insensitive_in_patterns ... ok
+test pricer::tests::mcp_tool_prices ... ok
+test pricer::tests::default_tool_price_applies_to_unknown_and_nameless_calls ... ok
+test pricer::tests::mcp_endpoint_detection ... ok
+test pricer::tests::routes_first_match_wins ... ok
+test pricer::tests::path_tricks_do_not_escape_a_price ... ok
+test pricer::tests::tag_carries_route_and_description ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+
+running 3 tests
+test tests::missing_env_is_an_error ... ok
+test tests::facade_round_trips_core_results ... ok
+test tests::d4_semantics_cross_the_boundary ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 19 tests
+test admin::tests::token_comparison ... ok
+test ledger::tests::rejects_unsupported_urls ... ok
+test facilitator::tests::settled_requires_a_transaction ... ok
+test pay::tests::collects_tool_call_ids ... ok
+test pay::tests::attaches_receipt_to_result_meta ... ok
+test pay::tests::duplicate_request_ids_are_never_settled ... ok
+test pay::tests::extracts_and_strips_mcp_payment ... ok
+test pay::tests::mcp_success_reads_every_sse_event ... ok
+test pay::tests::mcp_success_requires_a_good_result_for_every_call ... ok
+test pay::tests::numeric_ids_match_by_value_and_failures_are_explicit ... ok
+test pay::tests::replay_guard_claims_once_and_releases ... ok
+test proxy::tests::origin_headers_drop_payment_and_spoofed_agenttoll_headers ... ok
+test proxy::tests::preserve_host_keeps_client_host ... ok
+test proxy::tests::strips_hop_by_hop_and_connection_listed ... ok
+test x402::tests::challenge_round_trips_through_the_header ... ok
+test x402::tests::solana_requires_fee_payer ... ok
+test ledger::tests::records_once_per_signature_and_publishes ... ok
+test x402::tests::decode_rejects_garbage ... ok
+test ledger::tests::stats_aggregate_revenue_and_unbilled_traffic ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 10 tests
+test human_gets_the_page_free ... ok
+test agents_pass_free_routes_and_heuristic_agents_are_not_charged ... ok
+test fee_payer_is_read_from_facilitator_supported ... ok
+test agent_gets_a_valid_402_and_never_reaches_the_origin ... ok
+test mcp_get_is_never_charged ... ok
+test origin_never_sees_spoofed_or_payment_headers ... ok
+test mcp_tools_priced_per_call_discovery_free ... ok
+test malformed_and_oversized_mcp_bodies_are_rejected ... ok
+test path_tricks_still_pay ... ok
+test unverified_payment_is_refused_not_forwarded ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.11s
+
+
+running 27 tests
+test agent_traffic_on_free_routes_is_logged_humans_are_not ... ok
+test a_payment_is_bound_to_its_resource ... ok
+test admin_api_requires_its_token_and_streams_payments ... ok
+test admin_query_token_only_works_for_events_and_short_tokens_are_refused ... ok
+test an_mcp_payment_is_bound_to_its_tool ... ok
+test base_sepolia_payment_works_too ... ok
+test compressed_tool_response_is_never_settled_and_never_served_unpaid ... ok
+test discovery_lists_every_price ... ok
+test failed_settlement_withholds_the_content ... ok
+test float_id_echoed_as_integer_is_settled_not_leaked ... ok
+test failed_mcp_tool_is_never_settled ... ok
+test header_payment_on_mcp_never_leaks_a_body_payment_to_the_origin ... ok
+test invalid_payment_never_reaches_the_origin ... ok
+test malformed_payment_headers_are_client_errors ... ok
+test mcp_native_payment_is_settled_and_receipted_in_meta ... ok
+test origin_error_is_never_settled_and_payment_can_be_retried ... ok
+test paid_mcp_forwards_ask_for_uncompressed_responses ... ok
+test paid_request_is_verified_forwarded_settled_and_recorded ... ok
+test re_encoding_a_payment_does_not_dodge_the_replay_guard ... ok
+test replayed_payment_is_refused ... ok
+test sse_tool_error_after_a_notification_is_not_settled ... ok
+test sse_tool_success_after_a_notification_is_settled ... ok
+test tampered_quotes_are_refused_before_verify ... ok
+test tools_list_advertises_prices ... ok
+test unverifiable_2xx_mcp_content_is_withheld ... ok
+test settle_timeout_serves_content_and_records_it_unconfirmed ... ok
+test stats_separate_simulated_and_unconfirmed_money ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.25s
+
+
+running 4 tests
+test tests::ids_are_unique_and_valid_pubkey_length ... ok
+test tests::shape_checks ... ok
+test tests::fault_knobs_are_off_unless_enabled ... ok
+test tests::fault_knobs_are_read_from_the_payload_and_gated ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+   Compiling agenttoll-core v0.1.0 (/home/joseph/Hackathons/AgentToll-d8/crates/agenttoll-core)
+   Compiling agenttoll-mock-facilitator v0.1.0 (/home/joseph/Hackathons/AgentToll-d8/demo/mock-facilitator)
+   Compiling agenttoll-gateway v0.1.0 (/home/joseph/Hackathons/AgentToll-d8/crates/agenttoll-gateway)
+   Compiling agenttoll-core-wasm v0.1.0 (/home/joseph/Hackathons/AgentToll-d8/crates/agenttoll-core-wasm)
+   Compiling agenttoll-buyer v0.1.0 (/home/joseph/Hackathons/AgentToll-d8/crates/agenttoll-buyer)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.68s
+     Running unittests src/main.rs (target/debug/deps/agenttoll_buyer-2567536ba69a4922)
+     Running unittests src/lib.rs (target/debug/deps/agenttoll_core-32d24326d552a9fa)
+     Running unittests src/lib.rs (target/debug/deps/agenttoll_core_wasm-fa60ccf607d6ed75)
+     Running unittests src/main.rs (target/debug/deps/agenttoll_demo_origin-a4f7b7df793a4a8e)
+     Running unittests src/lib.rs (target/debug/deps/agenttoll_gateway-36edeb29894f30bb)
+     Running unittests src/main.rs (target/debug/deps/agenttoll_gateway-0d88b6eebf193d9d)
+     Running tests/gateway.rs (target/debug/deps/gateway-ec8952ca5d0823a3)
+     Running tests/payments.rs (target/debug/deps/payments-8e69dfaa50da6277)
+     Running unittests src/main.rs (target/debug/deps/agenttoll_mock_facilitator-bf7c75d081972326)
+   Doc-tests agenttoll_core
+   Doc-tests agenttoll_core_wasm
+   Doc-tests agenttoll_gateway

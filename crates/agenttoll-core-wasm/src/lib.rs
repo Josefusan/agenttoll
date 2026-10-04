@@ -142,12 +142,12 @@ impl Core {
     }
 
     /// JSON array of `{name, network, asset, payTo, facilitator, feePayer?}` in the order the
-    /// gateway quotes them (sorted by local name, as `BTreeMap` iterates).
+    /// gateway quotes them (`Config::networks_in_quote_order`: Solana first).
     pub fn networks_json(&self) -> String {
         let nets: Vec<_> = self
             .config
-            .networks
-            .iter()
+            .networks_in_quote_order()
+            .into_iter()
             .map(|(name, n)| {
                 json!({
                     "name": name,
@@ -272,9 +272,9 @@ impl Core {
     pub fn discovery_json(&self) -> String {
         let networks: Vec<Value> = self
             .config
-            .networks
-            .values()
-            .map(|n| json!({ "network": n.network, "scheme": "exact", "asset": n.asset, "payTo": n.pay_to }))
+            .networks_in_quote_order()
+            .into_iter()
+            .map(|(_, n)| json!({ "network": n.network, "scheme": "exact", "asset": n.asset, "payTo": n.pay_to }))
             .collect();
         let routes: Vec<Value> = self
             .config
@@ -403,8 +403,9 @@ mod tests {
         assert!(!core.should_charge(&curl).unwrap());
 
         let nets: serde_json::Value = serde_json::from_str(&core.networks_json()).unwrap();
-        assert_eq!(nets[0]["name"], "base");
-        assert_eq!(nets[1]["payTo"], "SoL");
+        assert_eq!(nets[0]["name"], "solana");
+        assert_eq!(nets[0]["payTo"], "SoL");
+        assert_eq!(nets[1]["name"], "base");
         assert_eq!(normalize_path("/a//b/../c/"), "/a/c");
     }
 
@@ -430,7 +431,8 @@ mod tests {
         assert_eq!(d["routes"][0]["priceUsd"], "0.002");
         assert_eq!(d["mcp"]["tools"]["search_docs"], "0.005");
         assert_eq!(d["networks"].as_array().unwrap().len(), 2);
-        assert_eq!(d["networks"][0]["payTo"], "0x1");
+        assert_eq!(d["networks"][0]["payTo"], "SoL");
+        assert_eq!(d["networks"][1]["payTo"], "0x1");
 
         let list = br#"{"jsonrpc":"2.0","id":1,"result":{"tools":[{"name":"search_docs","description":"Search the docs."},{"name":"ping","description":"Free."}]}}"#;
         let out: Value = serde_json::from_str(&core.advertise_prices(list).unwrap()).unwrap();
