@@ -32,7 +32,8 @@ pub struct Config {
     /// search indexing is never paywalled.
     #[serde(default)]
     pub charge_search_bots: bool,
-    /// Keyed by a local name (`solana`, `base`); one `accepts[]` entry is quoted per network.
+    /// Keyed by a local name (`solana`, `base`); one `accepts[]` entry is quoted per network,
+    /// in [`Config::networks_in_quote_order`] order.
     pub networks: BTreeMap<String, NetworkConfig>,
     /// First match wins. Unmatched requests are free.
     pub routes: Vec<RouteConfig>,
@@ -157,6 +158,15 @@ pub enum ConfigError {
 }
 
 impl Config {
+    /// Networks in the order they are quoted in `accepts[]`: Solana first (the primary rail,
+    /// DECISIONS 2026-10-02), then the rest. Each group keeps local-name order, so the order
+    /// is deterministic and a retried quote matches the one the client already built.
+    pub fn networks_in_quote_order(&self) -> Vec<(&String, &NetworkConfig)> {
+        let mut nets: Vec<_> = self.networks.iter().collect();
+        nets.sort_by_key(|(_, n)| !n.network.starts_with("solana:")); // stable
+        nets
+    }
+
     /// Parses config text, expanding `${VAR}` in string values through `env`.
     pub fn parse(text: &str, env: impl Fn(&str) -> Option<String>) -> Result<Config, ConfigError> {
         let mut tree: Value = serde_yaml::from_str(text)?;
@@ -289,6 +299,19 @@ mod tests {
         let mcp = c.mcp.unwrap();
         assert_eq!(mcp.tools["generate_report"], Atomic(50_000));
         assert_eq!(c.ledger.url, "sqlite://agenttoll.db");
+    }
+
+    #[test]
+    fn solana_is_quoted_first_even_though_base_sorts_first_by_name() {
+        let c = Config::parse(EXAMPLE, env).unwrap();
+        let names: Vec<&str> = c.networks.keys().map(String::as_str).collect();
+        assert_eq!(names, ["base", "solana"], "BTreeMap order is by local name");
+        let quoted: Vec<&str> = c
+            .networks_in_quote_order()
+            .iter()
+            .map(|(name, _)| name.as_str())
+            .collect();
+        assert_eq!(quoted, ["solana", "base"], "Solana is the primary rail");
     }
 
     #[test]

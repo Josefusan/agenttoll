@@ -1,0 +1,175 @@
+[
+  {
+    "id": "ADM-01",
+    "promise": "Admin API without a token is 401",
+    "steps": [
+      {
+        "request": {
+          "base": "admin",
+          "path": "/admin/stats"
+        },
+        "expect": {
+          "status": 401,
+          "body_not_contains": "totals"
+        }
+      }
+    ]
+  },
+  {
+    "id": "ADM-02",
+    "promise": "Admin API with a wrong token is 401",
+    "steps": [
+      {
+        "request": {
+          "base": "admin",
+          "path": "/admin/stats",
+          "auth": "wrong"
+        },
+        "expect": {
+          "status": 401
+        }
+      }
+    ]
+  },
+  {
+    "id": "ADM-03",
+    "promise": "Admin API with an empty bearer is 401 (an empty token never matches)",
+    "steps": [
+      {
+        "request": {
+          "base": "admin",
+          "path": "/admin/stats",
+          "auth": "empty"
+        },
+        "expect": {
+          "status": 401
+        }
+      }
+    ]
+  },
+  {
+    "id": "ADM-04",
+    "promise": "Admin stats with the right bearer token is 200 JSON with totals",
+    "steps": [
+      {
+        "request": {
+          "base": "admin",
+          "path": "/admin/stats",
+          "auth": "bearer"
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/totals/revenue_atomic": {
+              "type": "int"
+            },
+            "/totals/simulated_atomic": {
+              "type": "int"
+            },
+            "/by_route": {
+              "exists": true
+            },
+            "/unbilled": {
+              "exists": true
+            },
+            "/recent": {
+              "exists": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "ADM-05",
+    "promise": "?token= does NOT work on /admin/stats (tokens stay out of access logs)",
+    "steps": [
+      {
+        "request": {
+          "base": "admin",
+          "path": "/admin/stats",
+          "auth": "query"
+        },
+        "expect": {
+          "status": 401,
+          "body_not_contains": "totals"
+        }
+      }
+    ]
+  },
+  {
+    "id": "ADM-06",
+    "promise": "?token= works on /admin/events (EventSource cannot set headers) and answers as a stream",
+    "steps": [
+      {
+        "check": "admin_events_query_token"
+      }
+    ]
+  },
+  {
+    "id": "ADM-07",
+    "promise": "/admin/events without a token is 401",
+    "steps": [
+      {
+        "request": {
+          "base": "admin",
+          "path": "/admin/events"
+        },
+        "expect": {
+          "status": 401
+        }
+      }
+    ]
+  },
+  {
+    "id": "ADM-08",
+    "promise": "/admin/events with a wrong ?token= is 401",
+    "steps": [
+      {
+        "request": {
+          "base": "admin",
+          "path": "/admin/events?token=wrong"
+        },
+        "expect": {
+          "status": 401
+        }
+      }
+    ]
+  },
+  {
+    "id": "ADM-09",
+    "promise": "The admin API is not exposed on the public port (a human asking for /admin/stats gets the origin's 404, not stats)",
+    "steps": [
+      {
+        "request": {
+          "path": "/admin/stats",
+          "agent": "human-chrome"
+        },
+        "expect": {
+          "status": 404,
+          "body_not_contains": "revenue_atomic"
+        }
+      }
+    ]
+  },
+  {
+    "id": "ADM-10",
+    "promise": "Even an agent with the admin token on the public port does not reach admin data",
+    "steps": [
+      {
+        "request": {
+          "path": "/admin/stats",
+          "agent": "GPTBot",
+          "auth": "bearer"
+        },
+        "expect": {
+          "status": [
+            402,
+            404
+          ],
+          "body_not_contains": "revenue_atomic"
+        }
+      }
+    ]
+  }
+]

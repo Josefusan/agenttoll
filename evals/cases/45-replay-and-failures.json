@@ -1,0 +1,200 @@
+[
+  {
+    "id": "REPLAY-01",
+    "promise": "A payment that already settled is refused when replayed (duplicate_settlement) and the origin is not reached",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "id": "first",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 200,
+          "receipt": {
+            "/success": true
+          }
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "reuse": "first"
+        },
+        "expect": {
+          "status": 402,
+          "json": {
+            "/error": "duplicate_settlement"
+          },
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  },
+  {
+    "id": "REPLAY-02",
+    "promise": "A settled payment cannot be replayed on another priced route either",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/blog/agent-economy",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "id": "first",
+        "request": {
+          "path": "/blog/agent-economy",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 200,
+          "receipt": {
+            "/success": true
+          }
+        }
+      },
+      {
+        "request": {
+          "path": "/blog/other-post",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "reuse": "first"
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "other-post</h1>"
+        }
+      }
+    ]
+  },
+  {
+    "id": "REPLAY-03",
+    "promise": "A payment not consumed (origin 5xx) can be retried: the replay claim is released, the agent is not charged",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/fail",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "id": "try1",
+        "request": {
+          "path": "/api/fail",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 500,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          }
+        }
+      },
+      {
+        "request": {
+          "path": "/api/fail",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "reuse": "try1"
+        },
+        "expect": {
+          "status": 500,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/error": {
+              "contains": "down on purpose"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "REPLAY-04",
+    "promise": "Origin 5xx on a paid request is passed through and not settled (no PAYMENT-RESPONSE, origin body intact)",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/fail",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/fail",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 500,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            },
+            "payment-required": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/error": "origin is down on purpose"
+          }
+        }
+      }
+    ]
+  }
+]

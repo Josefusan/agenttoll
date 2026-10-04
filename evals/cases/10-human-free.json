@@ -1,0 +1,262 @@
+[
+  {
+    "id": "HUM-01",
+    "promise": "Chrome desktop gets 200 free on a paid route (GET /api/quote)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "human-chrome"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            },
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/paid": false,
+            "/symbol": "SOL/USD"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-02",
+    "promise": "Safari on iPhone gets 200 free on a paid route (GET /api/quote)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "human-safari-ios"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            },
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/paid": false,
+            "/symbol": "SOL/USD"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-03",
+    "promise": "Firefox gets 200 free on a paid route (GET /api/quote)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "human-firefox"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            },
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/paid": false,
+            "/symbol": "SOL/USD"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-04",
+    "promise": "Edge gets 200 free on a paid route (GET /api/quote)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "human-edge"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            },
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/paid": false,
+            "/symbol": "SOL/USD"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-05",
+    "promise": "Chrome on Android gets 200 free on a paid route (GET /api/quote)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "human-chrome-android"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            },
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/paid": false,
+            "/symbol": "SOL/USD"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-06",
+    "promise": "A human reads a paid blog route (GET /blog/*) for free",
+    "steps": [
+      {
+        "request": {
+          "path": "/blog/agent-economy",
+          "agent": "human-chrome"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            }
+          },
+          "body_contains": "agent-economy"
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-07",
+    "promise": "A human opens the home page for free",
+    "steps": [
+      {
+        "request": {
+          "path": "/",
+          "agent": "human-firefox"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            }
+          },
+          "body_contains": "Humans read this page for free"
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-08",
+    "promise": "Search bots (Googlebot) are not charged for indexing",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "Googlebot"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-09",
+    "promise": "A bare curl client is never charged on a guess (heuristic confidence below the charge bar)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "curl"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-10",
+    "promise": "python-requests is never charged on a guess",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "python-requests"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUM-11",
+    "promise": "A human on a free route is passed through to the origin untouched (no payment headers added)",
+    "steps": [
+      {
+        "request": {
+          "path": "/",
+          "agent": "human-chrome"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            },
+            "x-agenttoll-verdict": {
+              "absent": true
+            }
+          }
+        }
+      }
+    ]
+  }
+]

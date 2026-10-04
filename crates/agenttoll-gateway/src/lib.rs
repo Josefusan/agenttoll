@@ -56,7 +56,7 @@ impl Gateway {
         let pricer = Pricer::new(&config)?;
 
         let mut networks = Vec::new();
-        for (name, net) in &config.networks {
+        for (name, net) in config.networks_in_quote_order() {
             let fee_payer = match (&net.fee_payer, net.network.starts_with("solana:")) {
                 (Some(pinned), _) => Some(pinned.clone()),
                 (None, true) => Some(

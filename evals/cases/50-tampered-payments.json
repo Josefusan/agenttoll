@@ -1,0 +1,476 @@
+[
+  {
+    "id": "TAMPER-01",
+    "promise": "Tampered amount (2000 -> 1) is refused: the gateway compares against its own quote",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "tamper": {
+            "amount": "1"
+          }
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD",
+          "json": {
+            "/x402Version": 2,
+            "/error": {
+              "contains": "price quote"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-02",
+    "promise": "Zero amount is refused",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "tamper": {
+            "amount": "0"
+          }
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-03",
+    "promise": "Tampered asset (Base USDC offered on the Solana network) is refused",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "tamper": {
+            "asset": "$base_usdc"
+          }
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-04",
+    "promise": "Tampered payTo (attacker address) is refused",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "tamper": {
+            "payTo": "11111111111111111111111111111111"
+          }
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-05",
+    "promise": "Tampered network (a chain the gateway does not offer) is refused",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "tamper": {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+          }
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD",
+          "json": {
+            "/error": {
+              "contains": "network"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-06",
+    "promise": "Network swapped to Base while keeping the Solana asset and payTo is refused",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "tamper": {
+            "network": "$base_network"
+          }
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-07",
+    "promise": "Tampered scheme (upto instead of exact) is refused",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "tamper": {
+            "scheme": "upto"
+          }
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-08",
+    "promise": "An x402Version 1 payment is refused",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "version": 1
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD",
+          "json": {
+            "/error": {
+              "contains": "x402Version 2"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-09",
+    "promise": "A payment without `accepted` requirements is a 400, not a charge",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "drop": [
+            "accepted"
+          ]
+        },
+        "expect": {
+          "status": 400,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-10",
+    "promise": "A payment without a signed `payload` is a 400, not a charge",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "drop": [
+            "payload"
+          ]
+        },
+        "expect": {
+          "status": 400,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-11",
+    "promise": "A PAYMENT-SIGNATURE that is not base64 JSON is a 400",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "raw": "!!!not-base64-json!!!"
+        },
+        "expect": {
+          "status": 400,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-12",
+    "promise": "The v1 X-PAYMENT header is not accepted: 402 telling the client to use PAYMENT-SIGNATURE",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot",
+          "headers": {
+            "X-PAYMENT": "eyJ4NDAyVmVyc2lvbiI6MX0="
+          }
+        },
+        "expect": {
+          "status": 402,
+          "json": {
+            "/error": {
+              "contains": "v1 X-PAYMENT is not supported"
+            }
+          },
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "TAMPER-13",
+    "promise": "A tampered amount is refused on the Base rail too",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "accept": "base",
+          "tamper": {
+            "amount": "1"
+          }
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  }
+]

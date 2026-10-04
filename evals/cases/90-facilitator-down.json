@@ -1,0 +1,39 @@
+[
+  {
+    "id": "FAIL-01",
+    "promise": "If the facilitator is down, a paid request gets 502 and the content is withheld; nothing is settled",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "check": "stop_facilitator"
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 502,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  }
+]

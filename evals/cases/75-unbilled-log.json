@@ -1,0 +1,34 @@
+[
+  {
+    "id": "LOG-01",
+    "promise": "Unbilled crawler traffic on free pages is served and logged per agent and rule (4 Bytespider hits counted exactly)",
+    "steps": [
+      {
+        "check": "unbilled_crawlers",
+        "args": {
+          "agent": "Bytespider",
+          "hits": 4,
+          "path": "/"
+        }
+      }
+    ]
+  },
+  {
+    "id": "LOG-02",
+    "promise": "Human traffic is never written to the unbilled log",
+    "steps": [
+      {
+        "check": "human_not_logged"
+      }
+    ]
+  },
+  {
+    "id": "LOG-03",
+    "promise": "A search bot (Googlebot) on a priced route is free and shows up in the log, not the ledger",
+    "steps": [
+      {
+        "check": "search_bot_logged"
+      }
+    ]
+  }
+]

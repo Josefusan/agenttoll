@@ -1,0 +1,250 @@
+[
+  {
+    "id": "AGT-01",
+    "promise": "GPTBot gets 402 with an x402 v2 quote on a paid route",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-required": {
+              "exists": true
+            },
+            "x-agenttoll-verdict": "ua:GPTBot",
+            "content-type": {
+              "re": "^application/json"
+            }
+          },
+          "challenge": {
+            "/x402Version": 2
+          },
+          "json": {
+            "/x402Version": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "AGT-02",
+    "promise": "ClaudeBot gets 402 with an x402 v2 quote on a paid route",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "ClaudeBot"
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-required": {
+              "exists": true
+            },
+            "x-agenttoll-verdict": "ua:ClaudeBot",
+            "content-type": {
+              "re": "^application/json"
+            }
+          },
+          "challenge": {
+            "/x402Version": 2
+          },
+          "json": {
+            "/x402Version": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "AGT-03",
+    "promise": "PerplexityBot gets 402 with an x402 v2 quote on a paid route",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "PerplexityBot"
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-required": {
+              "exists": true
+            },
+            "x-agenttoll-verdict": "ua:PerplexityBot",
+            "content-type": {
+              "re": "^application/json"
+            }
+          },
+          "challenge": {
+            "/x402Version": 2
+          },
+          "json": {
+            "/x402Version": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "AGT-04",
+    "promise": "AgentToll-Buyer (the shipped buyer's declared UA) gets 402 with an x402 v2 quote on a paid route",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "AgentToll-Buyer"
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-required": {
+              "exists": true
+            },
+            "x-agenttoll-verdict": "ua:AgentToll-Buyer",
+            "content-type": {
+              "re": "^application/json"
+            }
+          },
+          "challenge": {
+            "/x402Version": 2
+          },
+          "json": {
+            "/x402Version": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "AGT-05",
+    "promise": "ChatGPT-User on a blog route gets 402 with an x402 v2 quote on a paid route",
+    "steps": [
+      {
+        "request": {
+          "path": "/blog/agent-economy",
+          "agent": "ChatGPT-User"
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-required": {
+              "exists": true
+            },
+            "x-agenttoll-verdict": "ua:ChatGPT-User",
+            "content-type": {
+              "re": "^application/json"
+            }
+          },
+          "challenge": {
+            "/x402Version": 2
+          },
+          "json": {
+            "/x402Version": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "AGT-06",
+    "promise": "An MCP client (any UA) calling a paid tool gets the MCP-native challenge, classified by endpoint",
+    "steps": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/mcp",
+          "agent": "mcp-client",
+          "json": {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {
+              "name": "search_docs",
+              "arguments": {
+                "query": "x402"
+              }
+            }
+          }
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "x-agenttoll-verdict": "mcp-endpoint",
+            "payment-required": {
+              "exists": true
+            }
+          },
+          "json": {
+            "/result/isError": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "AGT-07",
+    "promise": "A declared agent is charged on every priced route, including one the origin will fail (/api/fail)",
+    "steps": [
+      {
+        "request": {
+          "path": "/api/fail",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402,
+          "challenge": {
+            "/accepts/@solana/amount": "1000"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "AGT-08",
+    "promise": "A declared agent on a free route (/) is passed through, not charged",
+    "steps": [
+      {
+        "request": {
+          "path": "/",
+          "agent": "ClaudeBot"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            }
+          },
+          "body_contains": "Acme Data"
+        }
+      }
+    ]
+  },
+  {
+    "id": "AGT-09",
+    "promise": "The price list (/.well-known/agenttoll.json) is free for agents, so they can budget before paying",
+    "steps": [
+      {
+        "request": {
+          "path": "/.well-known/agenttoll.json",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-required": {
+              "absent": true
+            }
+          },
+          "json": {
+            "/x402Version": 2
+          }
+        }
+      }
+    ]
+  }
+]
