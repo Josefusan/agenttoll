@@ -12,12 +12,12 @@ Stack, in one shell:
 STACK_ONLY=1 bash scripts/demo-local.sh
 ```
 
-Claude, in another (`scripts/claude-pays-demo.sh` does all of this and writes this file). `$KEYPAIR` is the path of the throwaway key, redacted. The MCP config is:
+Claude, in another (`scripts/claude-pays-demo.sh` does all of this and writes this file). `$KEYPAIR` and `$SPEND_FILE` are the throwaway key and a temp spend file, paths redacted. The MCP config is:
 
 ```json
 {"mcpServers":{"agenttoll-pay":{"command":"node","args":["demo/pay-mcp/dist/index.js"],
  "env":{"BUYER_SOLANA_KEYPAIR":"$KEYPAIR","PAY_MCP_NETWORK":"solana",
-  "BUYER_MAX_USD_PER_CALL":"0.01","BUYER_MAX_USD_PER_DAY":"0.25"}}}}
+  "BUYER_MAX_USD_PER_CALL":"0.01","BUYER_MAX_USD_PER_DAY":"0.25","PAY_MCP_SPEND_FILE":"$SPEND_FILE"}}}}
 ```
 
 and each prompt runs as:
@@ -124,7 +124,7 @@ _Session: model `claude-sonnet-5-5`, MCP servers: agenttoll-pay (connected)_
     ],
     "warnings": []
   },
-  "spend_file": "/tmp/tmp.ezNcYqRGXw/spend.json",
+  "spend_file": "$SPEND_FILE",
   "reconcile": {
     "note": "nothing to reconcile",
     "count": 0,
@@ -274,7 +274,7 @@ The wallet refused the payment. I won't try to work around it, but I'll still ch
     ],
     "warnings": []
   },
-  "spend_file": "/tmp/tmp.ezNcYqRGXw/spend.json",
+  "spend_file": "$SPEND_FILE",
   "reconcile": {
     "note": "nothing to reconcile",
     "count": 0,
@@ -403,7 +403,7 @@ _Session: model `claude-sonnet-5-5`, MCP servers: agenttoll-pay (connected)_
     ],
     "warnings": []
   },
-  "spend_file": "/tmp/tmp.ezNcYqRGXw/spend.json",
+  "spend_file": "$SPEND_FILE",
   "reconcile": {
     "note": "nothing to reconcile",
     "count": 0,

@@ -29,7 +29,7 @@ Seven worked cases with configs and proofs: [docs/USE_CASES.md](docs/USE_CASES.m
 
 ## Try it in one command (no wallet, no funds)
 
-You need a Rust toolchain (`rustup`, stable), `curl` and `python3`. No Docker, no wallet, no keys. The first run compiles the workspace, about 400 crates: 14 minutes on a shared 4-core server limited to 2 build jobs (measured 2026-10-04), faster on a laptop. Later runs start in seconds.
+You need a Rust toolchain (`rustup`, stable), `curl` and `python3`. No Docker, no wallet, no keys. The first run compiles the workspace, about 590 crates (`cargo tree -e normal,build` on the four demo packages): 14 minutes on a shared 4-core server limited to 2 build jobs (measured 2026-10-04), faster on a laptop. Later runs start in seconds.
 
 ```bash
 bash scripts/demo-local.sh
@@ -50,7 +50,7 @@ The script builds the stack and walks through it:
 
 The demo settles through a **simulated facilitator** (`demo/mock-facilitator`). Every simulated payment carries a `SIMULATED-` id and is labelled as simulated by the gateway, dashboard, buyer and pay-mcp. Nothing touches a chain and nothing is ever shown as on-chain. To take real devnet payments, see [Real devnet payments](#real-devnet-payments).
 
-Keep the stack running and open the dashboard (`STACK_ONLY=1` instead starts the stack with an empty ledger and skips the walkthrough):
+Keep the stack running and open the dashboard (`STACK_ONLY=1` instead starts the stack, deletes the old demo ledger so it starts empty, and skips the walkthrough):
 
 ```bash
 KEEP=1 bash scripts/demo-local.sh

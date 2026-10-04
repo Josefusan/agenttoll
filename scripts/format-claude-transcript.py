@@ -34,10 +34,10 @@ w("Gateway: `%s` (AgentToll in front of `demo/origin`). Caps: $0.01 per call, $0
 w("## How it was run\n")
 w("Stack, in one shell:\n\n```bash\nSTACK_ONLY=1 bash scripts/demo-local.sh\n```\n")
 w("Claude, in another (`scripts/claude-pays-demo.sh` does all of this and writes this file). "
-  "`$KEYPAIR` is the path of the throwaway key, redacted. The MCP config is:\n")
+  "`$KEYPAIR` and `$SPEND_FILE` are the throwaway key and a temp spend file, paths redacted. The MCP config is:\n")
 w('```json\n{"mcpServers":{"agenttoll-pay":{"command":"node","args":["demo/pay-mcp/dist/index.js"],\n'
   ' "env":{"BUYER_SOLANA_KEYPAIR":"$KEYPAIR","PAY_MCP_NETWORK":"solana",\n'
-  '  "BUYER_MAX_USD_PER_CALL":"0.01","BUYER_MAX_USD_PER_DAY":"0.25"}}}}\n```\n')
+  '  "BUYER_MAX_USD_PER_CALL":"0.01","BUYER_MAX_USD_PER_DAY":"0.25","PAY_MCP_SPEND_FILE":"$SPEND_FILE"}}}}\n```\n')
 w("and each prompt runs as:\n")
 w("```bash\nclaude -p \"<prompt>\" --model %s --mcp-config mcp.json --strict-mcp-config \\\n"
   "  --tools \"\" --allowedTools \"mcp__agenttoll-pay\" --no-session-persistence \\\n"

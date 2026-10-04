@@ -4,7 +4,7 @@
 # payment is labelled SIMULATED. Ctrl-C (or the end of the script) stops everything.
 #   bash scripts/demo-local.sh          # run the scripted walkthrough and exit
 #   KEEP=1 bash scripts/demo-local.sh   # leave the stack running for the dashboard
-#   STACK_ONLY=1 bash scripts/demo-local.sh   # start the stack, skip the walkthrough (empty ledger)
+#   STACK_ONLY=1 bash scripts/demo-local.sh   # start the stack, skip the walkthrough (ledger reset first)
 # Ports (defaults in brackets): GATEWAY_PORT [8402] ADMIN_PORT [8403] ORIGIN_PORT [4000]
 # FACILITATOR_PORT [4020]. Set CARGO_TARGET_DIR to reuse an existing build, and
 # PROFILE=release to use release binaries (default: debug).
@@ -17,7 +17,7 @@ mkdir -p .demo
 GATEWAY_PORT="${GATEWAY_PORT:-8402}"; ADMIN_PORT="${ADMIN_PORT:-8403}"
 ORIGIN_PORT="${ORIGIN_PORT:-4000}"; FACILITATOR_PORT="${FACILITATOR_PORT:-4020}"
 
-echo "Building (first run compiles about 400 crates; later runs are instant)..."
+echo "Building (first run compiles about 590 crates; later runs are instant)..."
 PROFILE="${PROFILE:-debug}"
 cargo build -q $([ "$PROFILE" = release ] && echo --release) -p agenttoll-gateway -p agenttoll-demo-origin -p agenttoll-buyer -p agenttoll-mock-facilitator
 BIN="${CARGO_TARGET_DIR:-$ROOT/target}/$PROFILE"
@@ -31,6 +31,9 @@ sed -e "s#127.0.0.1:4000#127.0.0.1:$ORIGIN_PORT#" -e "s#127.0.0.1:4020#127.0.0.1
 [ -f .demo/buyer.json ] || "$BIN/agenttoll-buyer" --new-solana-keypair .demo/buyer.json > .demo/buyer.pub
 export AGENTTOLL_SOLANA_PAYTO="$(cat .demo/payto.pub)"
 export AGENTTOLL_ADMIN_TOKEN="${AGENTTOLL_ADMIN_TOKEN:-demo-admin-token-$(head -c 12 /dev/urandom | od -An -tx1 | tr -d ' \n')}"
+
+# STACK_ONLY starts from an empty ledger: the demo DB persists between runs otherwise.
+[ -n "${STACK_ONLY:-}" ] && rm -f .demo/agenttoll-demo.db .demo/agenttoll-demo.db-shm .demo/agenttoll-demo.db-wal
 
 pids=()
 cleanup() { for p in "${pids[@]}"; do kill "$p" 2>/dev/null || true; done; }
@@ -51,6 +54,7 @@ if [ -n "${STACK_ONLY:-}" ]; then
   echo "buyer keypair: $ROOT/.demo/buyer.json | pay_to: $AGENTTOLL_SOLANA_PAYTO"
   echo "admin token:   $AGENTTOLL_ADMIN_TOKEN"
   wait
+  exit 0
 fi
 
 step "1. A human opens the site: free"
@@ -95,4 +99,5 @@ PY
 if [ -n "${KEEP:-}" ]; then
   step "Stack is running. Dashboard: AGENTTOLL_ADMIN_URL=http://127.0.0.1:$ADMIN_PORT AGENTTOLL_ADMIN_TOKEN=$AGENTTOLL_ADMIN_TOKEN pnpm --dir apps/dashboard dev"
   wait
+  exit 0
 fi
