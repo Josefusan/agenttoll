@@ -29,9 +29,13 @@ Seven worked cases with configs and proofs: [docs/USE_CASES.md](docs/USE_CASES.m
 
 ## Try it in one command (no wallet, no funds)
 
+You need a Rust toolchain (`rustup`, stable), `curl` and `python3`. No Docker, no wallet, no keys. The first run compiles the workspace, about 590 crates (`cargo tree -e normal,build` on the four demo packages): 14 minutes on a shared 4-core server limited to 2 build jobs (measured 2026-10-04), faster on a laptop. Later runs start in seconds.
+
 ```bash
 bash scripts/demo-local.sh
 ```
+
+Ports are 8402 (gateway), 8403 (admin), 4000 (origin) and 4020 (simulated facilitator). If one is taken, set `GATEWAY_PORT`, `ADMIN_PORT`, `ORIGIN_PORT` or `FACILITATOR_PORT`.
 
 The script builds the stack and walks through it:
 
@@ -46,7 +50,7 @@ The script builds the stack and walks through it:
 
 The demo settles through a **simulated facilitator** (`demo/mock-facilitator`). Every simulated payment carries a `SIMULATED-` id and is labelled as simulated by the gateway, dashboard, buyer and pay-mcp. Nothing touches a chain and nothing is ever shown as on-chain. To take real devnet payments, see [Real devnet payments](#real-devnet-payments).
 
-Keep the stack running and open the dashboard:
+Keep the stack running and open the dashboard (`STACK_ONLY=1` instead starts the stack, deletes the old demo ledger so it starts empty, and skips the walkthrough):
 
 ```bash
 KEEP=1 bash scripts/demo-local.sh
@@ -54,6 +58,8 @@ KEEP=1 bash scripts/demo-local.sh
 cd apps/dashboard && pnpm install
 AGENTTOLL_ADMIN_URL=http://127.0.0.1:8403 AGENTTOLL_ADMIN_TOKEN=<token> pnpm dev
 ```
+
+See Claude pay: with the stack running (`STACK_ONLY=1`), build `demo/pay-mcp` and run `bash scripts/claude-pays-demo.sh`. The headless Claude CLI finds a price, pays it within its caps, gets refused on a $0.05 tool and pays for an MCP tool. Transcript with every tool call: [docs/assets/claude-pays-transcript.md](docs/assets/claude-pays-transcript.md). All payments are simulated.
 
 Or run everything in containers: `cp .env.example .env`, fill in the three `AGENTTOLL_*` values, then `docker compose up --build`.
 
