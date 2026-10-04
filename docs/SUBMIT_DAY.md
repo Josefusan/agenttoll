@@ -102,6 +102,7 @@ Any field the editor shows that is not in this table: answer it only from facts 
 
 ## 5. Last checks, then Submit
 
+- [ ] Run `bash scripts/refresh-live-urls.sh` on the VPS first (it checks every quick-tunnel URL in tracked files against `~/Hackathons/AgentToll-LIVE.txt` and prints `STALE`/`DEAD` for anything wrong; `--apply` rewrites the stale ones).
 - [ ] Every field filled. Both video links open in a private window.
 - [ ] Re-read the form once against the truth table. Anything you cannot defend in a 15-minute interview comes out.
 - [ ] Click **Submit** yourself.
