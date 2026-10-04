@@ -1,0 +1,179 @@
+[
+  {
+    "id": "PAY-01",
+    "promise": "Pay the quote with PAYMENT-SIGNATURE: 200, origin content, PAYMENT-RESPONSE with a SIMULATED- tx id, origin told who paid",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "id": "p",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 200,
+          "headers": {
+            "payment-response": {
+              "exists": true
+            }
+          },
+          "receipt": {
+            "/success": true,
+            "/transaction": {
+              "re": "^SIMULATED-"
+            },
+            "/network": "$solana_network",
+            "/payer": {
+              "exists": true
+            }
+          },
+          "json": {
+            "/paid": true,
+            "/agent": "GPTBot",
+            "/symbol": "SOL/USD"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "PAY-02",
+    "promise": "The settled amount equals the quote for the route (0.001 USD blog route settles 1000)",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/blog/agent-economy",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/blog/agent-economy",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 200,
+          "receipt": {
+            "/success": true,
+            "/amount": "1000",
+            "/transaction": {
+              "re": "^SIMULATED-"
+            }
+          },
+          "body_contains": "agent-economy"
+        }
+      }
+    ]
+  },
+  {
+    "id": "PAY-03",
+    "promise": "The shipped buyer CLI pays /api/quote end to end against the simulated facilitator (SIMULATED- tx, labelled simulated, ledger +2000)",
+    "steps": [
+      {
+        "check": "buyer_paid_flow"
+      }
+    ]
+  },
+  {
+    "id": "PAY-04",
+    "promise": "The buyer CLI refuses a quote above its per-call cap and spends nothing",
+    "steps": [
+      {
+        "check": "buyer_cap_refusal"
+      }
+    ]
+  },
+  {
+    "id": "PAY-05",
+    "promise": "Base Sepolia is a working backup rail: paying accepts[1] settles with network eip155:84532",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q",
+          "accept": "base"
+        },
+        "expect": {
+          "status": 200,
+          "receipt": {
+            "/success": true,
+            "/network": "$base_network",
+            "/transaction": {
+              "re": "^SIMULATED-"
+            }
+          },
+          "json": {
+            "/paid": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "PAY-06",
+    "promise": "A different declared agent (ClaudeBot) pays and is identified to the origin",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "ClaudeBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "ClaudeBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 200,
+          "receipt": {
+            "/success": true
+          },
+          "json": {
+            "/agent": "ClaudeBot",
+            "/paid": true
+          }
+        }
+      }
+    ]
+  }
+]

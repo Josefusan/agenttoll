@@ -1,0 +1,1223 @@
+{
+  "generated": "2026-10-04 06:54:26Z",
+  "commit": "0c54a00",
+  "gateway_version": "0.1.0",
+  "ports": {
+    "gateway": 18402,
+    "admin": 18403,
+    "origin": 14000,
+    "facilitator": 14020
+  },
+  "simulated_only": true,
+  "total": 117,
+  "passed": 117,
+  "failed": 0,
+  "cases": [
+    {
+      "id": "HUM-01",
+      "group": "HUM",
+      "promise": "Chrome desktop gets 200 free on a paid route (GET /api/quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [human-chrome] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
+      ],
+      "seconds": 0.008
+    },
+    {
+      "id": "HUM-02",
+      "group": "HUM",
+      "promise": "Safari on iPhone gets 200 free on a paid route (GET /api/quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [human-safari-ios] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
+      ],
+      "seconds": 0.007
+    },
+    {
+      "id": "HUM-03",
+      "group": "HUM",
+      "promise": "Firefox gets 200 free on a paid route (GET /api/quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [human-firefox] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "HUM-04",
+      "group": "HUM",
+      "promise": "Edge gets 200 free on a paid route (GET /api/quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [human-edge] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "HUM-05",
+      "group": "HUM",
+      "promise": "Chrome on Android gets 200 free on a paid route (GET /api/quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [human-chrome-android] -> 200 | ok: status, header payment-required, header payment-response, json /paid, json /symbol"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "HUM-06",
+      "group": "HUM",
+      "promise": "A human reads a paid blog route (GET /blog/*) for free",
+      "status": "pass",
+      "evidence": [
+        "GET /blog/agent-economy [human-chrome] -> 200 | ok: status, header payment-required, body contains"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "HUM-07",
+      "group": "HUM",
+      "promise": "A human opens the home page for free",
+      "status": "pass",
+      "evidence": [
+        "GET / [human-firefox] -> 200 | ok: status, header payment-required, body contains"
+      ],
+      "seconds": 0.009
+    },
+    {
+      "id": "HUM-08",
+      "group": "HUM",
+      "promise": "Search bots (Googlebot) are not charged for indexing",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [Googlebot] -> 200 | ok: status, header payment-required"
+      ],
+      "seconds": 0.009
+    },
+    {
+      "id": "HUM-09",
+      "group": "HUM",
+      "promise": "A bare curl client is never charged on a guess (heuristic confidence below the charge bar)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [curl] -> 200 | ok: status, header payment-required"
+      ],
+      "seconds": 0.006
+    },
+    {
+      "id": "HUM-10",
+      "group": "HUM",
+      "promise": "python-requests is never charged on a guess",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [python-requests] -> 200 | ok: status, header payment-required"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "HUM-11",
+      "group": "HUM",
+      "promise": "A human on a free route is passed through to the origin untouched (no payment headers added)",
+      "status": "pass",
+      "evidence": [
+        "GET / [human-chrome] -> 200 | ok: status, header payment-required, header x-agenttoll-verdict"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "AGT-01",
+      "group": "AGT",
+      "promise": "GPTBot gets 402 with an x402 v2 quote on a paid route",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, header x-agenttoll-verdict, header content-type, json /x402Version, challenge /x402Version"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "AGT-02",
+      "group": "AGT",
+      "promise": "ClaudeBot gets 402 with an x402 v2 quote on a paid route",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [ClaudeBot] -> 402 verdict=ua:ClaudeBot quote=2000 | ok: status, header payment-required, header x-agenttoll-verdict, header content-type, json /x402Version, challenge /x402Version"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "AGT-03",
+      "group": "AGT",
+      "promise": "PerplexityBot gets 402 with an x402 v2 quote on a paid route",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [PerplexityBot] -> 402 verdict=ua:PerplexityBot quote=2000 | ok: status, header payment-required, header x-agenttoll-verdict, header content-type, json /x402Version, challenge /x402Version"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "AGT-04",
+      "group": "AGT",
+      "promise": "AgentToll-Buyer (the shipped buyer's declared UA) gets 402 with an x402 v2 quote on a paid route",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [AgentToll-Buyer] -> 402 verdict=ua:AgentToll-Buyer quote=2000 | ok: status, header payment-required, header x-agenttoll-verdict, header content-type, json /x402Version, challenge /x402Version"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "AGT-05",
+      "group": "AGT",
+      "promise": "ChatGPT-User on a blog route gets 402 with an x402 v2 quote on a paid route",
+      "status": "pass",
+      "evidence": [
+        "GET /blog/agent-economy [ChatGPT-User] -> 402 verdict=ua:ChatGPT-User quote=1000 | ok: status, header payment-required, header x-agenttoll-verdict, header content-type, json /x402Version, challenge /x402Version"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "AGT-06",
+      "group": "AGT",
+      "promise": "An MCP client (any UA) calling a paid tool gets the MCP-native challenge, classified by endpoint",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, header x-agenttoll-verdict, header payment-required, json /result/isError"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "AGT-07",
+      "group": "AGT",
+      "promise": "A declared agent is charged on every priced route, including one the origin will fail (/api/fail)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/fail [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status, challenge /accepts/@solana/amount"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "AGT-08",
+      "group": "AGT",
+      "promise": "A declared agent on a free route (/) is passed through, not charged",
+      "status": "pass",
+      "evidence": [
+        "GET / [ClaudeBot] -> 200 | ok: status, header payment-required, body contains"
+      ],
+      "seconds": 0.006
+    },
+    {
+      "id": "AGT-09",
+      "group": "AGT",
+      "promise": "The price list (/.well-known/agenttoll.json) is free for agents, so they can budget before paying",
+      "status": "pass",
+      "evidence": [
+        "GET /.well-known/agenttoll.json [GPTBot] -> 200 | ok: status, header payment-required, json /x402Version"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "X402-01",
+      "group": "X402",
+      "promise": "PAYMENT-REQUIRED header is base64 JSON and carries the same PaymentRequired as the 402 body",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, json /x402Version, json /accepts/@solana/amount, challenge /x402Version, challenge /accepts/@solana/amount",
+        "check challenge_deterministic: two consecutive challenges have identical accepts[]"
+      ],
+      "seconds": 0.012
+    },
+    {
+      "id": "X402-02",
+      "group": "X402",
+      "promise": "x402Version is 2 and no v1 field (maxAmountRequired) is emitted",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /x402Version, challenge /accepts/@solana/maxAmountRequired, challenge /accepts/@solana/amount"
+      ],
+      "seconds": 0.006
+    },
+    {
+      "id": "X402-03",
+      "group": "X402",
+      "promise": "Each accepts[] entry uses scheme exact",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@solana/scheme, challenge /accepts/@base/scheme"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "X402-04",
+      "group": "X402",
+      "promise": "network is a CAIP-2 id; Solana devnet is the primary rail",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@solana/network, challenge /accepts/@base/network"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "X402-05",
+      "group": "X402",
+      "promise": "amount is atomic USDC: 0.002 USD quotes as \"2000\" (price * 1e6)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@solana/amount, challenge /accepts/@base/amount"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "X402-06",
+      "group": "X402",
+      "promise": "Quotes for every priced route and MCP tool equal price_usd * 1e6, matching the published price list",
+      "status": "pass",
+      "evidence": [
+        "check price_math: /api/quote 0.002 USD -> 2000; /blog/agent-economy 0.001 USD -> 1000; /api/fail 0.001 USD -> 1000; mcp broken_tool 0.005 USD -> 5000; mcp generate_report 0.05 USD -> 50000; mcp search_docs 0.005 USD -> 5000"
+      ],
+      "seconds": 0.022
+    },
+    {
+      "id": "X402-07",
+      "group": "X402",
+      "promise": "asset is the devnet USDC mint on Solana and USDC on Base Sepolia",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@solana/asset, challenge /accepts/@base/asset"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "X402-08",
+      "group": "X402",
+      "promise": "payTo is the configured receiving address on each rail",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@solana/payTo, challenge /accepts/@base/payTo"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "X402-09",
+      "group": "X402",
+      "promise": "maxTimeoutSeconds is a positive integer",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@solana/maxTimeoutSeconds"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "X402-10",
+      "group": "X402",
+      "promise": "Solana quote carries extra.feePayer, equal to the facilitator's advertised fee payer",
+      "status": "pass",
+      "evidence": [
+        "check fee_payer_matches_facilitator: quote extra.feePayer == facilitator /supported feePayer (7SQGrt...)"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "X402-11",
+      "group": "X402",
+      "promise": "Base quote carries the EIP-3009 USDC domain in extra (name USDC, version 2)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/@base/extra/name, challenge /accepts/@base/extra/version, challenge /accepts/@base/extra/feePayer"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "X402-12",
+      "group": "X402",
+      "promise": "resource.url binds the quote to the requested URL on the public base URL",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /resource/url, challenge /resource/description"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "X402-13",
+      "group": "X402",
+      "promise": "The 402 body explains what to do (error names the PAYMENT-SIGNATURE header)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, json /error"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "X402-14",
+      "group": "X402",
+      "promise": "Solana, the primary rail, is quoted first (accepts[0]) and Base Sepolia second",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, challenge /accepts/0/network, challenge /accepts/1/network"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "DISC-01",
+      "group": "DISC",
+      "promise": "/.well-known/agenttoll.json declares x402 v2 and the detection mode",
+      "status": "pass",
+      "evidence": [
+        "GET /.well-known/agenttoll.json [human-chrome] -> 200 | ok: status, json /x402Version, json /detection, json /agenttoll"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "DISC-02",
+      "group": "DISC",
+      "promise": "The price list shows every route with its USD price",
+      "status": "pass",
+      "evidence": [
+        "GET /.well-known/agenttoll.json -> 200 | ok: status, json /routes/0/match, json /routes/0/priceUsd, json /routes/1/match, json /routes/1/priceUsd, json /routes/2/match, json /routes/2/priceUsd"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "DISC-03",
+      "group": "DISC",
+      "promise": "The price list shows the MCP endpoint, tool prices and both payment transports",
+      "status": "pass",
+      "evidence": [
+        "GET /.well-known/agenttoll.json -> 200 | ok: status, json /mcp/endpoint, json /mcp/tools/search_docs, json /mcp/tools/generate_report, json /mcp/paymentTransports/0, json /mcp/paymentTransports/1"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "DISC-04",
+      "group": "DISC",
+      "promise": "The price list shows each payment rail (network, asset, payTo) and never leaks the admin token",
+      "status": "pass",
+      "evidence": [
+        "GET /.well-known/agenttoll.json -> 200 | ok: status, json /networks/@solana/network, json /networks/@solana/asset, json /networks/@solana/payTo, json /networks/@solana/scheme, json /networks/@base/network, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "PAY-01",
+      "group": "PAY",
+      "promise": "Pay the quote with PAYMENT-SIGNATURE: 200, origin content, PAYMENT-RESPONSE with a SIMULATED- tx id, origin told who paid",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 200 receipt.tx=SIMULATED-8648818bde4d871dd793d0a0 +payment(header) | ok: status, header payment-response, json /paid, json /agent, json /symbol, receipt /success, receipt /transaction, receipt /network, receipt /payer"
+      ],
+      "seconds": 0.016
+    },
+    {
+      "id": "PAY-02",
+      "group": "PAY",
+      "promise": "The settled amount equals the quote for the route (0.001 USD blog route settles 1000)",
+      "status": "pass",
+      "evidence": [
+        "GET /blog/agent-economy [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
+        "GET /blog/agent-economy [GPTBot] -> 200 receipt.tx=SIMULATED-32182ed24c029a522f4f9e4e +payment(header) | ok: status, receipt /success, receipt /amount, receipt /transaction, body contains"
+      ],
+      "seconds": 0.016
+    },
+    {
+      "id": "PAY-03",
+      "group": "PAY",
+      "promise": "The shipped buyer CLI pays /api/quote end to end against the simulated facilitator (SIMULATED- tx, labelled simulated, ledger +2000)",
+      "status": "pass",
+      "evidence": [
+        "check buyer_paid_flow: buyer CLI: status 200, tx SIMULATED-fe86998544b647b6373a7f7a, ledger +1 payment, +2000 atomic"
+      ],
+      "seconds": 0.227
+    },
+    {
+      "id": "PAY-04",
+      "group": "PAY",
+      "promise": "The buyer CLI refuses a quote above its per-call cap and spends nothing",
+      "status": "pass",
+      "evidence": [
+        "check buyer_cap_refusal: buyer exit 1, 'skipping quote' on stderr, ledger unchanged"
+      ],
+      "seconds": 0.09
+    },
+    {
+      "id": "PAY-05",
+      "group": "PAY",
+      "promise": "Base Sepolia is a working backup rail: paying accepts[1] settles with network eip155:84532",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 200 receipt.tx=SIMULATED-8058ab630a88a0ce9789c997 +payment(header) | ok: status, json /paid, receipt /success, receipt /network, receipt /transaction"
+      ],
+      "seconds": 0.029
+    },
+    {
+      "id": "PAY-06",
+      "group": "PAY",
+      "promise": "A different declared agent (ClaudeBot) pays and is identified to the origin",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [ClaudeBot] -> 402 verdict=ua:ClaudeBot quote=2000 | ok: status",
+        "GET /api/quote [ClaudeBot] -> 200 receipt.tx=SIMULATED-cb947943e900255ad56cacee +payment(header) | ok: status, json /agent, json /paid, receipt /success"
+      ],
+      "seconds": 0.025
+    },
+    {
+      "id": "REPLAY-01",
+      "group": "REPLAY",
+      "promise": "A payment that already settled is refused when replayed (duplicate_settlement) and the origin is not reached",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 200 receipt.tx=SIMULATED-b2e9fdee620dd2d896e890d3 +payment(header) | ok: status, receipt /success",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, json /error, body excludes"
+      ],
+      "seconds": 0.02
+    },
+    {
+      "id": "REPLAY-02",
+      "group": "REPLAY",
+      "promise": "A settled payment cannot be replayed on another priced route either",
+      "status": "pass",
+      "evidence": [
+        "GET /blog/agent-economy [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
+        "GET /blog/agent-economy [GPTBot] -> 200 receipt.tx=SIMULATED-f6408ac687d6fff034fad737 +payment(header) | ok: status, receipt /success",
+        "GET /blog/other-post [GPTBot] -> 402 verdict=payment-header quote=1000 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.022
+    },
+    {
+      "id": "REPLAY-03",
+      "group": "REPLAY",
+      "promise": "A payment not consumed (origin 5xx) can be retried: the replay claim is released, the agent is not charged",
+      "status": "pass",
+      "evidence": [
+        "GET /api/fail [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
+        "GET /api/fail [GPTBot] -> 500 +payment(header) | ok: status, header payment-response",
+        "GET /api/fail [GPTBot] -> 500 +payment(header) | ok: status, header payment-response, json /error"
+      ],
+      "seconds": 0.015
+    },
+    {
+      "id": "REPLAY-04",
+      "group": "REPLAY",
+      "promise": "Origin 5xx on a paid request is passed through and not settled (no PAYMENT-RESPONSE, origin body intact)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/fail [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
+        "GET /api/fail [GPTBot] -> 500 +payment(header) | ok: status, header payment-response, header payment-required, json /error"
+      ],
+      "seconds": 0.01
+    },
+    {
+      "id": "TAMPER-01",
+      "group": "TAMPER",
+      "promise": "Tampered amount (2000 -> 1) is refused: the gateway compares against its own quote",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, json /x402Version, json /error, body excludes"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "TAMPER-02",
+      "group": "TAMPER",
+      "promise": "Zero amount is refused",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.006
+    },
+    {
+      "id": "TAMPER-03",
+      "group": "TAMPER",
+      "promise": "Tampered asset (Base USDC offered on the Solana network) is refused",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.006
+    },
+    {
+      "id": "TAMPER-04",
+      "group": "TAMPER",
+      "promise": "Tampered payTo (attacker address) is refused",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.006
+    },
+    {
+      "id": "TAMPER-05",
+      "group": "TAMPER",
+      "promise": "Tampered network (a chain the gateway does not offer) is refused",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, json /error, body excludes"
+      ],
+      "seconds": 0.006
+    },
+    {
+      "id": "TAMPER-06",
+      "group": "TAMPER",
+      "promise": "Network swapped to Base while keeping the Solana asset and payTo is refused",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "TAMPER-07",
+      "group": "TAMPER",
+      "promise": "Tampered scheme (upto instead of exact) is refused",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "TAMPER-08",
+      "group": "TAMPER",
+      "promise": "An x402Version 1 payment is refused",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, json /error, body excludes"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "TAMPER-09",
+      "group": "TAMPER",
+      "promise": "A payment without `accepted` requirements is a 400, not a charge",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 400 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "TAMPER-10",
+      "group": "TAMPER",
+      "promise": "A payment without a signed `payload` is a 400, not a charge",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 400 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "TAMPER-11",
+      "group": "TAMPER",
+      "promise": "A PAYMENT-SIGNATURE that is not base64 JSON is a 400",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 400 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "TAMPER-12",
+      "group": "TAMPER",
+      "promise": "The v1 X-PAYMENT header is not accepted: 402 telling the client to use PAYMENT-SIGNATURE",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 | ok: status, header payment-response, json /error"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "TAMPER-13",
+      "group": "TAMPER",
+      "promise": "A tampered amount is refused on the Base rail too",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "BIND-01",
+      "group": "BIND",
+      "promise": "A payment for one blog post cannot be spent on another post of the same price (resource binding)",
+      "status": "pass",
+      "evidence": [
+        "GET /blog/post-a [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
+        "GET /blog/post-b [GPTBot] -> 402 verdict=payment-header quote=1000 +payment(header) | ok: status, header payment-response, json /error, body excludes"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "BIND-02",
+      "group": "BIND",
+      "promise": "A payment for /api/quote (2000) cannot buy a cheaper blog route (1000)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "GET /blog/agent-economy [GPTBot] -> 402 verdict=payment-header quote=1000 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "BIND-03",
+      "group": "BIND",
+      "promise": "A cheap payment (blog, 1000) cannot buy the dearer /api/quote (2000)",
+      "status": "pass",
+      "evidence": [
+        "GET /blog/agent-economy [GPTBot] -> 402 verdict=ua:GPTBot quote=1000 | ok: status",
+        "GET /api/quote [GPTBot] -> 402 verdict=payment-header quote=2000 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "MCP-01",
+      "group": "MCP",
+      "promise": "MCP initialize is free and reaches the origin",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 | ok: status, header payment-required, header payment-response, json /result/serverInfo/name"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "MCP-02",
+      "group": "MCP",
+      "promise": "MCP tools/list is free and advertises each paid tool's price in its description",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 | ok: status, header payment-required, json /result/tools/0/name, json /result/tools/0/description, json /result/tools/1/description"
+      ],
+      "seconds": 0.007
+    },
+    {
+      "id": "MCP-03",
+      "group": "MCP",
+      "promise": "Free tools are not decorated with a price and stay free to call",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 | ok: status, json /result/tools/2/name, json /result/tools/2/description",
+        "POST /mcp [mcp-client] -> 200 | ok: status, header payment-required, json /result/content/0/text, json /result/isError"
+      ],
+      "seconds": 0.014
+    },
+    {
+      "id": "MCP-04",
+      "group": "MCP",
+      "promise": "tools/call without payment gets the MCP-native challenge: HTTP 200, result.isError true, structuredContent is a v2 PaymentRequired",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, header payment-required, header x-agenttoll-verdict, json /jsonrpc, json /id, json /result/isError, json /result/structuredContent/x402Version, json /result/structuredContent/accepts/@solana/amount, json /result/structuredContent/accepts/@solana/scheme, json /result/content/0/type"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "MCP-05",
+      "group": "MCP",
+      "promise": "The MCP challenge text, structuredContent and PAYMENT-REQUIRED header all carry the same PaymentRequired",
+      "status": "pass",
+      "evidence": [
+        "check mcp_text_equals_structured: content[0].text == structuredContent == PAYMENT-REQUIRED header"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "MCP-06",
+      "group": "MCP",
+      "promise": "The MCP quote is bound to the tool: resource.url ends with #mcp:<tool>",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=50000 | ok: status, json /result/structuredContent/resource/url, json /result/structuredContent/accepts/@solana/amount"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "MCP-07",
+      "group": "MCP",
+      "promise": "Paid tools/call (MCP-native, params._meta[x402/payment]) succeeds and the receipt is in the result and header",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
+        "POST /mcp [mcp-client] -> 200 receipt.tx=SIMULATED-b5451b60e5db202edacd2328 +payment(mcp-meta) | ok: status, header payment-response, json /id, json /result/isError, json /result/content/0/text, receipt /success, receipt /transaction, body contains"
+      ],
+      "seconds": 0.018
+    },
+    {
+      "id": "MCP-08",
+      "group": "MCP",
+      "promise": "Paid tools/call also works with the HTTP PAYMENT-SIGNATURE header on /mcp",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=50000 | ok: status, json /result/isError",
+        "POST /mcp [mcp-client] -> 200 receipt.tx=SIMULATED-8f2661e7c192412ade696264 +payment(header) | ok: status, json /result/content/0/text, receipt /success, receipt /amount, receipt /transaction"
+      ],
+      "seconds": 0.015
+    },
+    {
+      "id": "MCP-09",
+      "group": "MCP",
+      "promise": "An MCP tool that errors is NOT settled: the JSON-RPC error is returned and there is no PAYMENT-RESPONSE",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
+        "POST /mcp [mcp-client] -> 200 +payment(mcp-meta) | ok: status, header payment-response, json /error/code, json /error/message, json /result"
+      ],
+      "seconds": 0.01
+    },
+    {
+      "id": "MCP-10",
+      "group": "MCP",
+      "promise": "A payment for one tool cannot be spent on another tool of the same price (resource fragment binding)",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 +payment(mcp-meta) | ok: status, header payment-response, json /result/isError, json /result/structuredContent/error"
+      ],
+      "seconds": 0.007
+    },
+    {
+      "id": "MCP-11",
+      "group": "MCP",
+      "promise": "A batch of tool calls is priced as the sum, so batching cannot dodge the price (5000 + 50000 = 55000)",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 402 verdict=mcp-endpoint quote=55000 | ok: status, challenge /accepts/@solana/amount, challenge /resource/url"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "MCP-12",
+      "group": "MCP",
+      "promise": "A paid-tool call on a mixed-case endpoint path (POST /MCP) is still challenged",
+      "status": "pass",
+      "evidence": [
+        "POST /MCP [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError, json /result/structuredContent/accepts/@solana/amount"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "MCP-13",
+      "group": "MCP",
+      "promise": "An MCP payment cannot be replayed on a second tools/call",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
+        "POST /mcp [mcp-client] -> 200 receipt.tx=SIMULATED-6f0932a03d8e44d483ca49cd +payment(header) | ok: status, receipt /success",
+        "POST /mcp [mcp-client] -> 402 verdict=payment-header quote=5000 +payment(header) | ok: status, header payment-response, json /error"
+      ],
+      "seconds": 0.02
+    },
+    {
+      "id": "MCP-14",
+      "group": "MCP",
+      "promise": "A malformed MCP body is a 400 JSON-RPC parse error, not free passage",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 400 | ok: status, json /error/code"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "MCP-15",
+      "group": "MCP",
+      "promise": "A tampered amount on an MCP-native payment is refused with the MCP challenge shape",
+      "status": "pass",
+      "evidence": [
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 | ok: status, json /result/isError",
+        "POST /mcp [mcp-client] -> 200 verdict=mcp-endpoint quote=5000 +payment(mcp-meta) | ok: status, header payment-response, json /result/isError, json /result/structuredContent/x402Version, json /id"
+      ],
+      "seconds": 0.007
+    },
+    {
+      "id": "NORM-01",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: upper-case path (/API/QUOTE)",
+      "status": "pass",
+      "evidence": [
+        "GET /API/QUOTE [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "NORM-02",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: mixed-case path (/Api/Quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /Api/Quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "NORM-03",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: dot segment (/api/./quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/./quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "NORM-04",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: double slash (/api//quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api//quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "NORM-05",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: matrix parameter (/api/quote;x)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote;x [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "NORM-06",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: jsessionid matrix parameter (/api/quote;jsessionid=1)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote;jsessionid=1 [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "NORM-07",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: percent-encoded dot segment (%2e) (/api/%2e/quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/%2e/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "NORM-08",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: percent-encoded letter (%71) (/api/%71uote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/%71uote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "NORM-09",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: percent-encoded semicolon (%3B) (/api/quote%3Bx)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote%3Bx [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "NORM-10",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: backslash separator (/api\\quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api\\quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "NORM-11",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: percent-encoded backslash (%5C) (/api%5Cquote)",
+      "status": "pass",
+      "evidence": [
+        "GET /api%5Cquote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "NORM-12",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: query string (/api/quote?x=1)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote?x=1 [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "NORM-13",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: empty query (/api/quote?)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote? [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "NORM-14",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: trailing slash (/api/quote/)",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote/ [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "NORM-15",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: parent segment from a free-looking path (/blog/../api/quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /blog/../api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.005
+    },
+    {
+      "id": "NORM-16",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: percent-encoded parent segment (/blog/%2e%2e/api/quote)",
+      "status": "pass",
+      "evidence": [
+        "GET /blog/%2e%2e/api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "NORM-17",
+      "group": "NORM",
+      "promise": "Path bypass attempt is still charged: leading double slash (//api/quote)",
+      "status": "pass",
+      "evidence": [
+        "GET //api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status, header payment-required, challenge /accepts/@solana/amount, body excludes"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "ADM-01",
+      "group": "ADM",
+      "promise": "Admin API without a token is 401",
+      "status": "pass",
+      "evidence": [
+        "GET /admin/stats -> 401 | ok: status, body excludes"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "ADM-02",
+      "group": "ADM",
+      "promise": "Admin API with a wrong token is 401",
+      "status": "pass",
+      "evidence": [
+        "GET /admin/stats -> 401 | ok: status"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "ADM-03",
+      "group": "ADM",
+      "promise": "Admin API with an empty bearer is 401 (an empty token never matches)",
+      "status": "pass",
+      "evidence": [
+        "GET /admin/stats -> 401 | ok: status"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "ADM-04",
+      "group": "ADM",
+      "promise": "Admin stats with the right bearer token is 200 JSON with totals",
+      "status": "pass",
+      "evidence": [
+        "GET /admin/stats -> 200 | ok: status, json /totals/revenue_atomic, json /totals/simulated_atomic, json /by_route, json /unbilled, json /recent"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "ADM-05",
+      "group": "ADM",
+      "promise": "?token= does NOT work on /admin/stats (tokens stay out of access logs)",
+      "status": "pass",
+      "evidence": [
+        "GET /admin/stats?token=*** -> 401 | ok: status, body excludes"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "ADM-06",
+      "group": "ADM",
+      "promise": "?token= works on /admin/events (EventSource cannot set headers) and answers as a stream",
+      "status": "pass",
+      "evidence": [
+        "check admin_events_query_token: 200 text/event-stream"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "ADM-07",
+      "group": "ADM",
+      "promise": "/admin/events without a token is 401",
+      "status": "pass",
+      "evidence": [
+        "GET /admin/events -> 401 | ok: status"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "ADM-08",
+      "group": "ADM",
+      "promise": "/admin/events with a wrong ?token= is 401",
+      "status": "pass",
+      "evidence": [
+        "GET /admin/events?token=wrong -> 401 | ok: status"
+      ],
+      "seconds": 0.001
+    },
+    {
+      "id": "ADM-09",
+      "group": "ADM",
+      "promise": "The admin API is not exposed on the public port (a human asking for /admin/stats gets the origin's 404, not stats)",
+      "status": "pass",
+      "evidence": [
+        "GET /admin/stats [human-chrome] -> 404 | ok: status, body excludes"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "ADM-10",
+      "group": "ADM",
+      "promise": "Even an agent with the admin token on the public port does not reach admin data",
+      "status": "pass",
+      "evidence": [
+        "GET /admin/stats [GPTBot] -> 404 | ok: status, body excludes"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "LOG-01",
+      "group": "LOG",
+      "promise": "Unbilled crawler traffic on free pages is served and logged per agent and rule (4 Bytespider hits counted exactly)",
+      "status": "pass",
+      "evidence": [
+        "check unbilled_crawlers: 4 Bytespider hits on /: served free, logged as unbilled (ua:Bytespider) = 4"
+      ],
+      "seconds": 0.041
+    },
+    {
+      "id": "LOG-02",
+      "group": "LOG",
+      "promise": "Human traffic is never written to the unbilled log",
+      "status": "pass",
+      "evidence": [
+        "check human_not_logged: 6 human requests served free; unbilled_agent_requests stays 13"
+      ],
+      "seconds": 0.835
+    },
+    {
+      "id": "LOG-03",
+      "group": "LOG",
+      "promise": "A search bot (Googlebot) on a priced route is free and shows up in the log, not the ledger",
+      "status": "pass",
+      "evidence": [
+        "check search_bot_logged: Googlebot on a priced blog route: 200 free, logged (count 1 -> 2)"
+      ],
+      "seconds": 0.016
+    },
+    {
+      "id": "FAIL-01",
+      "group": "FAIL",
+      "promise": "If the facilitator is down, a paid request gets 502 and the content is withheld; nothing is settled",
+      "status": "pass",
+      "evidence": [
+        "GET /api/quote [GPTBot] -> 402 verdict=ua:GPTBot quote=2000 | ok: status",
+        "check stop_facilitator: simulated facilitator stopped",
+        "GET /api/quote [GPTBot] -> 502 +payment(header) | ok: status, header payment-response, body excludes"
+      ],
+      "seconds": 0.01
+    },
+    {
+      "id": "STAT-01",
+      "group": "STAT",
+      "promise": "Ledger revenue and payment count equal exactly what the run saw settle; no refused or failed attempt was charged",
+      "status": "pass",
+      "evidence": [
+        "check ledger_matches_observed: ledger revenue_atomic=72000 payments=10 == observed (72000, 10)"
+      ],
+      "seconds": 0.004
+    },
+    {
+      "id": "STAT-02",
+      "group": "STAT",
+      "promise": "Stats separate simulated money: simulated_atomic equals revenue here, unconfirmed is 0, real is 0",
+      "status": "pass",
+      "evidence": [
+        "check simulated_separated: simulated_atomic=72000 of revenue_atomic=72000; real (non-simulated)=0; unconfirmed=0"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "STAT-03",
+      "group": "STAT",
+      "promise": "Every ledger row is labelled simulated with a SIMULATED- tx id",
+      "status": "pass",
+      "evidence": [
+        "check recent_all_labelled: 10 recent rows all simulated=true, SIMULATED- tx, status settled"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "STAT-04",
+      "group": "STAT",
+      "promise": "Routes whose paid attempts failed (origin 5xx, MCP tool error) have no revenue",
+      "status": "pass",
+      "evidence": [
+        "check failures_not_in_ledger: by_route ['GET /api/quote', 'GET /blog/*', 'mcp:generate_report', 'mcp:search_docs'] has no GET /api/* (origin 500) or mcp:broken_tool (tool error)"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "STAT-05",
+      "group": "STAT",
+      "promise": "Revenue is reported per network and matches what settled on each rail",
+      "status": "pass",
+      "evidence": [
+        "check by_network_both: by_network {'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1': 70000, 'eip155:84532': 2000} matches observed per-network totals"
+      ],
+      "seconds": 0.002
+    },
+    {
+      "id": "STAT-06",
+      "group": "STAT",
+      "promise": "MCP revenue is recorded per tool",
+      "status": "pass",
+      "evidence": [
+        "check mcp_tool_recorded: ledger records per-tool MCP revenue: ['generate_report', 'search_docs']"
+      ],
+      "seconds": 0.003
+    },
+    {
+      "id": "STAT-07",
+      "group": "STAT",
+      "promise": "Revenue is attributed to the agents that paid (GPTBot, AgentToll-Buyer)",
+      "status": "pass",
+      "evidence": [
+        "check agents_attributed: by_agent attributes revenue to ['AgentToll-Buyer', 'ClaudeBot', 'GPTBot', 'unknown']"
+      ],
+      "seconds": 0.003
+    }
+  ]
+}

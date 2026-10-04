@@ -1,0 +1,109 @@
+[
+  {
+    "id": "BIND-01",
+    "promise": "A payment for one blog post cannot be spent on another post of the same price (resource binding)",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/blog/post-a",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/blog/post-b",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 402,
+          "json": {
+            "/error": {
+              "contains": "different resource"
+            }
+          },
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "post-b</h1>"
+        }
+      }
+    ]
+  },
+  {
+    "id": "BIND-02",
+    "promise": "A payment for /api/quote (2000) cannot buy a cheaper blog route (1000)",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/blog/agent-economy",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "agent-economy</h1>"
+        }
+      }
+    ]
+  },
+  {
+    "id": "BIND-03",
+    "promise": "A cheap payment (blog, 1000) cannot buy the dearer /api/quote (2000)",
+    "steps": [
+      {
+        "id": "q",
+        "request": {
+          "path": "/blog/agent-economy",
+          "agent": "GPTBot"
+        },
+        "expect": {
+          "status": 402
+        }
+      },
+      {
+        "request": {
+          "path": "/api/quote",
+          "agent": "GPTBot"
+        },
+        "pay": {
+          "from": "q"
+        },
+        "expect": {
+          "status": 402,
+          "headers": {
+            "payment-response": {
+              "absent": true
+            }
+          },
+          "body_not_contains": "SOL/USD"
+        }
+      }
+    ]
+  }
+]

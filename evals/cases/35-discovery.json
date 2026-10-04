@@ -1,0 +1,89 @@
+[
+  {
+    "id": "DISC-01",
+    "promise": "/.well-known/agenttoll.json declares x402 v2 and the detection mode",
+    "steps": [
+      {
+        "request": {
+          "path": "/.well-known/agenttoll.json",
+          "agent": "human-chrome"
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/x402Version": 2,
+            "/detection": "agents-only",
+            "/agenttoll": {
+              "exists": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DISC-02",
+    "promise": "The price list shows every route with its USD price",
+    "steps": [
+      {
+        "request": {
+          "path": "/.well-known/agenttoll.json"
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/routes/0/match": "GET /api/quote",
+            "/routes/0/priceUsd": "0.002",
+            "/routes/1/match": "GET /api/*",
+            "/routes/1/priceUsd": "0.001",
+            "/routes/2/match": "GET /blog/*",
+            "/routes/2/priceUsd": "0.001"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DISC-03",
+    "promise": "The price list shows the MCP endpoint, tool prices and both payment transports",
+    "steps": [
+      {
+        "request": {
+          "path": "/.well-known/agenttoll.json"
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/mcp/endpoint": "/mcp",
+            "/mcp/tools/search_docs": "0.005",
+            "/mcp/tools/generate_report": "0.05",
+            "/mcp/paymentTransports/0": "http-402",
+            "/mcp/paymentTransports/1": "mcp-native"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DISC-04",
+    "promise": "The price list shows each payment rail (network, asset, payTo) and never leaks the admin token",
+    "steps": [
+      {
+        "request": {
+          "path": "/.well-known/agenttoll.json"
+        },
+        "expect": {
+          "status": 200,
+          "json": {
+            "/networks/@solana/network": "$solana_network",
+            "/networks/@solana/asset": "$solana_usdc",
+            "/networks/@solana/payTo": "$payto",
+            "/networks/@solana/scheme": "exact",
+            "/networks/@base/network": "$base_network"
+          },
+          "body_not_contains": "$admin_token"
+        }
+      }
+    ]
+  }
+]

@@ -197,6 +197,10 @@ async fn agent_gets_a_valid_402_and_never_reaches_the_origin() {
         "one accepts entry per configured network"
     );
 
+    // Solana is the primary rail (DECISIONS 2026-10-02), so it is quoted first even though the
+    // local name `base` sorts before `solana`.
+    assert_eq!(pr.accepts[0].network, SOLANA_DEVNET);
+    assert_eq!(pr.accepts[1].network, "eip155:84532");
     let base = pr
         .accepts
         .iter()

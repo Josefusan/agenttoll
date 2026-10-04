@@ -13,3 +13,4 @@ dist/
 agenttoll.yaml
 .demo/
 id.json
+evals/__pycache__/
