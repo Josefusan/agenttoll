@@ -4,6 +4,17 @@
 
 **Charge AI agents per request. Keep humans free.**
 
+## Judges: 60 seconds
+
+```bash
+GW=https://years-cow-stations-dubai.trycloudflare.com   # Cloudflare quick tunnel; changes on restart
+curl -s -o /dev/null -w 'human:  %{http_code}\n' -A 'Mozilla/5.0 Chrome/141' $GW/api/quote           # 200, free
+curl -s -D - -o /dev/null -A 'Claude-User/1.0' $GW/api/quote | grep -iE '^HTTP|^payment-required'   # 402 + price quote
+curl -s $GW/.well-known/agenttoll.json                                                               # the price list
+```
+
+Payments in the live demo are **SIMULATED** - no funds moved, nothing on chain; the real-facilitator rejection is recorded in [docs/assets/real-facilitator-handshake.md](docs/assets/real-facilitator-handshake.md). These URLs are Cloudflare quick tunnels and change when a tunnel restarts.
+
 <p align="center"><img src="docs/assets/live-feed.gif" alt="AgentToll revenue dashboard: the Live settlements feed receiving USDC payments from the buyer CLI, each row tagged Solana devnet and Simulated" width="100%"></p>
 
 <p align="center"><img src="docs/assets/dashboard-1440.png" alt="AgentToll revenue dashboard: revenue from agents, paid requests, unbilled agent requests, revenue over time, by route, by agent, live settlements and the agent traffic you are not billing yet" width="100%"></p>
@@ -93,6 +104,14 @@ Dashboard ◀── SSE: +$0.002 · ClaudeBot · GET /api/quote · Solana devnet
 | **Buyer CLI** (`crates/agenttoll-buyer`) | Pays an x402 URL from the command line on Solana devnet or Base Sepolia. |
 
 Full design: [ARCHITECTURE.md](ARCHITECTURE.md). Every design decision with its reason: [docs/DECISIONS.md](docs/DECISIONS.md).
+
+## Why Solana
+
+- **Sub-cent economics.** A per-call price like the live `$0.002` quote (KB-AMT-01: `2000` atomic USDC) only clears where the transaction fee is a fraction of the price. The facilitator sponsors the fee (KB-X402-07, KB-SOL-02), so the agent's only cost is the USDC and the founder keeps the amount.
+- **Settlement in about a second.** The x402 exact scheme is one transfer (KB-X402-07), and the dashboard renders a settlement within a second of it landing - no batch job or bank rail in between.
+- **Agents hold only USDC.** The facilitator is the transaction `feePayer`, and AgentToll reads it from the facilitator's `/supported` at startup instead of hardcoding it (KB-X402-07, KB-X402-04), so an agent needs no SOL.
+- **Solana is quoted first.** Every `402` lists Solana devnet in `accepts[0]` and Base Sepolia second, and the gateway carries no chain-specific money logic (KB-X402-06), so a second rail is a config block.
+- **PayAI is supported.** `https://facilitator.payai.network` serves x402 v2 `exact` on `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` with no API key on devnet (KB-X402-04), and this repo records a handshake against it.
 
 ## Money rules
 
