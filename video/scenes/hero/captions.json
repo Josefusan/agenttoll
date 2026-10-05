@@ -1,7 +1,7 @@
 [
   {
-    "start": 3.15,
-    "end": 5.4,
+    "start": 2.6,
+    "end": 5.3,
     "text": "Agents already use your product. Now you can bill them.",
     "kind": "title"
   },
@@ -48,134 +48,158 @@
     "kind": "caption"
   },
   {
-    "start": 26.6,
-    "end": 29.8,
-    "text": "The agent asks. AgentToll answers with a price.",
+    "start": 26.15,
+    "end": 29.4,
+    "text": "x402: the web's 402 status code, finally paid.",
+    "kind": "title"
+  },
+  {
+    "start": 26.3,
+    "end": 29.15,
+    "text": "x402: the web's 402 status code, finally paid.",
     "kind": "caption"
   },
   {
-    "start": 30.0,
-    "end": 33.0,
-    "text": "The agent signs. The facilitator verifies.",
+    "start": 29.55,
+    "end": 32.0,
+    "text": "On Solana the agent only holds USDC.",
     "kind": "caption"
   },
   {
-    "start": 33.2,
-    "end": 35.8,
-    "text": "Your origin answers. Then the payment settles.",
+    "start": 29.7,
+    "end": 32.35,
+    "text": "USDC on Solana: the facilitator pays the fee, the agent only holds USDC.",
+    "kind": "title"
+  },
+  {
+    "start": 32.75,
+    "end": 35.3,
+    "text": "The agent asks, gets a price, signs.",
     "kind": "caption"
   },
   {
-    "start": 36.0,
-    "end": 38.2,
-    "text": "USDC goes to your pay_to.",
+    "start": 35.4,
+    "end": 37.7,
+    "text": "The facilitator verifies. The origin answers.",
     "kind": "caption"
   },
   {
-    "start": 38.4,
-    "end": 41.6,
+    "start": 37.8,
+    "end": 40.3,
+    "text": "It settles. USDC goes to your pay_to.",
+    "kind": "caption"
+  },
+  {
+    "start": 40.45,
+    "end": 43.3,
     "text": "Settle only after the origin succeeds.",
     "kind": "caption"
   },
   {
-    "start": 38.45,
-    "end": 42.5,
+    "start": 40.45,
+    "end": 43.6,
     "text": "Funds go to your pay_to. AgentToll holds nothing.",
     "kind": "title"
   },
   {
-    "start": 42.6,
-    "end": 46.0,
+    "start": 43.9,
+    "end": 47.1,
     "text": "Claude gets a wallet: pay-mcp, with hard spend caps.",
     "kind": "caption"
   },
   {
-    "start": 46.2,
+    "start": 47.2,
     "end": 50.8,
     "text": "It checks the price, checks its caps, then pays $0.002.",
     "kind": "caption"
   },
   {
-    "start": 51.0,
-    "end": 54.0,
+    "start": 50.9,
+    "end": 52.75,
+    "text": "The receipt says SIMULATED.",
+    "kind": "caption"
+  },
+  {
+    "start": 52.9,
+    "end": 55.4,
     "text": "The payment lands on the founder's dashboard.",
     "kind": "caption"
   },
   {
-    "start": 54.2,
-    "end": 57.0,
+    "start": 55.5,
+    "end": 57.3,
     "text": "Simulated: no on-chain transaction exists.",
     "kind": "caption"
   },
   {
-    "start": 57.2,
-    "end": 60.4,
+    "start": 57.4,
+    "end": 60.6,
     "text": "Now a $0.05 tool. Claude's per-call cap is $0.01.",
     "kind": "caption"
   },
   {
-    "start": 60.6,
-    "end": 64.6,
+    "start": 60.7,
+    "end": 63.4,
     "text": "Refused before signing. No money moved.",
     "kind": "caption"
   },
   {
-    "start": 64.8,
-    "end": 69.6,
+    "start": 63.6,
+    "end": 68.4,
     "text": "The wallet's caps win. Claude does not work around them.",
     "kind": "caption"
   },
   {
-    "start": 70.4,
-    "end": 73.8,
+    "start": 70.2,
+    "end": 73.6,
     "text": "MCP servers sell per tool. tools/list carries each price.",
     "kind": "caption"
   },
   {
-    "start": 74.0,
-    "end": 77.6,
+    "start": 73.8,
+    "end": 77.1,
     "text": "initialize and tools/list stay free. search_docs: $0.005.",
     "kind": "caption"
   },
   {
-    "start": 77.9,
-    "end": 86.3,
+    "start": 77.4,
+    "end": 86.2,
     "text": "The repo grades itself.",
     "kind": "title"
   },
   {
-    "start": 78.4,
-    "end": 82.8,
+    "start": 78.95,
+    "end": 83.15,
     "text": "119 of 119 evals pass. 93 Rust tests. 21 Worker parity tests.",
     "kind": "caption"
   },
   {
-    "start": 81.4,
-    "end": 86.3,
+    "start": 80.8,
+    "end": 86.2,
     "text": "Talks to the real PayAI and x402.org facilitators. Settlement waits on funded devnet and testnet wallets.",
     "kind": "title"
   },
   {
-    "start": 83.0,
-    "end": 85.8,
+    "start": 83.3,
+    "end": 86.1,
     "text": "Devnet and testnet only. Demo payments are simulated.",
     "kind": "caption"
   },
   {
-    "start": 86.8,
-    "end": 90.0,
+    "start": 86.7,
+    "end": 90.5,
     "text": "Agents already use your product. Now you can bill them.",
     "kind": "title"
   },
   {
-    "start": 87.3,
-    "end": 90.0,
+    "start": 87.2,
+    "end": 90.5,
     "text": "github.com/Josefusan/agenttoll",
     "kind": "title"
   },
   {
-    "start": 87.6,
-    "end": 90.0,
+    "start": 87.5,
+    "end": 90.5,
     "text": "COLOSSEUM CRYPTO WORLD'S FAIR",
     "kind": "title"
   }
