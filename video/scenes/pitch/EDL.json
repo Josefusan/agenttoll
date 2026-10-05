@@ -1,24 +1,8 @@
 {
   "name": "agenttoll-pitch",
-  "note": "Pitch cut for the Colosseum pitch-video field (2:00-3:00). Story order: cold open 402, the problem, same URL; the product working (Claude pays, the cap refuses, MCP per tool) by 0:57; why x402 + why Solana; how a real payment flows; why now, who buys, business model (PLAN), distribution (PLAN); proof; what's next (PLAN) + team; close. Hero segments render with ?noprogress&cut=pitch (no progress bar; section labels renumbered for this order). Each join after the first is a 0.4 s blur dissolve (edl.mjs) with a whoosh, so no seam is a hard cut and no frame is empty. The render is about 2:04; Joseph's two 10 s on-camera slots (see slots, and video/vo/VO_SCRIPT.md) are spliced before and after it, for about 2:24.",
+  "note": "Pitch cut for the Colosseum pitch-video field (2:00-3:00), about 2:37, narrated end to end by a stock female AI voice presented as Joseph's AI assistant (Kokoro TTS; she names herself in the first line, the close card credits the AI voice). Story order: cold open 402 + the narrator's intro, the problem, same URL; the product working (Claude pays, the cap refuses, MCP per tool); why x402 + why Solana; how a real payment flows; why now, who buys + one use case end to end (a small data API, an example), business model (PLAN), distribution (PLAN); proof; what's next (PLAN); the founder card; close. Hero segments render with ?noprogress&cut=pitch (no progress bar; section labels renumbered for this order; the intro caption is pitch-only). Each join after the first is a 0.4 s blur dissolve (edl.mjs) with a whoosh, so no seam is a hard cut and no frame is empty; no spoken line starts inside a dissolve or runs past its segment (video/vo/narration.py --check).",
   "fps": 60,
   "xfade": 0.4,
-  "slots": [
-    {
-      "id": "joseph-open",
-      "seconds": 10,
-      "where": "before segment 0",
-      "rendered": false,
-      "script": "docs/launch/PITCH_VIDEO.md 0:00 (problem, on camera); video/vo/VO_SCRIPT.md"
-    },
-    {
-      "id": "joseph-close",
-      "seconds": 10,
-      "where": "after the last segment",
-      "rendered": false,
-      "script": "docs/launch/PITCH_VIDEO.md 2:50 (close and ask, on camera); video/vo/VO_SCRIPT.md"
-    }
-  ],
   "segments": [
     {
       "scene": "video/scenes/hero/index.html",
@@ -51,8 +35,8 @@
     {
       "scene": "video/scenes/pitch/index.html",
       "from": 0,
-      "to": 36.4,
-      "what": "06 why now, 07 who buys, 08 business model (PLAN), 09 distribution (PLAN)"
+      "to": 63.7,
+      "what": "06 why now, 07 who buys + the use case (a small data API), 08 business model (PLAN), 09 distribution (PLAN)"
     },
     {
       "scene": "video/scenes/hero/index.html",
@@ -63,9 +47,9 @@
     },
     {
       "scene": "video/scenes/pitch/index.html",
-      "from": 37.4,
-      "to": 49,
-      "what": "11 what's next (PLAN), team"
+      "from": 64.7,
+      "to": 81.3,
+      "what": "11 what's next (PLAN), 12 team: the founder card"
     },
     {
       "scene": "video/scenes/hero/index.html",

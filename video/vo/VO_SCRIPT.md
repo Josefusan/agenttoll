@@ -1,145 +1,192 @@
-# Voiceover script (for Joseph to record)
+# Narration: an AI voice, presented as Joseph's AI assistant
 
-The films ship with burned-in captions, a synthesized music bed and UI sound. A voice and a face are the pieces an agent cannot supply: record them, then mux the voice with
-`bash video/render/mux.sh --video <film>-picture.mp4 --audio <bed>.wav --vo voice.wav --out <film>.mp4` (the bed is ducked about 8:1 under the voice).
+All three films are narrated by a stock **female synthetic voice**: Kokoro-82M v1.0, voice
+`af_heart` (kokoro-onnx on CPU, set up in `~/agenttoll-vo/` on the VPS). Joseph's voice is not
+cloned, and the voice never claims to be a person or to be Joseph.
 
-Read each line so it starts at its timecode and ends by the next one. The lines are the on-screen captions, so voice and captions agree. Regenerate a table after a caption or EDL change: hero `python3 video/scenes/hero/captions.py` then the table below; pitch `python3 video/vo/pitch_vo.py`.
+- The pitch and the full demo open with her naming herself: "Hi, I'm Joseph's AI assistant. Let
+  me show you AgentToll."
+- Every end card carries the credit line `Narration: AI voice (Kokoro TTS) · Joseph's AI assistant`.
+- The pitch's founder card (section 12, TEAM) is narrated by her: "Joseph Clark builds AgentToll,
+  at Clark Technology Ventures. A solo builder, working with AI coding agents." It shows
+  only facts from the repo: docs/COLOSSEUM_SUBMISSION.md (solo builder, based in the United
+  States, AI coding agents plus an adversarial critic agent on every pull request, the
+  landing-page service), docs/launch/PITCH_VIDEO.md (Clark Technology Ventures) and README.md
+  (@Josefusan). It replaces the two 10 s on-camera slots the earlier cut reserved for Joseph.
 
-Before upload, a person listens to all three mixes on laptop speakers and on earbuds: the coin and thud SFX must not clip under the voice, and the bed must sit at least 10 dB under speech. If the synthesized bed sounds thin, replace it with a licensed or CC0 track and keep only the 402 thud, the logo riser and the refusal tone.
+## Captions are the narration
 
-## Pitch cut (agenttoll-pitch.mp4): two on-camera slots, not in the render
+Every spoken line is a burned-in caption, word for word, at the same time. The `say` field in the
+scripts differs from `text` only in pronunciation spelling ("x402" -> "x four oh two", "$0.002" ->
+"two tenths of a cent", "USDC" -> "U S D C"; the rules are `~/agenttoll-vo/lexicon.json` plus
+`SAY` in `narration.py`). To change a line, change the caption, then rebuild:
 
-The render (`video/scenes/pitch/EDL.json`) is 2:04.35. Joseph's two on-camera pieces are spliced before and after it, for about 2:24 in all (the Colosseum pitch field allows 2:00 to 3:00). They are listed in `EDL.json` under `slots` with `"rendered": false`; the render never contains them.
-
-Recording: eye level, soft key light, a dark backdrop close to the film's `#07060F`, 1080p, the same sitting for both.
-
-### SLOT A: joseph-open, 10 s, before 0:00 of the render
-
-"I'm Joseph Clark. I run an AI landing-page service: we ship sites for small businesses. Agents read every one of them, all day, for free. AgentToll lets them pay."
-
-(Source: docs/launch/PITCH_VIDEO.md 0:00 problem; docs/COLOSSEUM_SUBMISSION.md "We run … an AI landing-page service".)
-
-### SLOT B: joseph-close, 10 s, after the end of the render
-
-"Everything you saw is open source and runs with one command, no wallet needed: github.com/Josefusan/agenttoll. Put it in front of something agents already read. Agents already use your product. Now you can bill them."
-
-(Source: docs/launch/PITCH_VIDEO.md 2:50 close and ask; README.md "Try it in one command (no wallet, no funds)".)
-
-### Voiceover over the render (timecodes are the render's, slot A not counted)
-
-Optional extra lines for Joseph's own voice, not on screen: at the business model (about 1:30), "an agency bundle and a pro dashboard come later"; at distribution (about 1:38), "that is our own landing-page service, so the first sites are ours." Both are plans (docs/COLOSSEUM_SUBMISSION.md business model and distribution).
-
-Render length 2:04.35 (124.35 s).
-
-| Start | End | Line |
+| Film | Captions live in | Spoken lines |
 |---|---|---|
-| 0:05.40 | 0:08.60 | Agents read your site all day. They pay nothing. |
-| 0:09.40 | 0:13.20 | 8 agent requests, no price: $0.016 left on the table. |
-| 0:14.50 | 0:17.30 | Same URL. A person gets the data, free. |
-| 0:17.40 | 0:20.90 | An agent gets 402 Payment Required, with a price. |
-| 0:21.00 | 0:25.60 | People: free. Agents: $0.002. |
-| 0:25.35 | 0:28.15 | Claude gets a wallet: pay-mcp, with hard spend caps. |
-| 0:28.25 | 0:31.85 | It checks the price, checks its caps, then pays $0.002. |
-| 0:31.95 | 0:33.80 | The receipt says SIMULATED. |
-| 0:33.95 | 0:36.45 | The payment lands on the founder's dashboard. |
-| 0:36.55 | 0:38.35 | Simulated: no on-chain transaction exists. |
-| 0:38.45 | 0:41.65 | Now a $0.05 tool. Claude's per-call cap is $0.01. |
-| 0:41.75 | 0:44.45 | Refused before signing. No money moved. |
-| 0:44.65 | 0:49.45 | The wallet's caps win. Claude does not work around them. |
-| 0:51.25 | 0:54.55 | MCP servers sell per tool. tools/list carries each price. |
-| 0:54.70 | 0:57.05 | initialize and tools/list stay free. search_docs: $0.005. |
-| 0:56.65 | 0:58.20 | Open protocol: HTTP and MCP. |
-| 0:58.65 | 1:02.35 | Solana leads x402: about $3.3M USDC settled in one week. |
-| 1:02.15 | 1:04.85 | Funded wallet: USDC settles to your pay_to. |
-| 1:04.95 | 1:07.80 | Settle only after the origin succeeds. |
-| 1:07.65 | 1:10.85 | Why now? PayAI batch settlement on Solana, Sep 30. |
-| 1:10.95 | 1:14.85 | Cloudflare announced a gateway in July: waitlist-only, tied to its network. |
-| 1:14.95 | 1:18.85 | Agents already hold wallets: Coinbase's Payments MCP pays x402 on Solana. |
-| 1:18.95 | 1:22.85 | The open, self-hosted version was not built. So we built it. |
-| 1:22.95 | 1:26.85 | Who buys: four kinds of seller whose product agents already use. |
-| 1:26.95 | 1:30.55 | Buyer types, not customers. No customers and no revenue yet. |
-| 1:30.75 | 1:34.35 | We charge for convenience, never by holding the seller's funds. |
-| 1:34.45 | 1:38.35 | Free core. Hosted: flat tier plus a fee on settled volume. |
-| 1:38.45 | 1:41.65 | Distribution: we already ship landing pages to small businesses. |
-| 1:41.75 | 1:43.85 | Plan: each client's pay_to, their own address. |
-| 1:44.25 | 1:48.25 | 119 of 119 evals. 93 Rust, 69 pay-mcp, 70 Worker tests. |
-| 1:48.90 | 1:52.40 | What's next, as a plan: a funded devnet settlement, then mainnet. |
-| 1:52.50 | 1:55.50 | A funded wallet is the only missing piece. |
-| 1:56.30 | 2:00.00 | Built by Joseph Clark, a solo builder. |
-| 2:00.25 | 2:03.75 | Open source. One command, no wallet needed. |
+| hero | `video/scenes/hero/index.html` (`AT.Caption` block; `python3 video/scenes/hero/captions.py` writes `captions.json`) | `video/vo/narration/hero.json` |
+| demo | `video/scenes/demo/captions.json` (act-relative; demo.js ends a cue 0.42 s before the next) | `video/vo/narration/demo.json` |
+| pitch | hero cues inside each `EDL.json` segment (`only: 'pitch'` cues included) + `video/scenes/pitch/index.html` | `video/vo/narration/pitch.json` (cut time) |
 
-## Hero film (1:31.5, agenttoll-film-90s.mp4)
+Pace: lines are written to be said at a natural rate inside their window (Kokoro speed 1.0, never
+above 1.12). Not every second is spoken: the cold open's 402, the gold `+$0.002` row and the
+refusal land on a beat of silence and their sound cue.
 
-| Start | End | Line |
-|---|---|---|
-| 0:05.40 | 0:08.60 | Agents read your site all day. They pay nothing. |
-| 0:09.40 | 0:13.20 | 8 agent requests, no price: $0.016 left on the table. |
-| 0:14.50 | 0:17.30 | Same URL. A person gets the data, free. |
-| 0:17.40 | 0:20.90 | An agent gets 402 Payment Required, with a price. |
-| 0:21.00 | 0:25.60 | People: free. Agents: $0.002. |
-| 0:26.10 | 0:27.85 | Open protocol: HTTP and MCP. |
-| 0:28.30 | 0:32.00 | Solana leads x402: about $3.3M USDC settled in one week. |
-| 0:32.75 | 0:35.30 | The agent asks, gets a price, signs. |
-| 0:35.40 | 0:37.55 | The facilitator verifies. The origin answers. |
-| 0:37.65 | 0:40.35 | Funded wallet: USDC settles to your pay_to. |
-| 0:40.45 | 0:43.30 | Settle only after the origin succeeds. |
-| 0:43.90 | 0:47.10 | Claude gets a wallet: pay-mcp, with hard spend caps. |
-| 0:47.20 | 0:50.80 | It checks the price, checks its caps, then pays $0.002. |
-| 0:50.90 | 0:52.75 | The receipt says SIMULATED. |
-| 0:52.90 | 0:55.40 | The payment lands on the founder's dashboard. |
-| 0:55.50 | 0:57.30 | Simulated: no on-chain transaction exists. |
-| 0:57.40 | 1:00.60 | Now a $0.05 tool. Claude's per-call cap is $0.01. |
-| 1:00.70 | 1:03.40 | Refused before signing. No money moved. |
-| 1:03.60 | 1:08.40 | The wallet's caps win. Claude does not work around them. |
-| 1:10.20 | 1:13.50 | MCP servers sell per tool. tools/list carries each price. |
-| 1:13.65 | 1:16.10 | initialize and tools/list stay free. search_docs: $0.005. |
-| 1:16.60 | 1:19.40 | The plan: free open-source core, paid hosted edition. |
-| 1:21.20 | 1:25.20 | 119 of 119 evals. 93 Rust, 69 pay-mcp, 70 Worker tests. |
-| 1:27.40 | 1:30.90 | Open source. One command, no wallet needed. |
+## Rebuild
 
-## Full product demo (2:51, agenttoll-full-demo.mp4)
+On the VPS, in `~/Hackathons/AgentToll-film`:
 
-| Start | End | Line |
-|---|---|---|
-| 0:00.20 | 0:03.00 | Same URL. A person gets the data, free. |
-| 0:03.10 | 0:05.60 | An agent gets 402 Payment Required. |
-| 0:09.90 | 0:12.50 | One YAML file: Solana devnet USDC, paid to your own pay_to. Facilitator here: SIMULATED. |
-| 0:12.60 | 0:14.90 | GET /api/quote costs an agent $0.002. Everything under /* stays free. |
-| 0:15.00 | 0:17.20 | MCP tools carry their own prices: search_docs $0.005, generate_report $0.05. |
-| 0:17.40 | 0:19.40 | One command starts the stack. SIMULATED facilitator, empty ledger. |
-| 0:20.10 | 0:23.90 | A person opens the site through the gateway: the normal page, free. |
-| 0:24.10 | 0:27.50 | Same gateway, /api/quote: the browser gets the JSON, with paid: false. |
-| 0:27.70 | 0:32.00 | Claude-User asks for the same URL and gets 402 Payment Required. |
-| 0:32.20 | 0:36.30 | The PAYMENT-REQUIRED header decodes to an x402 v2 quote: 2000 atomic USDC, $0.002. |
-| 0:36.50 | 0:39.60 | Network, asset and payTo: everything an agent needs to pay. |
-| 0:40.50 | 0:44.50 | Agents can read every price first: /.well-known/agenttoll.json is free. |
-| 0:44.70 | 0:48.70 | Routes, MCP tools and networks, generated from the same YAML file. |
-| 0:49.50 | 0:53.70 | The buyer CLI asks, gets the 402, signs a devnet USDC transfer and retries. |
-| 0:53.90 | 0:57.50 | 200 OK. The receipt comes back in the PAYMENT-RESPONSE header. |
-| 0:57.70 | 1:01.90 | The dashboard gets the row: +$0.002, AgentToll-Buyer, Solana devnet, Simulated. |
-| 1:02.10 | 1:06.30 | Same id on both sides: SIMULATED-…121d. No funds moved. |
-| 1:07.00 | 1:10.60 | Claude gets a wallet through pay-mcp. First it reads the price. |
-| 1:10.80 | 1:15.00 | $0.002 is under both caps, so Claude pays. The receipt says simulated. |
-| 1:15.20 | 1:19.40 | Next, a $0.05 tool. Claude is told it may spend up to 10 cents. |
-| 1:19.60 | 1:23.80 | The wallet refuses before signing: $0.05 is above the $0.01 per-call cap. |
-| 1:24.00 | 1:27.40 | Nothing was signed and nothing counted. Claude did not work around it. |
-| 1:27.60 | 1:30.30 | On the film stack the wallet gives the same refusal, word for word. |
-| 1:31.00 | 1:35.20 | MCP servers sell per tool. tools/list stays free and carries every price. |
-| 1:35.40 | 1:40.00 | An unpaid tools/call gets the MCP-native challenge: isError plus a quote, 5000 = $0.005. |
-| 1:40.20 | 1:44.40 | Paid through pay-mcp, the tool gets its own dashboard row: mcp search_docs. |
-| 1:45.00 | 1:50.00 | Recorded from the running dashboard: the buyer CLI pays every 2 s, rows land. |
-| 1:50.20 | 1:55.40 | Each simulated payment updates the totals and the feed as it arrives. |
-| 1:55.90 | 1:59.60 | After 19 payments: $0.034, and the card says it outright: all of it simulated. |
-| 1:59.80 | 2:03.40 | By network: 100% Solana devnet. Base Sepolia, the backup rail, is not set up here. |
-| 2:03.60 | 2:07.20 | The feed: 19 of 19 simulated. No transaction exists, so there is nothing to link. |
-| 2:07.40 | 2:11.00 | Agent traffic you are not billing yet, per agent, by name. |
-| 2:11.20 | 2:15.00 | Cash out: spendable $0.00, because every payment was simulated. |
-| 2:15.20 | 2:18.60 | Funds go to your own pay_to. AgentToll holds nothing. |
-| 2:18.80 | 2:21.60 | The same dashboard on a phone. |
-| 2:22.20 | 2:26.20 | The same core compiles to WebAssembly and runs as a Cloudflare Worker. |
-| 2:26.40 | 2:30.60 | 21 parity tests check byte-identical quotes against the Rust gateway. |
-| 2:32.30 | 2:35.80 | In the repo: 119 of 119 evals, 93 Rust tests, 69 pay-mcp tests, 70 Worker tests. |
-| 2:36.20 | 2:38.40 | Wired to the real PayAI and x402.org facilitators. |
-| 2:38.50 | 2:41.00 | PayAI, Solana devnet: an unfunded throwaway wallet, rejected as expected. |
-| 2:41.10 | 2:43.60 | x402.org, Base Sepolia: also rejected. The wallet holds no USDC. |
-| 2:43.80 | 2:46.40 | A funded wallet is the only missing piece. |
+```bash
+python3 video/scenes/hero/captions.py                       # hero captions.json from index.html
+~/agenttoll-vo/.venv/bin/python video/vo/narration.py --check   # scripts + pace table; fails on a line
+                                                            # inside a pitch dissolve or past its segment
+python3 video/vo/claims_check.py                            # System-1 claim checks over the spoken text
+for f in hero demo pitch; do                                # voice tracks at absolute film time, -16 LUFS
+  ~/agenttoll-vo/.venv/bin/python ~/agenttoll-vo/narrate.py --script video/vo/narration/$f.json \
+    --out-dir video/vo/narration/out/$f --voice af_heart --max-speed 1.12 --threads 4 \
+    --duration $(case $f in hero) echo 91.5;; demo) echo 171.2;; pitch) echo 156.65;; esac)
+  cp video/vo/narration/out/$f/report.json video/vo/narration/report-$f.json   # committed
+done
+```
+
+`narrate.py` writes `out/<film>/voice.wav` (48 kHz mono, -16 LUFS integrated, true peak <= -1.5
+dBFS), `out/<film>/lines/*.wav` and `report.json` (per line: window, duration, speed, overflow,
+the faster-whisper small.en transcript and its word error rate against `say`). The wavs stay out
+of git (`video/vo/narration/out/` is ignored); the reports are committed.
+
+## Mux
+
+The picture master comes from `render.mjs` + `encode.sh` (pitch: `edl.mjs`), the music bed and UI
+sound from `audio.mjs`, then `mux.sh --vo` ducks the bed under the voice (sidechain, about 8:1) and
+loudness-normalises the mix to -16 LUFS:
+
+```bash
+node video/render/render.mjs --scene video/scenes/hero/index.html --cues ~/agenttoll-scratch/audio/hero.cues.json
+node video/render/audio.mjs --cues ~/agenttoll-scratch/audio/hero.cues.json --out ~/agenttoll-scratch/audio/hero.wav
+bash video/render/mux.sh --video ~/agenttoll-scratch/film-out/agenttoll-film-90s-picture.mp4 \
+  --audio ~/agenttoll-scratch/audio/hero.wav --vo video/vo/narration/out/hero/voice.wav \
+  --out ~/agenttoll-scratch/film-out/agenttoll-film-90s.mp4
+# pitch: edl.mjs writes <out>.cues.json next to the picture; feed that to audio.mjs, then mux the same way
+```
+
+## Before upload: a person listens
+
+Listen to all three mixes on laptop speakers and on earbuds. The voice must sit clearly over the
+bed, the coin and thud SFX must not clip under it, and no line may be cut by a pitch join. If the
+synthesized bed sounds thin, replace it with a licensed or CC0 track and keep only the 402 thud,
+the logo riser and the refusal tone.
+
+## Lines (generated: `narration.py --md`)
+
+### hero (91.5 s)
+
+| id | Start | End | Line (caption = speech) |
+|---|---|---|---|
+| h01 | 0:05.60 | 0:09.20 | Agents read your site all day. They pay nothing. |
+| h02 | 0:09.35 | 0:13.80 | 8 agent requests, no price: $0.016 left on the table. |
+| h03 | 0:14.30 | 0:17.30 | Same URL. A person gets the data, free. |
+| h04 | 0:17.45 | 0:20.90 | An agent gets 402 Payment Required. |
+| h05 | 0:21.05 | 0:25.60 | People: free. Agents: $0.002. |
+| h06 | 0:26.75 | 0:32.00 | Solana leads x402: about $3.3M settled in one week. |
+| h07 | 0:33.00 | 0:37.60 | The agent signs. The facilitator verifies. The origin answers. |
+| h08 | 0:38.02 | 0:43.33 | With a funded wallet, USDC settles to your pay_to after the origin succeeds. |
+| h09 | 0:44.75 | 0:47.10 | Claude gets a capped wallet. |
+| h10 | 0:47.20 | 0:50.80 | It checks the price and caps, then pays $0.002. |
+| h11 | 0:50.90 | 0:52.75 | The receipt says SIMULATED. |
+| h12 | 0:52.90 | 0:57.30 | It lands on the founder's dashboard, simulated: no transaction exists. |
+| h13 | 0:57.40 | 1:00.60 | Now a $0.05 tool, over the $0.01 per-call cap. |
+| h14 | 1:01.00 | 1:03.00 | Refused before signing. |
+| h15 | 1:03.40 | 1:08.40 | No money moved. The caps win, and Claude does not work around them. |
+| h16 | 1:10.20 | 1:15.90 | MCP servers sell per tool. Discovery stays free; search_docs costs $0.005. |
+| h17 | 1:16.50 | 1:19.60 | The plan: free open-source core, paid hosted edition. |
+| h18 | 1:21.20 | 1:26.20 | 119 of 119 evals pass. Run them yourself. |
+| h19 | 1:27.70 | 1:31.20 | Open source. One command, no wallet needed. |
+
+### demo (171.2 s)
+
+| id | Start | End | Line (caption = speech) |
+|---|---|---|---|
+| d01 | 0:00.30 | 0:04.60 | Hi, I'm Joseph's AI assistant. Let me show you AgentToll. |
+| d02 | 0:06.40 | 0:09.40 | Every payment here is simulated. |
+| d03 | 0:09.90 | 0:12.38 | One YAML file. Paid to your own pay_to. |
+| d04 | 0:12.80 | 0:16.98 | A quote costs agents $0.002. Tools have prices too. |
+| d05 | 0:17.40 | 0:19.40 | One command starts the stack. |
+| d06 | 0:20.10 | 0:23.68 | A person opens the site through the gateway: free. |
+| d07 | 0:24.10 | 0:27.50 | A browser gets the quote, with paid: false. |
+| d08 | 0:28.00 | 0:31.78 | Claude-User gets 402 Payment Required. |
+| d09 | 0:32.20 | 0:35.88 | The header decodes to a price: $0.002. |
+| d10 | 0:36.30 | 0:39.60 | Plus network, asset and payTo. |
+| d11 | 0:40.50 | 0:44.28 | Agents can read the price list first, for free. |
+| d12 | 0:44.70 | 0:49.08 | Routes, tools and networks, all from the same YAML file. |
+| d13 | 0:49.50 | 0:53.48 | The buyer CLI gets the 402, signs, and retries. |
+| d14 | 0:53.90 | 0:57.68 | 200 OK. The receipt comes back in a header. |
+| d15 | 0:58.10 | 1:01.68 | The dashboard gets the row: +$0.002. |
+| d16 | 1:02.10 | 1:06.58 | Same simulated id on both sides. No funds moved. |
+| d17 | 1:07.00 | 1:10.38 | Claude gets a capped wallet, and reads the price first. |
+| d18 | 1:10.80 | 1:14.78 | $0.002 is under both caps, so Claude pays: simulated. |
+| d19 | 1:15.20 | 1:19.40 | Next, a $0.05 tool. Claude is told: up to 10 cents. |
+| d20 | 1:20.00 | 1:23.58 | The wallet refuses: the per-call cap is $0.01. |
+| d21 | 1:24.00 | 1:27.18 | Nothing was signed. Claude did not work around it. |
+| d22 | 1:27.60 | 1:30.58 | On the film stack: the same refusal, word for word. |
+| d23 | 1:31.00 | 1:34.98 | MCP servers sell per tool; tools/list stays free. |
+| d24 | 1:35.40 | 1:39.78 | An unpaid tool call gets a quote: $0.005. |
+| d25 | 1:40.20 | 1:44.40 | Paid through pay-mcp, the tool gets its own dashboard row. |
+| d26 | 1:45.00 | 1:49.78 | Recorded from the running dashboard: the buyer CLI pays every 2 s. |
+| d27 | 1:50.20 | 1:53.00 | Each simulated payment updates the totals. |
+| d28 | 1:53.90 | 1:57.38 | 19 payments: $0.034, all simulated. |
+| d29 | 1:57.80 | 2:01.18 | By network: 100% Solana devnet. |
+| d30 | 2:01.60 | 2:04.98 | The feed: 19 of 19 simulated. |
+| d31 | 2:05.40 | 2:08.78 | Agent traffic you are not billing yet, by name. |
+| d32 | 2:09.20 | 2:12.78 | Spendable: $0.00. It was all simulated. |
+| d33 | 2:13.20 | 2:16.38 | Funds go to your pay_to. AgentToll holds nothing. |
+| d34 | 2:16.80 | 2:19.60 | The same dashboard on a phone. |
+| d35 | 2:20.20 | 2:23.98 | The same core runs as a Cloudflare Worker, in WebAssembly. |
+| d36 | 2:24.40 | 2:29.40 | 21 parity tests check byte-identical quotes against the Rust gateway. |
+| d37 | 2:30.00 | 2:33.78 | 119 of 119 evals pass. |
+| d38 | 2:34.20 | 2:38.68 | Wired to the real PayAI and x402.org facilitators. |
+| d39 | 2:39.10 | 2:43.08 | Both rejected the unfunded throwaway wallets, as expected. |
+| d40 | 2:43.50 | 2:46.60 | A funded wallet is the only missing piece. |
+| d41 | 2:47.35 | 2:50.65 | Open source. One command, no wallet needed. |
+
+### pitch (156.65 s)
+
+| id | Start | End | Line (caption = speech) |
+|---|---|---|---|
+| p01 | 0:01.60 | 0:05.45 | Hi, I'm Joseph's AI assistant. Let me show you AgentToll. |
+| p02 | 0:05.60 | 0:09.20 | Agents read your site all day. They pay nothing. |
+| p03 | 0:09.35 | 0:13.80 | 8 agent requests, no price: $0.016 left on the table. |
+| p04 | 0:14.30 | 0:17.30 | Same URL. A person gets the data, free. |
+| p05 | 0:17.45 | 0:20.90 | An agent gets 402 Payment Required. |
+| p06 | 0:21.05 | 0:25.60 | People: free. Agents: $0.002. |
+| p07 | 0:25.80 | 0:28.15 | Claude gets a capped wallet. |
+| p08 | 0:28.25 | 0:31.85 | It checks the price and caps, then pays $0.002. |
+| p09 | 0:31.95 | 0:33.80 | The receipt says SIMULATED. |
+| p10 | 0:33.95 | 0:38.35 | It lands on the founder's dashboard, simulated: no transaction exists. |
+| p11 | 0:38.45 | 0:41.65 | Now a $0.05 tool, over the $0.01 per-call cap. |
+| p12 | 0:42.05 | 0:44.05 | Refused before signing. |
+| p13 | 0:44.45 | 0:49.45 | No money moved. The caps win, and Claude does not work around them. |
+| p14 | 0:51.25 | 0:56.95 | MCP servers sell per tool. Discovery stays free; search_docs costs $0.005. |
+| p15 | 0:57.10 | 1:02.35 | Solana leads x402: about $3.3M settled in one week. |
+| p16 | 1:02.52 | 1:07.83 | With a funded wallet, USDC settles to your pay_to after the origin succeeds. |
+| p17 | 1:07.95 | 1:12.25 | Why now? PayAI batch settlement on Solana, Sep 30. |
+| p18 | 1:12.45 | 1:17.25 | Cloudflare announced a gateway in July: waitlist-only, tied to its network. |
+| p19 | 1:17.40 | 1:22.70 | Coinbase's Payments MCP already pays x402 on Solana. |
+| p20 | 1:22.95 | 1:26.85 | The open, self-hosted version was not built. So we built it. |
+| p21 | 1:27.75 | 1:31.15 | Who buys? Sellers whose product agents already use. |
+| p22 | 1:31.45 | 1:33.75 | Say you run a small data API. |
+| p23 | 1:34.05 | 1:37.85 | Agents call it all day, and none of them can sign up for a key. |
+| p24 | 1:38.15 | 1:42.05 | Put AgentToll in front: each call quotes $0.002. |
+| p25 | 1:42.35 | 1:45.85 | The agent pays in USDC, straight to your own pay_to. |
+| p26 | 1:46.05 | 1:49.75 | A card can't bill $0.002. x402 can. |
+| p27 | 1:50.05 | 1:53.45 | How we make money: a plan. No revenue yet. |
+| p28 | 1:53.75 | 1:58.25 | The core is free. Hosted: a flat tier plus a fee on settled volume. |
+| p29 | 1:58.55 | 2:02.25 | We charge for convenience, never by holding the seller's funds. |
+| p30 | 2:03.15 | 2:07.45 | Distribution: we already ship landing pages to small businesses. |
+| p31 | 2:07.75 | 2:10.75 | The plan: each client's pay_to is their own address. |
+| p32 | 2:11.55 | 2:16.55 | 119 of 119 evals pass. Run them yourself. |
+| p33 | 2:16.70 | 2:20.80 | What's next, as a plan: a funded devnet settlement, then mainnet. |
+| p34 | 2:21.10 | 2:24.00 | A funded wallet is the only missing piece. |
+| p35 | 2:24.80 | 2:28.80 | Joseph Clark builds AgentToll, at Clark Technology Ventures. |
+| p36 | 2:29.05 | 2:32.50 | A solo builder, working with AI coding agents. |
+| p37 | 2:32.85 | 2:36.35 | Open source. One command, no wallet needed. |
+
+0 line(s) over 1.08x their window or overlapping

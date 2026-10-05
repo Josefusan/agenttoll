@@ -1,6 +1,6 @@
 # Full product demo: shot list
 
-`video/scenes/demo/index.html` is a Loom-style walkthrough of the real product. It runs 171.2 s (2:51) at 1920x1080 and 30 fps, has captions burned in, a synthesized music bed and UI sound (`video/render/audio.mjs`, CC0), and no voiceover yet (script: `video/vo/VO_SCRIPT.md`). It shows a desktop canvas on the brand background, browser and terminal windows, a visible cursor and Screen Studio-style zooms.
+`video/scenes/demo/index.html` is a Loom-style walkthrough of the real product. It runs 171.2 s (2:51) at 1920x1080 and 30 fps, has captions burned in, a synthesized music bed and UI sound (`video/render/audio.mjs`, CC0), and narration by a stock female AI voice presented as Joseph's AI assistant (Kokoro TTS; the captions are her lines word for word, see `video/vo/VO_SCRIPT.md`). It shows a desktop canvas on the brand background, browser and terminal windows, a visible cursor and Screen Studio-style zooms.
 
 All payments in it are **SIMULATED**. They went through the local test facilitator (`demo/mock-facilitator`), every transaction id starts with `SIMULATED-`, and no funds moved. The gold `SIMULATED · no funds moved` badge appears in two places. It is on the title card from 6.9 to 9.4 s, and it stays in the top-right corner, without a break, from 49.35 s to 140.05 s (`S.requireBadge` fails the render if any frame from 49.6 s to 139.7 s lacks it) (it leaves only after the last payment frame has faded), which covers acts 04 to 07: every act that shows a payment.
 
@@ -52,7 +52,7 @@ Every window has a mono source note (now on the fixed provenance line, bottom-le
 5. **The live segment (07a)** is the real CDP screencast from `dash_capture.mjs`, at 0.6–8.6 s, in real time.
    - It is cropped to the content column (x 336–1584 CSS px) and re-encoded to VP9 (libvpx-vp9, CRF 20).
    - Round 2 dropped the side terminal of buyer stdout; the provenance line still names `dashboard-live-recording.json` (the scripted buyer paid every 2 s).
-6. **Network split.** Only Solana devnet appears, because the demo config prices Solana only. The caption says Base Sepolia is the backup rail and is not set up here.
+6. **Network split.** Only Solana devnet appears, because the demo config prices Solana only. The caption says "By network: 100% Solana devnet."
 7. **Other dashboard details.** "Unique agents 1" is correct: every payment came from AgentToll-Buyer. Dashboard times are in the VPS's local time zone.
 8. **No tooltip recreation.** Headless Chromium does not draw native `title` tooltips, so the film shows no tooltip. The cursor hovers the real Simulated badge, and the gold rings point to the dashboard's own "Includes … simulated" and "19 of 19 simulated" labels.
 9. **Worker.** Act 08 shows only the summary lines of the captured parity run. The gateway's WARN log lines are omitted and the RUN path is shown with `$HOME`. The Worker is not deployed, and the info card says so.
@@ -107,3 +107,13 @@ Preview in a desktop browser: open `video/scenes/demo/index.html?t=58` or `?play
 - Every push-in that frames the dashboard's own "Live settlements" heading carries a gold note beside it, "= SIMULATED settlements · no funds moved" (act 04 row, act 07 live segment, act 07 feed stop); the By-network stop frames the Settled tiles together with their gold callout, above the caption.
 - While the camera is pushed in, a dark band under the caption (scene-level, `.botscrim`) pairs with the engine's top scrim, so half-cropped lines never read beside the caption pill or the eyebrow.
 - The Worker info card joins the camera's crop guard (`data-at-panel`).
+
+## Narration (2026-10-05)
+
+- The captions are the narration's subtitles, word for word (`video/vo/narration.py` builds
+  `video/vo/narration/demo.json` from `captions.json`). Lines were shortened to a natural spoken
+  pace; the cold open is now the narrator's intro ("Hi, I'm Joseph's AI assistant. Let me show you
+  AgentToll."), the title card says "Every payment here is simulated.", and the close says "Open
+  source. One command, no wallet needed."
+- The end card adds the credit "Narration: AI voice (Kokoro TTS) · Joseph's AI assistant"; the
+  run/devnet footer moved up to 868 px to make room.

@@ -849,7 +849,8 @@
     node('Agents already use your product. <span class="g">Now you can bill them.</span>', 'tagline', 560, c0 + 0.6, 22);
     node('github.com/Josefusan/agenttoll', 'repo', 680, c0 + 1.0, 16);
     node("COLOSSEUM CRYPTO WORLD'S FAIR", 'event', 748, c0 + 1.25, 12);
-    node('Run it: <b>KEEP=1 bash scripts/demo-local.sh</b>  ·  Devnet and testnet only. Every payment in this demo was simulated.', 'footline', 900, c0 + 1.5, 8);
+    node('Run it: <b>KEEP=1 bash scripts/demo-local.sh</b>  ·  Devnet and testnet only. Every payment in this demo was simulated.', 'footline', 868, c0 + 1.5, 8);
+    node("Narration: AI voice (Kokoro TTS) · Joseph's AI assistant", 'credit', 906, c0 + 1.7, 6);
   }
 
   /* SIMULATED badge: on screen through every act that shows a payment (04 to 07). */

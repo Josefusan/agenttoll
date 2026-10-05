@@ -126,6 +126,7 @@
 .event { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 18px/1 var(--mono); color: var(--muted); letter-spacing: 0.32em; }
 .footline { position: absolute; left: 0; width: 1920px; text-align: center; font: 500 18px/1.4 var(--mono); color: var(--dim); white-space: nowrap; }
 .footline b { color: var(--muted); font-weight: 600; }
+.credit { position: absolute; left: 0; width: 1920px; text-align: center; font: 500 16px/1 var(--mono); color: var(--dim); letter-spacing: 0.04em; white-space: nowrap; }
 .scrim.deep { background: rgba(5,4,12,0.86); }
 /* gold note for a world-space (zoomed) annotation: small, so it lands at about 23-31 px on screen */
 .callout.wsm { padding: 5px 8px; font-size: 12px; border-radius: 6px; }

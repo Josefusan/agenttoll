@@ -4,7 +4,7 @@ Scene source: `video/scenes/hero/index.html`. On-screen captions and title lines
 
 ## Rules this film follows
 
-- **Payments are simulated.** All of them went through the local mock facilitator, and every transaction id starts with `SIMULATED-`. Any frame showing a payment or a settlement carries the gold `SIMULATED · no funds moved` badge: one badge, on without a break from 32.4 s (the settlement diagram) to 77.2 s (end of the wipe out of 05). `S.requireBadge` makes the render fail if any frame between 32.7 s and 76.85 s lacks it. The diagram is labelled "03 — HOW A REAL PAYMENT FLOWS" and its settle caption says "Funded wallet: USDC settles to your pay_to.", so it reads as the protocol, not as a settlement that happened.
+- **Payments are simulated.** All of them went through the local mock facilitator, and every transaction id starts with `SIMULATED-`. Any frame showing a payment or a settlement carries the gold `SIMULATED · no funds moved` badge: one badge, on without a break from 32.4 s (the settlement diagram) to 77.2 s (end of the wipe out of 05). `S.requireBadge` makes the render fail if any frame between 32.7 s and 76.85 s lacks it. The diagram is labelled "03 — HOW A REAL PAYMENT FLOWS" and its settle caption says "With a funded wallet, USDC settles to your pay_to after the origin succeeds.", so it reads as the protocol, not as a settlement that happened.
 - **Plans are labelled.** The business beat (76.1–79.9 s) carries a gold `PLAN · no revenue yet` badge and the words "PLAN · NO REVENUE YET".
 - **No made-up strings.** Every terminal line, number, header, price and UI state comes from a real run or from a file in the repo, as the table below shows. There are only three kinds of edit:
   - **Line selection:** a capture is excerpted, but each line shown is unchanged.
@@ -36,7 +36,7 @@ Sound: `video/render/audio.mjs` synthesizes the bed and UI sounds from the cues 
 | Time | On screen | Source |
 |---|---|---|
 | 0–2.0 | `HTTP/1.1 402 Payment Required` and `x-agenttoll-verdict: ua:ClaudeBot` full frame, then the command `$ curl -s -i -A 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' http://127.0.0.1:8502/api/quote` above them at 40 px | `video/captures/terminal/claudebot-402.json` (command plus 2 of its header lines) |
-| 26–27.8 | "x402: the web's 402 status code, finally paid."; caption "Open protocol: HTTP and MCP." | KB-X402-01; `docs/COLOSSEUM_SUBMISSION.md` ("x402 v2 has HTTP and MCP transports") |
+| 26–27.8 | "x402: the web's 402 status code, finally paid." (no caption; the Solana line starts at 26.75) | KB-X402-01; `docs/COLOSSEUM_SUBMISSION.md` ("x402 v2 has HTTP and MCP transports") |
 | 28–33 | Solana mark, "≈ $3.3M", "USDC settled over x402 on Solana in one week. Solana took the top spot for agent payments."; chips "KB-SOL-03 PayAI batch settlement: a mainnet path for sub-cent traffic" and "KB-SOL-02 The agent only holds USDC: the facilitator pays the fee" | KB-MKT-01 ("Solana took the top spot for x402 agent payments with about $3.3M USDC settled in one week"), KB-SOL-03 and `docs/COLOSSEUM_SUBMISSION.md` ("a mainnet path for sub-cent traffic"), KB-SOL-02 ("it pays SOL fees so agents only need USDC") and `docs/launch/JUDGE_FAQ.md`. No finality or fee figures: the KB has none |
 | 2.0–5.3 | Robot icon, `AgentToll`, "Agents already use your product. Now you can bill them." | `brand/icon.svg`; tagline from `README.md` line 26 and `docs/launch/PITCH_VIDEO.md` (close) |
 | 5–9 | "Agents read. / Founders pay." | `docs/launch/PITCH_VIDEO.md` (0:00 on-screen text) |
@@ -75,3 +75,12 @@ Sound: `video/render/audio.mjs` synthesizes the bed and UI sounds from the cues 
 - **Dashboard rows.** Scene 04 doesn't fake a row "landing": it shows a crop of the real row from the screenshot taken right after the Claude run. Scene 05 shows both rows.
 - **Pitch cut.** `?cut=pitch` renumbers the labels for the pitch order in `video/scenes/pitch/EDL.json`: 04 → 03, 05 → 04, 03 → 05, 06 → 10. The business beat (05b) is not in the pitch; the pitch has its own business section.
 - **Mid-transition frames.** In those frames the camera and the Ken Burns drift scale real screenshots. No pixels inside a screenshot are edited.
+
+## Narration (2026-10-05)
+
+The captions are now the narration's subtitles, word for word: a stock female AI voice (Kokoro TTS,
+`af_heart`) presented as Joseph's AI assistant reads them (`video/vo/VO_SCRIPT.md`). Lines were
+shortened to be said at a natural pace inside their windows (`video/vo/narration.py --check`). The
+hero's cold open has no line, so the 402 thud and the logo riser land on their own; the pitch cut
+adds a pitch-only intro cue there (`only: 'pitch'`). The close card adds the credit line
+"Narration: AI voice (Kokoro TTS) · Joseph's AI assistant".

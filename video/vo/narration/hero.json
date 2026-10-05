@@ -1,0 +1,135 @@
+[
+ {
+  "id": "h01",
+  "start": 5.6,
+  "end": 9.2,
+  "text": "Agents read your site all day. They pay nothing.",
+  "say": "Agents read your site all day. They pay nothing."
+ },
+ {
+  "id": "h02",
+  "start": 9.35,
+  "end": 13.8,
+  "text": "8 agent requests, no price: $0.016 left on the table.",
+  "say": "eight agent requests, no price: one point six cents left on the table."
+ },
+ {
+  "id": "h03",
+  "start": 14.3,
+  "end": 17.3,
+  "text": "Same URL. A person gets the data, free.",
+  "say": "Same U R L. A person gets the data, free."
+ },
+ {
+  "id": "h04",
+  "start": 17.45,
+  "end": 20.9,
+  "text": "An agent gets 402 Payment Required.",
+  "say": "An agent gets four oh two, Payment Required."
+ },
+ {
+  "id": "h05",
+  "start": 21.05,
+  "end": 25.6,
+  "text": "People: free. Agents: $0.002.",
+  "say": "People: free. Agents: two tenths of a cent."
+ },
+ {
+  "id": "h06",
+  "start": 26.75,
+  "end": 32.0,
+  "text": "Solana leads x402: about $3.3M settled in one week.",
+  "say": "Solana leads x four oh two: about three point three million dollars settled in one week."
+ },
+ {
+  "id": "h07",
+  "start": 33.0,
+  "end": 37.6,
+  "text": "The agent signs. The facilitator verifies. The origin answers.",
+  "say": "The agent signs. The facilitator verifies. The origin answers."
+ },
+ {
+  "id": "h08",
+  "start": 38.02,
+  "end": 43.33,
+  "text": "With a funded wallet, USDC settles to your pay_to after the origin succeeds.",
+  "say": "With a funded wallet, U S D C settles to your pay to after the origin succeeds."
+ },
+ {
+  "id": "h09",
+  "start": 44.75,
+  "end": 47.1,
+  "text": "Claude gets a capped wallet.",
+  "say": "Claude gets a capped wallet."
+ },
+ {
+  "id": "h10",
+  "start": 47.2,
+  "end": 50.8,
+  "text": "It checks the price and caps, then pays $0.002.",
+  "say": "It checks the price and caps, then pays two tenths of a cent."
+ },
+ {
+  "id": "h11",
+  "start": 50.9,
+  "end": 52.75,
+  "text": "The receipt says SIMULATED.",
+  "say": "The receipt says simulated."
+ },
+ {
+  "id": "h12",
+  "start": 52.9,
+  "end": 57.3,
+  "text": "It lands on the founder's dashboard, simulated: no transaction exists.",
+  "say": "It lands on the founder's dashboard, simulated: no transaction exists."
+ },
+ {
+  "id": "h13",
+  "start": 57.4,
+  "end": 60.6,
+  "text": "Now a $0.05 tool, over the $0.01 per-call cap.",
+  "say": "Now a five-cent tool, over the one-cent per-call cap."
+ },
+ {
+  "id": "h14",
+  "start": 61.0,
+  "end": 63.0,
+  "text": "Refused before signing.",
+  "say": "Refused before signing."
+ },
+ {
+  "id": "h15",
+  "start": 63.4,
+  "end": 68.4,
+  "text": "No money moved. The caps win, and Claude does not work around them.",
+  "say": "No money moved. The caps win, and Claude does not work around them."
+ },
+ {
+  "id": "h16",
+  "start": 70.2,
+  "end": 75.9,
+  "text": "MCP servers sell per tool. Discovery stays free; search_docs costs $0.005.",
+  "say": "M C P servers sell per tool. Discovery stays free; search docs costs half a cent."
+ },
+ {
+  "id": "h17",
+  "start": 76.5,
+  "end": 79.6,
+  "text": "The plan: free open-source core, paid hosted edition.",
+  "say": "The plan: free open-source core, paid hosted edition."
+ },
+ {
+  "id": "h18",
+  "start": 81.2,
+  "end": 86.2,
+  "text": "119 of 119 evals pass. Run them yourself.",
+  "say": "one hundred nineteen of one hundred nineteen evals pass. Run them yourself."
+ },
+ {
+  "id": "h19",
+  "start": 87.7,
+  "end": 91.2,
+  "text": "Open source. One command, no wallet needed.",
+  "say": "Open source. One command, no wallet needed."
+ }
+]

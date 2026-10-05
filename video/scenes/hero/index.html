@@ -30,6 +30,7 @@
   .tagline .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .repo { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 30px/1 var(--mono); color: var(--teal); letter-spacing: 0.01em; }
   .event { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 18px/1 var(--mono); color: var(--muted); letter-spacing: 0.32em; }
+  .credit { position: absolute; left: 0; width: 1920px; text-align: center; font: 500 16px/1 var(--mono); color: var(--dim); letter-spacing: 0.04em; }
 
   /* cold open: the 402 line slams in gold */
   .slam .c-yellow { color: #FCD34D; text-shadow: 0 0 calc(var(--glow, 0) * 28px) rgba(251,191,36,0.85), 0 0 calc(var(--glow, 0) * 60px) rgba(251,191,36,0.45); }
@@ -763,6 +764,7 @@ const g7 = group('close', CL, 91.5, { drift: 0.025, hold: true }).e;
   anim(node('<span><b>Run it:</b> KEEP=1 bash scripts/demo-local.sh</span>', 'runit', g7, { y: 626 }), { at: CL + 1.3, y: 14, blur: 6 });
   anim(node('Devnet and testnet only. Every payment in this film was simulated.', 'honest', g7, { y: 712 }), { at: CL + 1.55, y: 10, blur: 4 });
   anim(node("COLOSSEUM CRYPTO WORLD'S FAIR", 'event', g7, { y: 778 }), { at: CL + 1.8, y: 12, blur: 4 });
+  anim(node("Narration: AI voice (Kokoro TTS) · Joseph's AI assistant", 'credit', g7, { y: 832 }), { at: CL + 2.0, y: 8, blur: 3 });
 }
 AT.sfx(CL + 0.15, 'lift', { gain: 0.7 });
 AT.swell(CL, 91.5, -1);
@@ -803,32 +805,32 @@ for (const [html, at, out] of [
   ['<b>Run it:</b> README.md · scripts/demo-local.sh', CL + 1.4, 91.5],
 ]) AT.Source({ html, at, out });
 
+// Captions are the narration's subtitles, word for word (video/vo/narration.py builds the voice
+// script from them). only: 'pitch' | 'hero' keeps a cue in one cut; the pitch cut opens with the
+// narrator naming herself (an AI voice, Joseph's AI assistant), the hero lets the cold open land on
+// the 402 thud and the logo riser alone.
 AT.Caption({ cues: [
-  { at: 5.4, end: 8.6, text: 'Agents read your site all day. They pay nothing.' },
-  { at: 9.4, end: 13.2, text: '8 agent requests, no price: $0.016 left on the table.', hl: ['8'], gold: ['$0.016'] },
-  { at: 14.5, end: 17.3, text: 'Same URL. A person gets the data, free.', hl: ['free.'] },
-  { at: 17.4, end: 20.9, text: 'An agent gets 402 Payment Required, with a price.', gold: ['402', 'Payment', 'Required,'] },
-  { at: 21.0, end: 25.6, text: 'People: free. Agents: $0.002.', hl: ['free.'], gold: ['$0.002.'] },
-  { at: 26.1, end: 27.85, text: 'Open protocol: HTTP and MCP.', hl: ['protocol:'] },
-  { at: 28.3, end: 32.0, text: 'Solana leads x402: about $3.3M USDC settled in one week.', hl: ['Solana'] },
-  { at: 32.75, end: 35.3, text: 'The agent asks, gets a price, signs.' },
-  { at: 35.4, end: 37.55, text: 'The facilitator verifies. The origin answers.' },
-  { at: 37.65, end: 40.35, text: 'Funded wallet: USDC settles to your pay_to.', gold: ['USDC'], hl: ['pay_to.'] },
-  { at: 40.45, end: 43.3, text: 'Settle only after the origin succeeds.' },
-  { at: 43.9, end: 47.1, text: 'Claude gets a wallet: pay-mcp, with hard spend caps.', hl: ['pay-mcp,'] },
-  { at: 47.2, end: 50.8, text: 'It checks the price, checks its caps, then pays $0.002.', gold: ['$0.002.'] },
+  { at: 1.6, end: 5.45, text: "Hi, I'm Joseph's AI assistant. Let me show you AgentToll.", only: 'pitch' },
+  { at: 5.6, end: 9.2, text: 'Agents read your site all day. They pay nothing.' },
+  { at: 9.35, end: 13.8, text: '8 agent requests, no price: $0.016 left on the table.', hl: ['8'], gold: ['$0.016'] },
+  { at: 14.3, end: 17.3, text: 'Same URL. A person gets the data, free.', hl: ['free.'] },
+  { at: 17.45, end: 20.9, text: 'An agent gets 402 Payment Required.', gold: ['402', 'Payment', 'Required.'] },
+  { at: 21.05, end: 25.6, text: 'People: free. Agents: $0.002.', hl: ['free.'], gold: ['$0.002.'] },
+  { at: 26.75, end: 32.0, text: 'Solana leads x402: about $3.3M settled in one week.', hl: ['Solana'] },
+  { at: 33.0, end: 37.6, text: 'The agent signs. The facilitator verifies. The origin answers.' },
+  { at: 38.02, end: 43.33, text: 'With a funded wallet, USDC settles to your pay_to after the origin succeeds.', gold: ['USDC'], hl: ['pay_to'] },
+  { at: 44.75, end: 47.1, text: 'Claude gets a capped wallet.', hl: ['capped'] },
+  { at: 47.2, end: 50.8, text: 'It checks the price and caps, then pays $0.002.', gold: ['$0.002.'] },
   { at: 50.9, end: 52.75, text: 'The receipt says SIMULATED.', gold: ['SIMULATED.'] },
-  { at: 52.9, end: 55.4, text: "The payment lands on the founder's dashboard.", gold: ['payment'] },
-  { at: 55.5, end: 57.3, text: 'Simulated: no on-chain transaction exists.', gold: ['Simulated:'] },
-  { at: 57.4, end: 60.6, text: "Now a $0.05 tool. Claude's per-call cap is $0.01.", gold: ['$0.05', '$0.01.'] },
-  { at: 60.7, end: 63.4, text: 'Refused before signing. No money moved.', hl: ['Refused'] },
-  { at: 63.6, end: 68.4, text: "The wallet's caps win. Claude does not work around them." },
-  { at: M5 + 1.3, end: M5 + 4.6, text: 'MCP servers sell per tool. tools/list carries each price.', hl: ['tools/list'] },
-  { at: M5 + 4.75, end: M5 + 7.2, text: 'initialize and tools/list stay free. search_docs: $0.005.', hl: ['free.'], gold: ['$0.005.'] },
-  { at: 76.6, end: 79.4, text: 'The plan: free open-source core, paid hosted edition.', hl: ['plan:'] },
-  { at: P6 + 1.6, end: P6 + 5.6, text: '119 of 119 evals. 93 Rust, 69 pay-mcp, 70 Worker tests.', hl: ['119', '93', '69', '70'] },
-  { at: CL + 1.1, end: CL + 4.6, text: 'Open source. One command, no wallet needed.', hl: ['One', 'command,'] },
-] });
+  { at: 52.9, end: 57.3, text: "It lands on the founder's dashboard, simulated: no transaction exists.", gold: ['simulated:'] },
+  { at: 57.4, end: 60.6, text: 'Now a $0.05 tool, over the $0.01 per-call cap.', gold: ['$0.05', '$0.01'] },
+  { at: 61.0, end: 63.0, text: 'Refused before signing.', hl: ['Refused'] },
+  { at: 63.4, end: 68.4, text: 'No money moved. The caps win, and Claude does not work around them.', hl: ['No', 'money', 'moved.'] },
+  { at: M5 + 1.3, end: M5 + 7.0, text: 'MCP servers sell per tool. Discovery stays free; search_docs costs $0.005.', hl: ['free;'], gold: ['$0.005.'] },
+  { at: 76.5, end: 79.6, text: 'The plan: free open-source core, paid hosted edition.', hl: ['plan:'] },
+  { at: P6 + 1.6, end: P6 + 6.6, text: '119 of 119 evals pass. Run them yourself.', hl: ['119'] },
+  { at: CL + 1.4, end: CL + 4.9, text: 'Open source. One command, no wallet needed.', hl: ['One', 'command,'] },
+].filter(c => !c.only || c.only === (PITCH ? 'pitch' : 'hero')) });
 </script>
 </body>
 </html>

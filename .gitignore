@@ -18,3 +18,6 @@ buyer.json
 payto.json
 wallet*.json
 evals/__pycache__/
+
+# narration audio (Kokoro TTS output); only scripts + reports are committed
+video/vo/narration/out/

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Write captions.json from index.html so the guardrail input never drifts from the film.
 
-Captions: every cue of the AT.Caption block (Loom-style pills).
+Captions: every cue of the AT.Caption block (Loom-style pills). They are also the narration's
+subtitles (video/vo/narration.py). A cue with only: 'pitch' or 'hero' carries that key.
 Titles: the headline-sized on-screen claims; each must appear verbatim in index.html.
 Run: python3 video/scenes/hero/captions.py
 """
@@ -11,11 +12,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 src = open(os.path.join(HERE, 'index.html'), encoding='utf-8').read()
 
 block = src[src.index('AT.Caption({ cues: ['):]
-block = block[:block.index('] });')]
+block = block[:block.index('});')]
 consts = {k: float(v) for k, v in re.findall(r"const (M5|P6|R2|CL) = ([\d.]+);", src)}
 num = lambda e: eval(e, {}, dict(consts))  # cue times are numbers or "M5 + 1.3" style offsets
-cue = re.compile(r"\{ at: ([\w. +]+?), end: ([\w. +]+?), text: (['\"])(.*?)\3")
-out = [{'start': round(num(a), 3), 'end': round(num(b), 3), 'text': t.replace("\\'", "'"), 'kind': 'caption'} for a, b, _, t in cue.findall(block)]
+cue = re.compile(r"\{ at: ([\w. +]+?), end: ([\w. +]+?), text: (['\"])(.*?)\3(.*?)\}")
+out = []
+for a, b, _, t, rest in cue.findall(block):
+    c = {'start': round(num(a), 3), 'end': round(num(b), 3), 'text': t.replace("\\'", "'"), 'kind': 'caption'}
+    m = re.search(r"only: '(\w+)'", rest)
+    if m:
+        c['only'] = m.group(1)
+    out.append(c)
 
 TITLES = [  # (start, end, text, html fragment that must exist in index.html)
     (2.5, 5.9, 'Agents already use your product. Now you can bill them.', 'Agents already use your product. <span class="g">Now you can bill them.</span>'),
@@ -39,6 +46,7 @@ TITLES = [  # (start, end, text, html fragment that must exist in index.html)
     (87.6, 91.5, 'Run it: KEEP=1 bash scripts/demo-local.sh', '<b>Run it:</b> KEEP=1 bash scripts/demo-local.sh'),
     (87.85, 91.5, 'Devnet and testnet only. Every payment in this film was simulated.', "'Devnet and testnet only. Every payment in this film was simulated.'"),
     (88.1, 91.5, "COLOSSEUM CRYPTO WORLD'S FAIR", "\"COLOSSEUM CRYPTO WORLD'S FAIR\""),
+    (88.3, 91.5, "Narration: AI voice (Kokoro TTS) · Joseph's AI assistant", "\"Narration: AI voice (Kokoro TTS) · Joseph's AI assistant\""),
 ]
 for a, b, text, frag in TITLES:
     assert frag in src, 'title not found in index.html: ' + text

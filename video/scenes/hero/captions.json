@@ -1,5 +1,12 @@
 [
   {
+    "start": 1.6,
+    "end": 5.45,
+    "text": "Hi, I'm Joseph's AI assistant. Let me show you AgentToll.",
+    "kind": "caption",
+    "only": "pitch"
+  },
+  {
     "start": 2.5,
     "end": 5.9,
     "text": "Agents already use your product. Now you can bill them.",
@@ -12,8 +19,8 @@
     "kind": "title"
   },
   {
-    "start": 5.4,
-    "end": 8.6,
+    "start": 5.6,
+    "end": 9.2,
     "text": "Agents read your site all day. They pay nothing.",
     "kind": "caption"
   },
@@ -30,25 +37,25 @@
     "kind": "title"
   },
   {
-    "start": 9.4,
-    "end": 13.2,
+    "start": 9.35,
+    "end": 13.8,
     "text": "8 agent requests, no price: $0.016 left on the table.",
     "kind": "caption"
   },
   {
-    "start": 14.5,
+    "start": 14.3,
     "end": 17.3,
     "text": "Same URL. A person gets the data, free.",
     "kind": "caption"
   },
   {
-    "start": 17.4,
+    "start": 17.45,
     "end": 20.9,
-    "text": "An agent gets 402 Payment Required, with a price.",
+    "text": "An agent gets 402 Payment Required.",
     "kind": "caption"
   },
   {
-    "start": 21.0,
+    "start": 21.05,
     "end": 25.6,
     "text": "People: free. Agents: $0.002.",
     "kind": "caption"
@@ -60,9 +67,9 @@
     "kind": "title"
   },
   {
-    "start": 26.1,
-    "end": 27.85,
-    "text": "Open protocol: HTTP and MCP.",
+    "start": 26.75,
+    "end": 32.0,
+    "text": "Solana leads x402: about $3.3M settled in one week.",
     "kind": "caption"
   },
   {
@@ -70,12 +77,6 @@
     "end": 33.0,
     "text": "≈ $3.3M USDC settled over x402 on Solana in one week. Solana took the top spot for agent payments.",
     "kind": "title"
-  },
-  {
-    "start": 28.3,
-    "end": 32.0,
-    "text": "Solana leads x402: about $3.3M USDC settled in one week.",
-    "kind": "caption"
   },
   {
     "start": 29.0,
@@ -96,27 +97,15 @@
     "kind": "title"
   },
   {
-    "start": 32.75,
-    "end": 35.3,
-    "text": "The agent asks, gets a price, signs.",
+    "start": 33.0,
+    "end": 37.6,
+    "text": "The agent signs. The facilitator verifies. The origin answers.",
     "kind": "caption"
   },
   {
-    "start": 35.4,
-    "end": 37.55,
-    "text": "The facilitator verifies. The origin answers.",
-    "kind": "caption"
-  },
-  {
-    "start": 37.65,
-    "end": 40.35,
-    "text": "Funded wallet: USDC settles to your pay_to.",
-    "kind": "caption"
-  },
-  {
-    "start": 40.45,
-    "end": 43.3,
-    "text": "Settle only after the origin succeeds.",
+    "start": 38.02,
+    "end": 43.33,
+    "text": "With a funded wallet, USDC settles to your pay_to after the origin succeeds.",
     "kind": "caption"
   },
   {
@@ -126,15 +115,15 @@
     "kind": "title"
   },
   {
-    "start": 43.9,
+    "start": 44.75,
     "end": 47.1,
-    "text": "Claude gets a wallet: pay-mcp, with hard spend caps.",
+    "text": "Claude gets a capped wallet.",
     "kind": "caption"
   },
   {
     "start": 47.2,
     "end": 50.8,
-    "text": "It checks the price, checks its caps, then pays $0.002.",
+    "text": "It checks the price and caps, then pays $0.002.",
     "kind": "caption"
   },
   {
@@ -145,44 +134,32 @@
   },
   {
     "start": 52.9,
-    "end": 55.4,
-    "text": "The payment lands on the founder's dashboard.",
-    "kind": "caption"
-  },
-  {
-    "start": 55.5,
     "end": 57.3,
-    "text": "Simulated: no on-chain transaction exists.",
+    "text": "It lands on the founder's dashboard, simulated: no transaction exists.",
     "kind": "caption"
   },
   {
     "start": 57.4,
     "end": 60.6,
-    "text": "Now a $0.05 tool. Claude's per-call cap is $0.01.",
+    "text": "Now a $0.05 tool, over the $0.01 per-call cap.",
     "kind": "caption"
   },
   {
-    "start": 60.7,
-    "end": 63.4,
-    "text": "Refused before signing. No money moved.",
+    "start": 61.0,
+    "end": 63.0,
+    "text": "Refused before signing.",
     "kind": "caption"
   },
   {
-    "start": 63.6,
+    "start": 63.4,
     "end": 68.4,
-    "text": "The wallet's caps win. Claude does not work around them.",
+    "text": "No money moved. The caps win, and Claude does not work around them.",
     "kind": "caption"
   },
   {
     "start": 70.2,
-    "end": 73.5,
-    "text": "MCP servers sell per tool. tools/list carries each price.",
-    "kind": "caption"
-  },
-  {
-    "start": 73.65,
-    "end": 76.1,
-    "text": "initialize and tools/list stay free. search_docs: $0.005.",
+    "end": 75.9,
+    "text": "MCP servers sell per tool. Discovery stays free; search_docs costs $0.005.",
     "kind": "caption"
   },
   {
@@ -192,8 +169,8 @@
     "kind": "title"
   },
   {
-    "start": 76.6,
-    "end": 79.4,
+    "start": 76.5,
+    "end": 79.6,
     "text": "The plan: free open-source core, paid hosted edition.",
     "kind": "caption"
   },
@@ -205,8 +182,8 @@
   },
   {
     "start": 81.2,
-    "end": 85.2,
-    "text": "119 of 119 evals. 93 Rust, 69 pay-mcp, 70 Worker tests.",
+    "end": 86.2,
+    "text": "119 of 119 evals pass. Run them yourself.",
     "kind": "caption"
   },
   {
@@ -228,16 +205,16 @@
     "kind": "title"
   },
   {
-    "start": 87.4,
-    "end": 90.9,
-    "text": "Open source. One command, no wallet needed.",
-    "kind": "caption"
-  },
-  {
     "start": 87.6,
     "end": 91.5,
     "text": "Run it: KEEP=1 bash scripts/demo-local.sh",
     "kind": "title"
+  },
+  {
+    "start": 87.7,
+    "end": 91.2,
+    "text": "Open source. One command, no wallet needed.",
+    "kind": "caption"
   },
   {
     "start": 87.85,
@@ -249,6 +226,12 @@
     "start": 88.1,
     "end": 91.5,
     "text": "COLOSSEUM CRYPTO WORLD'S FAIR",
+    "kind": "title"
+  },
+  {
+    "start": 88.3,
+    "end": 91.5,
+    "text": "Narration: AI voice (Kokoro TTS) · Joseph's AI assistant",
     "kind": "title"
   }
 ]
