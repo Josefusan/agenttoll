@@ -1,24 +1,87 @@
 # Voiceover script (for Joseph to record)
 
-The films ship with burned-in captions, a synthesized music bed and UI sound. A voice is the one piece an agent cannot supply: record it, then mux it with
+The films ship with burned-in captions, a synthesized music bed and UI sound. A voice and a face are the pieces an agent cannot supply: record them, then mux the voice with
 `bash video/render/mux.sh --video <film>-picture.mp4 --audio <bed>.wav --vo voice.wav --out <film>.mp4` (the bed is ducked about 8:1 under the voice).
 
-Read each line so it starts at its timecode and ends by the next one. The lines are the on-screen captions, so voice and captions agree. For the pitch cut, the full voiceover with the business sections is in `docs/launch/PITCH_VIDEO.md`; Joseph's on-camera open and close (10 s each) go before and after `agenttoll-pitch.mp4`.
+Read each line so it starts at its timecode and ends by the next one. The lines are the on-screen captions, so voice and captions agree. Regenerate a table after a caption or EDL change: hero `python3 video/scenes/hero/captions.py` then the table below; pitch `python3 video/vo/pitch_vo.py`.
 
-## Hero film (1:30.5, agenttoll-film-90s.mp4)
+Before upload, a person listens to all three mixes on laptop speakers and on earbuds: the coin and thud SFX must not clip under the voice, and the bed must sit at least 10 dB under speech. If the synthesized bed sounds thin, replace it with a licensed or CC0 track and keep only the 402 thud, the logo riser and the refusal tone.
+
+## Pitch cut (agenttoll-pitch.mp4): two on-camera slots, not in the render
+
+The render (`video/scenes/pitch/EDL.json`) is 2:04.35. Joseph's two on-camera pieces are spliced before and after it, for about 2:24 in all (the Colosseum pitch field allows 2:00 to 3:00). They are listed in `EDL.json` under `slots` with `"rendered": false`; the render never contains them.
+
+Recording: eye level, soft key light, a dark backdrop close to the film's `#07060F`, 1080p, the same sitting for both.
+
+### SLOT A: joseph-open, 10 s, before 0:00 of the render
+
+"I'm Joseph Clark. I run an AI landing-page service: we ship sites for small businesses. Agents read every one of them, all day, for free. AgentToll lets them pay."
+
+(Source: docs/launch/PITCH_VIDEO.md 0:00 problem; docs/COLOSSEUM_SUBMISSION.md "We run … an AI landing-page service".)
+
+### SLOT B: joseph-close, 10 s, after the end of the render
+
+"Everything you saw is open source and runs with one command, no wallet needed: github.com/Josefusan/agenttoll. Put it in front of something agents already read. Agents already use your product. Now you can bill them."
+
+(Source: docs/launch/PITCH_VIDEO.md 2:50 close and ask; README.md "Try it in one command (no wallet, no funds)".)
+
+### Voiceover over the render (timecodes are the render's, slot A not counted)
+
+Optional extra lines for Joseph's own voice, not on screen: at the business model (about 1:30), "an agency bundle and a pro dashboard come later"; at distribution (about 1:38), "that is our own landing-page service, so the first sites are ours." Both are plans (docs/COLOSSEUM_SUBMISSION.md business model and distribution).
+
+Render length 2:04.35 (124.35 s).
 
 | Start | End | Line |
 |---|---|---|
-| 0:05.60 | 0:08.80 | Agents read your site all day. They pay nothing. |
-| 0:09.30 | 0:13.70 | The dashboard counts them: 8 agent requests on routes with no price. |
-| 0:14.60 | 0:18.00 | Same URL. A person gets the data, free. |
-| 0:18.20 | 0:21.80 | An agent gets 402 Payment Required, with a price. |
-| 0:22.00 | 0:25.60 | People: free. Agents: $0.002. |
-| 0:26.30 | 0:29.15 | x402: the web's 402 status code, finally paid. |
-| 0:29.55 | 0:32.00 | On Solana the agent only holds USDC. |
+| 0:05.40 | 0:08.60 | Agents read your site all day. They pay nothing. |
+| 0:09.40 | 0:13.20 | 8 agent requests, no price: $0.016 left on the table. |
+| 0:14.50 | 0:17.30 | Same URL. A person gets the data, free. |
+| 0:17.40 | 0:20.90 | An agent gets 402 Payment Required, with a price. |
+| 0:21.00 | 0:25.60 | People: free. Agents: $0.002. |
+| 0:25.35 | 0:28.15 | Claude gets a wallet: pay-mcp, with hard spend caps. |
+| 0:28.25 | 0:31.85 | It checks the price, checks its caps, then pays $0.002. |
+| 0:31.95 | 0:33.80 | The receipt says SIMULATED. |
+| 0:33.95 | 0:36.45 | The payment lands on the founder's dashboard. |
+| 0:36.55 | 0:38.35 | Simulated: no on-chain transaction exists. |
+| 0:38.45 | 0:41.65 | Now a $0.05 tool. Claude's per-call cap is $0.01. |
+| 0:41.75 | 0:44.45 | Refused before signing. No money moved. |
+| 0:44.65 | 0:49.45 | The wallet's caps win. Claude does not work around them. |
+| 0:51.25 | 0:54.55 | MCP servers sell per tool. tools/list carries each price. |
+| 0:54.70 | 0:57.05 | initialize and tools/list stay free. search_docs: $0.005. |
+| 0:56.65 | 0:58.20 | Open protocol: HTTP and MCP. |
+| 0:58.65 | 1:02.35 | Solana leads x402: about $3.3M USDC settled in one week. |
+| 1:02.15 | 1:04.85 | Funded wallet: USDC settles to your pay_to. |
+| 1:04.95 | 1:07.80 | Settle only after the origin succeeds. |
+| 1:07.65 | 1:10.85 | Why now? PayAI batch settlement on Solana, Sep 30. |
+| 1:10.95 | 1:14.85 | Cloudflare announced a gateway in July: waitlist-only, tied to its network. |
+| 1:14.95 | 1:18.85 | Agents already hold wallets: Coinbase's Payments MCP pays x402 on Solana. |
+| 1:18.95 | 1:22.85 | The open, self-hosted version was not built. So we built it. |
+| 1:22.95 | 1:26.85 | Who buys: four kinds of seller whose product agents already use. |
+| 1:26.95 | 1:30.55 | Buyer types, not customers. No customers and no revenue yet. |
+| 1:30.75 | 1:34.35 | We charge for convenience, never by holding the seller's funds. |
+| 1:34.45 | 1:38.35 | Free core. Hosted: flat tier plus a fee on settled volume. |
+| 1:38.45 | 1:41.65 | Distribution: we already ship landing pages to small businesses. |
+| 1:41.75 | 1:43.85 | Plan: each client's pay_to, their own address. |
+| 1:44.25 | 1:48.25 | 119 of 119 evals. 93 Rust, 69 pay-mcp, 70 Worker tests. |
+| 1:48.90 | 1:52.40 | What's next, as a plan: a funded devnet settlement, then mainnet. |
+| 1:52.50 | 1:55.50 | A funded wallet is the only missing piece. |
+| 1:56.30 | 2:00.00 | Built by Joseph Clark, a solo builder. |
+| 2:00.25 | 2:03.75 | Open source. One command, no wallet needed. |
+
+## Hero film (1:31.5, agenttoll-film-90s.mp4)
+
+| Start | End | Line |
+|---|---|---|
+| 0:05.40 | 0:08.60 | Agents read your site all day. They pay nothing. |
+| 0:09.40 | 0:13.20 | 8 agent requests, no price: $0.016 left on the table. |
+| 0:14.50 | 0:17.30 | Same URL. A person gets the data, free. |
+| 0:17.40 | 0:20.90 | An agent gets 402 Payment Required, with a price. |
+| 0:21.00 | 0:25.60 | People: free. Agents: $0.002. |
+| 0:26.10 | 0:27.85 | Open protocol: HTTP and MCP. |
+| 0:28.30 | 0:32.00 | Solana leads x402: about $3.3M USDC settled in one week. |
 | 0:32.75 | 0:35.30 | The agent asks, gets a price, signs. |
-| 0:35.40 | 0:37.70 | The facilitator verifies. The origin answers. |
-| 0:37.80 | 0:40.30 | It settles. USDC goes to your pay_to. |
+| 0:35.40 | 0:37.55 | The facilitator verifies. The origin answers. |
+| 0:37.65 | 0:40.35 | Funded wallet: USDC settles to your pay_to. |
 | 0:40.45 | 0:43.30 | Settle only after the origin succeeds. |
 | 0:43.90 | 0:47.10 | Claude gets a wallet: pay-mcp, with hard spend caps. |
 | 0:47.20 | 0:50.80 | It checks the price, checks its caps, then pays $0.002. |
@@ -28,10 +91,11 @@ Read each line so it starts at its timecode and ends by the next one. The lines 
 | 0:57.40 | 1:00.60 | Now a $0.05 tool. Claude's per-call cap is $0.01. |
 | 1:00.70 | 1:03.40 | Refused before signing. No money moved. |
 | 1:03.60 | 1:08.40 | The wallet's caps win. Claude does not work around them. |
-| 1:10.20 | 1:13.60 | MCP servers sell per tool. tools/list carries each price. |
-| 1:13.80 | 1:17.10 | initialize and tools/list stay free. search_docs: $0.005. |
-| 1:18.95 | 1:23.15 | 119 of 119 evals pass. 93 Rust tests. 21 Worker parity tests. |
-| 1:23.30 | 1:26.10 | Devnet and testnet only. Demo payments are simulated. |
+| 1:10.20 | 1:13.50 | MCP servers sell per tool. tools/list carries each price. |
+| 1:13.65 | 1:16.10 | initialize and tools/list stay free. search_docs: $0.005. |
+| 1:16.60 | 1:19.40 | The plan: free open-source core, paid hosted edition. |
+| 1:21.20 | 1:25.20 | 119 of 119 evals. 93 Rust, 69 pay-mcp, 70 Worker tests. |
+| 1:27.40 | 1:30.90 | Open source. One command, no wallet needed. |
 
 ## Full product demo (2:51, agenttoll-full-demo.mp4)
 

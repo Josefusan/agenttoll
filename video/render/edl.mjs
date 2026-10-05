@@ -9,7 +9,7 @@
 // <out>.cues.json: every segment's sound cues shifted onto the cut's timeline (audio.mjs input).
 //
 // Joins: with "xfade": d (seconds, EDL-wide or per segment), the last d s of the previous segment
-// and the first d s of this one are blended with a smoothstep crossfade (ffmpeg blend), so a join
+// and the first d s of this one are blended with a smoothstep blur dissolve (ffmpeg gblur + blend), so a join
 // is never a hard cut and never an empty frame. The cut gets d s shorter per join, and a soft
 // whoosh is cued on each join. --fps/--scale override the EDL for low-cost previews.
 import fs from 'node:fs';
@@ -29,6 +29,8 @@ let offset = 0;
 const cut = { duration: 0, sfx: [], duck: [], swell: [], segments: [] };
 const seq = path.join(work, 'seq');
 if (!a['cues-only']) { fs.rmSync(seq, { recursive: true, force: true }); fs.mkdirSync(seq); }
+const XBLUR = +(a.xblur || edl.xblur || 12) * (+(a.scale) || 1);   // gblur sigma at the middle of a join, in output px
+const XTOP = Math.round(64 * (+(a.scale) || 1));   // the brand bar (same in every segment) stays sharp through a join
 const fname = i => `f_${String(i).padStart(6, '0')}.jpg`;
 let n = 0;
 edl.segments.forEach((s, k) => {
@@ -63,7 +65,11 @@ edl.segments.forEach((s, k) => {
       fs.writeFileSync(listB, files.slice(0, nx).map(f => `file '${path.join(dir, f)}'\nduration ${1 / fps}\n`).join(''));
       const u = `((N+0.5)/${nx})`, sm = `(${u}*${u}*(3-2*${u}))`;
       execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', listA, '-f', 'concat', '-safe', '0', '-i', listB,
-        '-filter_complex', `[0:v]format=yuv444p[a];[1:v]format=yuv444p[b];[a][b]blend=all_expr='A+(B-A)*${sm}',format=yuvj420p`,
+        // blur dissolve, the same grammar as the scenes' own shot changes: the outgoing frame blurs
+        // out over the first half, the incoming one sharpens over the second, under a smoothstep mix
+        '-filter_complex', `[0:v]format=yuv444p,split[a0][a1];[a1]gblur=sigma=${XBLUR}[ab];[a0][ab]blend=all_expr='if(lt(Y,${XTOP}),A,A+(B-A)*clip(2*${u},0,1))'[a];` +
+          `[1:v]format=yuv444p,split[b0][b1];[b1]gblur=sigma=${XBLUR}[bb];[bb][b0]blend=all_expr='if(lt(Y,${XTOP}),B,A+(B-A)*clip(2*${u}-1,0,1))'[b];` +
+          `[a][b]blend=all_expr='A+(B-A)*${sm}',format=yuvj420p`,
         '-frames:v', String(nx), '-fps_mode', 'passthrough', '-q:v', '2', path.join(tmp, 'x_%06d.jpg')], { stdio: 'inherit' });
       for (let i = 0; i < nx; i++) fs.renameSync(path.join(tmp, `x_${String(i + 1).padStart(6, '0')}.jpg`), path.join(seq, fname(n - nx + i)));
       fs.rmSync(tmp, { recursive: true, force: true });

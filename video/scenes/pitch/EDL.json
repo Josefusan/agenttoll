@@ -1,6 +1,6 @@
 {
   "name": "agenttoll-pitch",
-  "note": "Pitch cut for the Colosseum pitch-video field (2:00-3:00). Story order: cold open 402, the problem, same URL; the product working (Claude pays, the cap refuses, MCP per tool) by 0:57; why x402 + why Solana; how a real payment flows; why now, who buys, business model (PLAN), distribution (PLAN); proof; what's next (PLAN) + team; close. Hero segments render with ?noprogress&cut=pitch (no progress bar; section labels renumbered for this order). Each join after the first is a 0.4 s crossfade (edl.mjs) with a whoosh, so no seam is a hard cut and no frame is empty. The render is about 2:03; Joseph's two 10 s on-camera slots (see slots, and video/vo/VO_SCRIPT.md) are spliced before and after it, for about 2:23.",
+  "note": "Pitch cut for the Colosseum pitch-video field (2:00-3:00). Story order: cold open 402, the problem, same URL; the product working (Claude pays, the cap refuses, MCP per tool) by 0:57; why x402 + why Solana; how a real payment flows; why now, who buys, business model (PLAN), distribution (PLAN); proof; what's next (PLAN) + team; close. Hero segments render with ?noprogress&cut=pitch (no progress bar; section labels renumbered for this order). Each join after the first is a 0.4 s blur dissolve (edl.mjs) with a whoosh, so no seam is a hard cut and no frame is empty. The render is about 2:04; Joseph's two 10 s on-camera slots (see slots, and video/vo/VO_SCRIPT.md) are spliced before and after it, for about 2:24.",
   "fps": 60,
   "xfade": 0.4,
   "slots": [
@@ -64,7 +64,7 @@
     {
       "scene": "video/scenes/pitch/index.html",
       "from": 37.4,
-      "to": 48,
+      "to": 49,
       "what": "11 what's next (PLAN), team"
     },
     {
