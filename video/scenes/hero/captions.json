@@ -7,7 +7,7 @@
   },
   {
     "start": 5.1,
-    "end": 8.9,
+    "end": 8.5,
     "text": "Agents read. Founders pay.",
     "kind": "title"
   },
@@ -19,13 +19,13 @@
   },
   {
     "start": 6.3,
-    "end": 8.9,
+    "end": 8.55,
     "text": "Until now the choices were block them or absorb it.",
     "kind": "title"
   },
   {
-    "start": 7.85,
-    "end": 9.0,
+    "start": 7.1,
+    "end": 8.65,
     "text": "7 agent reads · $0 billed",
     "kind": "title"
   },
@@ -55,7 +55,7 @@
   },
   {
     "start": 26.05,
-    "end": 28.2,
+    "end": 28.05,
     "text": "x402: the web's 402 status code, finally paid.",
     "kind": "title"
   },
@@ -66,7 +66,7 @@
     "kind": "caption"
   },
   {
-    "start": 28.2,
+    "start": 28.1,
     "end": 33.0,
     "text": "≈ $3.3M USDC settled over x402 on Solana in one week. Solana took the top spot for agent payments.",
     "kind": "title"

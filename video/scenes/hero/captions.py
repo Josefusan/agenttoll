@@ -19,11 +19,11 @@ out = [{'start': round(num(a), 3), 'end': round(num(b), 3), 'text': t.replace("\
 
 TITLES = [  # (start, end, text, html fragment that must exist in index.html)
     (2.5, 5.9, 'Agents already use your product. Now you can bill them.', 'Agents already use your product. <span class="g">Now you can bill them.</span>'),
-    (5.1, 8.9, 'Agents read. Founders pay.', "lines: ['Agents read.', { text: 'Founders pay.', grad: true }]"),
-    (6.3, 8.9, 'Until now the choices were block them or absorb it.', 'Until now the choices were <b>block them</b> or <b>absorb it.</b>'),
-    (7.85, 9.0, '7 agent reads · $0 billed', "'<i></i>7 agent reads · $0 billed'"),
-    (26.05, 28.2, "x402: the web's 402 status code, finally paid.", "lines: [\"x402: the web's 402 status code,\", { text: 'finally paid.', grad: true }]"),
-    (28.2, 33.0, '≈ $3.3M USDC settled over x402 on Solana in one week. Solana took the top spot for agent payments.',
+    (5.1, 8.5, 'Agents read. Founders pay.', "lines: ['Agents read.', { text: 'Founders pay.', grad: true }]"),
+    (6.3, 8.55, 'Until now the choices were block them or absorb it.', 'Until now the choices were <b>block them</b> or <b>absorb it.</b>'),
+    (7.1, 8.65, '7 agent reads · $0 billed', "'<i></i>7 agent reads · $0 billed'"),
+    (26.05, 28.05, "x402: the web's 402 status code, finally paid.", "lines: [\"x402: the web's 402 status code,\", { text: 'finally paid.', grad: true }]"),
+    (28.1, 33.0, '≈ $3.3M USDC settled over x402 on Solana in one week. Solana took the top spot for agent payments.',
      'USDC settled over x402 on Solana in one week. <span class="m">Solana took the top spot for agent payments.</span>'),
     (29.0, 33.0, 'KB-SOL-03 PayAI batch settlement: a mainnet path for sub-cent traffic', 'PayAI batch settlement: a mainnet path for sub-cent traffic'),
     (29.35, 33.0, 'KB-SOL-02 The agent only holds USDC: the facilitator pays the fee', 'The agent only holds USDC: the facilitator pays the fee'),

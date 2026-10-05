@@ -21,7 +21,7 @@ Scene source: `video/scenes/hero/index.html`. On-screen captions and title lines
 | 13.9–26.9 | 02 Same URL, two answers (the person's pane is already loaded) | gradient wipe left to right |
 | 25.85–33 | 02b Why x402 (2 s), why Solana (KB-MKT-01 figure, KB-SOL-03, KB-SOL-02) | dissolve |
 | 32.2–44.3 | 03 How a real payment flows (diagram) | dissolve |
-| 43.4–69.9 | 04 Using it: Claude pays, the dashboard row, the refusal | gradient wipe right to left |
+| 43.4–69.3 | 04 Using it: Claude pays, the dashboard row, the refusal | gradient wipe right to left; leaves with a timed blur-out while 05 builds |
 | 68.9–76.95 | 05 MCP servers sell per tool | dissolve |
 | 76.1–80.4 | 05b How AgentToll makes money (PLAN) | gradient wipe left to right |
 | 79.5–87.2 | 06 Proof | dissolve |
@@ -42,7 +42,7 @@ Sound: `video/render/audio.mjs` synthesizes the bed and UI sounds from the cues 
 | 5–9 | "Agents read. / Founders pay." | `docs/launch/PITCH_VIDEO.md` (0:00 on-screen text) |
 | 6.3–9 | "Until now the choices were block them or absorb it." | `docs/launch/PITCH_VIDEO.md` (problem voiceover) |
 | 6–9 | The `for ua in …; do curl …; done` loop and its 7 output lines `200  …ClaudeBot/1.0)` etc.; the 200 column boxed green; tag "7 agent reads · $0 billed" | `video/captures/terminal/crawler-hits-free-pages.json` (command and stdout verbatim; the bot names are coloured). The tag counts that run's 7 lines; the pages are free routes, so nothing was billed |
-| 8.75–14 | Dashboard at `http://127.0.0.1:3502`, opened already scrolled to "Agent traffic you are not billing yet"; the camera holds on its header line and the ClaudeBot 3, GPTBot 2, CCBot 1, PerplexityBot 1 rows; "8" and "$0.016" ringed gold, the four rows ringed teal | `video/captures/dashboard/dashboard-02-unbilled-no-payments-full.png` (real Playwright capture with zero payments, cropped to page x 300–1620). Ring positions from `dashboard-02-unbilled-no-payments.boxes.json` (unbilled_panel) and its panel crop; the rings are overlays, no pixel of the capture is edited |
+| 8.4–14 | Dashboard at `http://127.0.0.1:3502`, opened already scrolled to "Agent traffic you are not billing yet"; the camera holds on its header line and the ClaudeBot 3, GPTBot 2, CCBot 1, PerplexityBot 1 rows; "8" and "$0.016" ringed gold, the four rows ringed teal | `video/captures/dashboard/dashboard-02-unbilled-no-payments-full.png` (real Playwright capture with zero payments, cropped to page x 300–1620). Ring positions from `dashboard-02-unbilled-no-payments.boxes.json` (unbilled_panel) and its panel crop; the rings are overlays, no pixel of the capture is edited; while the camera holds on the card a dark veil covers the page above it (overlay, the capture itself is unchanged) |
 | 9.4–13.2 | "8 agent requests, no price: $0.016 left on the table." | The same screenshot reads "8 agent requests reached routes with no price. That is about $0.016 left on the table at $0.002 a request." |
 | 13.9–26.9 | Browser at `http://127.0.0.1:8502/api/quote`, JSON `{"agent":null,…,"paid":false,"price":143.62,…}`, `200 OK` pill | `video/captures/origin/origin-api-quote.png` and `origin/origin.json` (status 200), re-captured in dark mode on 2026-10-05 (commit 6f5db63); the top 22 CSS px, Chrome's Pretty-print bar, sit above the view |
 | 14.95–26.9 | Response headers card: status 200, `content-type: application/json`, `content-length: 80` | `video/captures/origin/origin.json` (the same request as the screenshot) |
