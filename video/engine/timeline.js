@@ -17,6 +17,17 @@
  *
  * Preview in a desktop browser: open scene.html?play (real-time loop, preview only) or ?t=3.2.
  * GIF cut: render with ?flat (render.mjs --flat): grain off and the mesh frozen.
+ *
+ * Frame rules the engine enforces (review round 2):
+ *  - Fixed chrome lives in S.overlay: brand bar, badge, section label, caption, provenance line.
+ *    SectionLabel is always mounted there; its `parent` group is only followed for opacity/clip.
+ *  - Camera safe area (S.safe, default top 150 / bottom 160 / sides 40): every resting zoom key is
+ *    solved inside it; neighbouring panels the frame cuts in half fade out while pushed in.
+ *  - Overlay badges are pinned to the top band; captions grow with their words.
+ *  - Frame 0 must be composed: seek(0) throws when nothing readable is >= 90% visible.
+ *  - Shots built with AT.Group dissolve under the next shot as it builds (no empty frames).
+ *  - Cursor: `park` waypoints rest beside a value (AT.park, term.park), never on it.
+ *  - node video/engine/lint.mjs --scene <page> checks all of it without rendering a frame.
  */
 (function () {
   'use strict';
@@ -156,8 +167,13 @@
   function scene(opts = {}) {
     const o = Object.assign({ duration: 8, background: true, grain: true, chrome: true, progress: true, vignette: true, seed: 7,
       // Camera safe area: zoom targets are fitted inside it, clear of the top chrome + badge band
-      // and the caption pill, so a compliance badge or a caption never lands on the subject.
-      safe: { top: 150, bottom: 150, left: 40, right: 40 } }, opts);
+      // (top 150) and the caption pill (bottom 160), so a badge or a caption never lands on the
+      // subject. The Camera enforces it on every resting key, even against an explicit scale.
+      safe: { top: 150, bottom: 160, left: 40, right: 40 },
+      // poster: frame 0 must be a composed thumbnail. seek(0) throws when nothing on screen is at
+      // least 90% visible (see AT.presence). false opts out (never for a film that ships).
+      poster: true }, opts);
+    o.safe = Object.assign({ top: 150, bottom: 160, left: 40, right: 40 }, o.safe);
     const qs = new URLSearchParams(location.search);
     if (qs.has('noprogress')) o.progress = false;
     // flat mode (?flat or {flat:true}) is for the GIF cut: no grain, frozen mesh, so unchanged
@@ -170,8 +186,8 @@
     const world = el('div', 'at-world', stage);
     const vignette = o.vignette ? el('div', 'at-vignette', stage) : null;
     const overlay = el('div', 'at-overlay', stage);
-    const S = { duration: o.duration, stage, bg, world, overlay, vignette, comps: [], fns: [], checks: [], viewScale: 1, opts: o,
-      cues: { sfx: [], duck: [], swell: [] } };
+    const S = { duration: o.duration, stage, bg, world, overlay, vignette, comps: [], fns: [], post: [], checks: [], viewScale: 1, opts: o,
+      safe: o.safe, cues: { sfx: [], duck: [], swell: [] } };
     // Sound cues live on the timeline next to the pictures they belong to. render.mjs --cues
     // dumps window.AT_CUES and video/render/audio.mjs turns it into the music bed + SFX track.
     window.AT_CUES = { get duration() { return S.duration; }, sfx: S.cues.sfx, duck: S.cues.duck, swell: S.cues.swell };
@@ -180,6 +196,9 @@
     const topScrim = el('div', 'at-topscrim', overlay);
     S.add = c => { S.comps.push(c); return c; };
     S.every = fn => { S.fns.push(fn); return fn; };
+    // after(fn): runs after every component and every S.every hook of the frame, so it can read the
+    // final opacity/clip of any element (fixed chrome that follows a group, crop fades, guards).
+    S.after = fn => { S.post.push(fn); return fn; };
     /* rect(target, relativeTo=world) -> [x, y, w, h] at rest layout (call from a layout() hook). */
     S.rect = (target, rel = world) => {
       const e = typeof target === 'string' ? document.querySelector(target) : target;
@@ -207,6 +226,11 @@
       await fontsReady;
       await Promise.all(pendingImages);
       for (const c of S.comps) if (c.layout) c.layout(S);
+      // second pass: things that read other components' layout (camera keys and cursor waypoints
+      // that point at a terminal line), whatever order the scene registered them in
+      for (const c of S.comps) if (c.postLayout) c.postLayout(S);
+      // content census for AT.presence(): everything big enough to read, at rest layout
+      S.census = census(S);
     })());
     const raf = () => new Promise(r => requestAnimationFrame(() => r()));
     S.frame = t => {
@@ -214,10 +238,13 @@
       S.t = t;
       for (const c of S.comps) c.update(t, S);
       for (const fn of S.fns) fn(t, S);
+      for (const fn of S.post) fn(t, S);
       const z = S.camera ? S.camera.state(t).s : 1, zk = ease.easeInOutCubic(clamp((z - 1.02) / 0.25));
       topScrim.style.opacity = zk.toFixed(3); topScrim.style.visibility = zk > 0.001 ? 'visible' : 'hidden';
       for (const ck of S.checks) ck(t, S);
     };
+    /* zoom(t) -> 0..1, how far the camera is pushed in (0 at full frame, 1 from ~1.25x). */
+    S.zoom = t => (S.camera ? ease.easeInOutCubic(clamp((S.camera.state(t).s - 1.02) / 0.25)) : 0);
     /* requireBadge(badge, [[t0, t1], ...]): the render fails if the badge is not fully visible
        at any frame inside a range (every frame that shows a payment must carry it). */
     S.requireBadge = (badge, ranges) => S.checks.push(t => {
@@ -229,6 +256,11 @@
     window.seek = async t => {
       await getReady();
       S.frame(t);
+      if (t === 0 && o.poster !== false) {
+        const p = presence(S);
+        if (p < 0.9) throw new Error(`frame 0 is not a composed thumbnail: the most visible content is at ${p.toFixed(2)} opacity (need >= 0.90). ` +
+          'Start the opening shot already built (component at <= -0.8, or a group with enter:"none"), or pass AT.scene({poster:false}) for a test page.');
+      }
       await Promise.all(pendingImages);
       await document.fonts.ready;
       await raf(); await raf();   // paint barrier only; no state reads from rAF
@@ -258,6 +290,186 @@
     return S;
   }
   const reg = c => { if (!current) throw new Error('AT.scene() must be called first'); return current.add(c); };
+
+  /* ---------- presence: is anything readable on screen? ---------- */
+  // Chrome, captions, badges, cursor and background never count as content: a frame that shows
+  // only those is an empty-background frame.
+  const NOT_CONTENT = '.at-bg, .at-grain, .at-vignette, .at-chrome, .at-progress, .at-src, .at-topscrim, .at-caption, .at-badge, .at-cursor, .at-ripple, .at-section, [data-at-chrome]';
+  function census(S) {
+    const out = [], skip = new Set(S.stage.querySelectorAll(NOT_CONTENT));
+    const walk = e => {
+      for (const c of e.children) {
+        if (skip.has(c)) continue;
+        const r = c.getBoundingClientRect(), k = S.viewScale;
+        if ((r.width / k) * (r.height / k) >= 6000 && paints(c)) out.push(c);
+        walk(c);
+      }
+    };
+    walk(S.world); walk(S.overlay);
+    return out;
+  }
+  /* paints(el): the box itself draws something (text, an image or an opaque-ish fill); bare wrappers
+     such as a full-frame group div do not, or an empty group would read as "content". */
+  function paints(e) {
+    if (/^(IMG|CANVAS|VIDEO)$/.test(e.tagName)) return true;
+    if (e.tagName === 'svg' || e.closest('svg')) return false;
+    for (const n of e.childNodes) if (n.nodeType === 3 && n.nodeValue.trim()) return true;
+    const cs = getComputedStyle(e);
+    if (cs.backgroundImage !== 'none') return true;
+    const bg = cs.backgroundColor.match(/[\d.]+/g);
+    if (bg && (bg.length < 4 || parseFloat(bg[3]) > 0.3)) return true;
+    return false;
+  }
+  /* opacityOf(el, root=stage) -> effective opacity: own x every ancestor, 0 when hidden or not rendered. */
+  function opacityOf(e, root) {
+    if (!e.isConnected || e.getClientRects().length === 0) return 0;
+    if (getComputedStyle(e).visibility === 'hidden') return 0;
+    let o = 1;
+    for (let n = e; n && n !== root; n = n.parentElement) { const v = parseFloat(getComputedStyle(n).opacity); o *= isNaN(v) ? 1 : v; if (o <= 0.001) return 0; }
+    return o;
+  }
+  /* shown(el) -> [left, top, right, bottom] in viewport px after clipping by every overflow:hidden
+     ancestor (a scrolled page image inside a browser view only counts where the view shows it). */
+  function shown(e, root) {
+    const r = e.getBoundingClientRect();
+    let l = r.left, t = r.top, rt = r.right, b = r.bottom;
+    for (let n = e.parentElement; n && n !== root; n = n.parentElement) {
+      const cs = getComputedStyle(n);
+      if (cs.overflow === 'visible' && cs.overflowX === 'visible' && cs.overflowY === 'visible') continue;
+      const q = n.getBoundingClientRect();
+      l = Math.max(l, q.left); t = Math.max(t, q.top); rt = Math.min(rt, q.right); b = Math.min(b, q.bottom);
+      if (rt <= l || b <= t) break;
+    }
+    return [l, t, rt, b];
+  }
+  /*
+   * presence(S | element, {min=6000}) -> 0..1: the most visible readable thing on screen (or inside
+   * element): max effective opacity over content boxes of >= min px² whose on-screen part is >= min
+   * px². ~0 means an empty-background frame. Groups use it to dissolve under the next scene.
+   */
+  function presence(target, o = {}) {
+    const S = current, min = o.min || 6000;
+    const list = target && target.nodeType === 1 ? (target.__atCensus = target.__atCensus || [target, ...target.querySelectorAll('*')].filter(e => !e.closest(NOT_CONTENT) && paints(e))) : (S.census || census(S));
+    const sr = S.stage.getBoundingClientRect(), k = S.viewScale;
+    let best = 0;
+    for (const e of list) {
+      const [l, tp, rt, bt] = shown(e, S.stage);
+      const w = (Math.min(rt, sr.right) - Math.max(l, sr.left)) / k, h = (Math.min(bt, sr.bottom) - Math.max(tp, sr.top)) / k;
+      if (w <= 0 || h <= 0 || w * h < min) continue;
+      const v = opacityOf(e, S.stage);
+      if (v > best) { best = v; if (best >= 0.999) break; }
+    }
+    return best;
+  }
+
+  /* ---------- groups: scene containers that never pass through an empty frame ---------- */
+  /*
+   * Group({name, t0, t1, enter='push'|'fade'|'none', exit='under'|'push'|'none', drift=0.018, parent=S.world}) -> {e, ...}
+   * One shot of a film. Children are mounted in g.e (a full-frame div) and keep their own `at`s.
+   *  enter 'push': fades up from 94% scale with a short blur. 'fade': opacity only. 'none': already there.
+   *  exit 'under' (default): the dissolve is driven by the NEXT group's presence (AT.presence):
+   *     this group stays up while the next one builds and fades out as the next one becomes
+   *     readable, so the background is never bare between shots. It is forced out by t1.
+   *  exit 'push': timed blur-out over [t1-0.45, t1] (only safe when the next shot is composed by t1-0.45).
+   * The next group is the next Group created with a later t0. Overlap the two ranges by >= 0.8 s
+   * and give the next group content that is visible within ~0.5 s of its t0. AT.lint() reports
+   * any frame that still ends up empty.
+   */
+  const groupsOf = new WeakMap();
+  function Group(o) {
+    const S = current, e = el('div', 'at-grp', o.parent || S.world);
+    if (o.name) e.id = 'g-' + o.name;
+    const g = { e, name: o.name, t0: o.t0, t1: o.t1, enter: o.enter || 'push', exit: o.exit || 'under', drift: o.drift == null ? 0.018 : o.drift, next: null };
+    const list = groupsOf.get(S) || []; list.push(g); groupsOf.set(S, list);
+    list.sort((a, b) => a.t0 - b.t0);
+    list.forEach((x, i) => { x.next = list[i + 1] || null; });
+    // the group's own style runs in a hook, after children have been updated
+    S.every(t => {
+      const live = t >= g.t0 - 0.001 && t <= g.t1 + 0.001;
+      if (!live) { e.style.display = 'none'; return; }
+      e.style.display = 'block';
+      let op = 1, sc = 1 + g.drift * ease.easeInOutSine(progress(t, g.t0, g.t1)), blur = 0;
+      if (g.enter === 'push' || g.enter === 'fade') {
+        const p = ease.easeOutCubic(progress(t, g.t0, g.t0 + 0.7));
+        op *= ease.easeOutCubic(progress(t, g.t0, g.t0 + 0.4));
+        if (g.enter === 'push') { sc *= lerp(0.94, 1, p); blur += (1 - p) * 10; }
+      }
+      g.op = op; g.sc = sc; g.blur = blur;
+      e.style.opacity = op >= 0.999 ? '1' : op.toFixed(4);
+      e.style.transform = Math.abs(sc - 1) > 1e-5 ? `scale(${sc.toFixed(5)})` : 'none';
+      e.style.filter = blur > 0.1 ? `blur(${blur.toFixed(2)}px)` : 'none';
+    });
+    // exits run after every group has its enter state, so presence(next) is this frame's truth
+    S.after(t => {
+      if (t < g.t0 - 0.001 || t > g.t1 + 0.001) return;
+      let q = 0;
+      if (g.exit === 'push') q = ease.easeInCubic(progress(t, g.t1 - 0.45, g.t1));
+      else if (g.exit === 'under') {
+        // the film's last shot holds to the end; any other shot is gone by its t1
+        const forced = !g.next && g.t1 >= S.duration - 1e-3 ? 0 : ease.easeInCubic(progress(t, g.t1 - 0.3, g.t1));
+        const nx = g.next && t >= g.next.t0 ? presence(g.next.e) : 0;
+        q = Math.max(forced, ease.smoothstep(clamp((nx - 0.15) / 0.7)));
+      }
+      if (q <= 0) return;
+      const op = (g.op == null ? 1 : g.op) * (1 - q), sc = (g.sc || 1) * (1 + 0.02 * q), blur = (g.blur || 0) + 14 * q;
+      e.style.opacity = op.toFixed(4);
+      e.style.transform = `scale(${sc.toFixed(5)})`;
+      e.style.filter = blur > 0.1 ? `blur(${blur.toFixed(2)}px)` : 'none';
+    });
+    return g;
+  }
+
+  /* ---------- lint: the rules a reviewer would otherwise catch on the contact sheet ---------- */
+  /*
+   * AT.lint({fps=10, from=0, to=DURATION, dead=0.3}) -> {ok, frame0, dead:[{from,to,min}], camera:[...], badge:[...], label:[...]}
+   * Steps the timeline without painting (fast) and reports:
+   *  frame0  presence at t=0 (must be >= 0.9: frame 0 is the thumbnail)
+   *  dead    runs of frames where nothing readable is >= `dead` visible (empty background)
+   *  camera  resting keys that could not be fitted into the safe area
+   *  badge   frames where a top-band badge sits on readable, undimmed content or on a stat/number
+   *  label   frames where a section label overlaps the brand bar
+   * video/engine/lint.mjs runs it headless and exits 1 when ok is false.
+   */
+  function lint(o = {}) {
+    const S = current, fps = o.fps || 10, from = o.from || 0, to = o.to == null ? S.duration : o.to, thr = o.dead == null ? 0.3 : o.dead;
+    const res = { frame0: null, dead: [], camera: (S.camera && S.camera.violations) || [], badge: [], label: [] };
+    const sr = S.stage.getBoundingClientRect(), k = S.viewScale;
+    const box = e => { const [l, t, r, b] = shown(e, S.stage); return [(l - sr.left) / k, (t - sr.top) / k, Math.max(0, r - l) / k, Math.max(0, b - t) / k]; };
+    const hit = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
+    const badges = [...S.overlay.querySelectorAll('.at-badge[data-at-band]')];
+    const labels = [...S.overlay.querySelectorAll('.at-section')], brand = S.overlay.querySelector('.at-chrome.l');
+    const texty = (S.census || []).filter(e => [...e.childNodes].some(n => n.nodeType === 3 && n.nodeValue.trim()) || e.matches('.at-stat, .at-num, img'));
+    const scrim = S.overlay.querySelector('.at-topscrim');
+    let run = null;
+    const n = Math.round((to - from) * fps);
+    for (let i = 0; i <= n; i++) {
+      const t = Math.min(to, from + i / fps);
+      S.frame(t);
+      const p = presence(S);
+      if (i === 0 && from === 0) res.frame0 = +p.toFixed(3);
+      if (p < thr) { if (!run) run = { from: +t.toFixed(3), to: +t.toFixed(3), min: p }; run.to = +t.toFixed(3); run.min = Math.min(run.min, p); }
+      else if (run) { res.dead.push(run); run = null; }
+      const dimmed = parseFloat(scrim.style.opacity || '0') >= 0.6;
+      for (const b of badges) {
+        if (opacityOf(b, S.stage) < 0.5) continue;
+        const bb = box(b);
+        for (const e of texty) {
+          const isValue = e.matches('.at-stat, .at-num') || !!e.closest('.at-stat');
+          if (dimmed && !isValue) continue;
+          if (!hit(bb, box(e))) continue;
+          const v = opacityOf(e, S.stage);
+          if (v < 0.35) continue;
+          if (res.badge.length < 40) res.badge.push({ t: +t.toFixed(3), badge: b.textContent.trim(), on: (e.textContent || e.getAttribute('src') || '').trim().slice(0, 60), opacity: +v.toFixed(2) });
+          break;
+        }
+      }
+      if (brand) for (const l of labels) if (opacityOf(l, S.stage) > 0.2 && hit(box(l), box(brand)) && res.label.length < 20) res.label.push({ t: +t.toFixed(3), label: l.textContent });
+    }
+    if (run) res.dead.push(run);
+    res.dead.forEach(d => { d.min = +d.min.toFixed(3); });
+    res.ok = (res.frame0 == null || res.frame0 >= 0.9) && !res.dead.length && !res.camera.length && !res.badge.length && !res.label.length;
+    return res;
+  }
 
   /* ---------- sound cues ---------- */
   /* sfx(t, kind, {gain=1, pan=0}) kinds: thud riser lift coin deny click key tick whoosh swell pop */
@@ -342,7 +554,9 @@
     const c = { el: e, update(t) { if (o.animate) { const f = Math.floor(t * 24), r = rng(f * 7919 + 13); e.style.backgroundPosition = `${(r() * n) | 0}px ${(r() * n) | 0}px`; } } };
     return reg(c);
   }
-  /* Chrome({left='AGENTTOLL / DEMO', right='github.com/Josefusan/agenttoll', at=0.1}) top corners. */
+  /* Chrome({left='AGENTTOLL / DEMO', right='github.com/Josefusan/agenttoll', at=0.1, hideOnZoom=false}) top corners.
+     The brand bar stays up through camera moves: zoom targets are kept below the top safe band
+     and the top scrim dims whatever zoomed UI passes under it. */
   function Chrome(o = {}) {
     const S = current;
     const left = o.left || 'AGENTTOLL / DEMO';
@@ -350,11 +564,10 @@
     const l = el('div', 'at-chrome l', S.overlay, `<span class="dot"></span><b>${esc(a)}</b>${b ? `<span class="sep">/</span>${esc(b)}` : ''}`);
     const r = el('div', 'at-chrome r', S.overlay, esc(o.right || 'github.com/Josefusan/agenttoll'));
     const at = o.at == null ? 0.1 : o.at;
-    // Chrome steps aside while the Camera is zoomed past 1.08x, so it never sits on top of zoomed UI.
     return reg({
       el: l,
       update(t, S) {
-        const z = S.camera ? S.camera.state(t).s : 1, k = 1 - ease.easeInOutCubic(clamp((z - 1.02) / 0.3));
+        const k = o.hideOnZoom ? 1 - S.zoom(t) : 1;
         for (const [e, d] of [[l, 0], [r, 0.08]]) { const v = show(e, t, { at: at + d, dur: 0.9, y: -8, blur: 0, out: o.out }) * k; e.style.opacity = v.toFixed(3); e.style.visibility = v > 0.001 ? 'visible' : 'hidden'; }
       },
     });
@@ -367,12 +580,47 @@
   }
 
   /* ---------- typography ---------- */
-  /* SectionLabel({num:'01', text:'THE PROBLEM', at, out, x=128, y=128, parent}) -> "01 — THE PROBLEM". */
+  /*
+   * follow(el, src): fixed overlay chrome that belongs to a scene group. Every frame (after the
+   * scene's own hooks) el's opacity is multiplied by src's effective opacity up to the world layer,
+   * el is hidden while src is not rendered, and src's nearest clip-path (a wipe) and blur are
+   * mirrored. Transforms are NOT followed: the camera and group scale/drift never move el.
+   */
+  function follow(e, src) {
+    const S = current;
+    S.after(() => {
+      let o = 1, clip = null, blur = 0, shown = src.isConnected && src.getClientRects().length > 0;
+      for (let n = src; shown && n && n !== S.world && n !== S.stage; n = n.parentElement) {
+        const cs = n.style;
+        const v = cs.opacity === '' ? 1 : parseFloat(cs.opacity); o *= isNaN(v) ? 1 : v;
+        if (cs.visibility === 'hidden') o = 0;
+        if (!clip && cs.clipPath && cs.clipPath !== 'none') clip = cs.clipPath;
+        const m = (cs.filter || '').match(/blur\(([\d.]+)px\)/); if (m) blur += parseFloat(m[1]);
+      }
+      if (!shown) o = 0;
+      const own = e.style.opacity === '' ? 1 : parseFloat(e.style.opacity);
+      const v = own * o;
+      e.style.opacity = v.toFixed(3); e.style.visibility = v > 0.001 ? 'visible' : 'hidden';
+      e.style.clipPath = clip || 'none';
+      e.style.filter = blur > 0.1 ? `blur(${blur.toFixed(2)}px)` : 'none';
+    });
+  }
+  /*
+   * SectionLabel({num:'01', text:'THE PROBLEM', at, out, x=128, y=128, parent}) -> "01 — THE PROBLEM".
+   * Fixed chrome: always mounted in S.overlay, so the camera never scales it and a group's
+   * scale/drift never slides it toward the brand bar. `parent` (a scene group) is followed for
+   * opacity, visibility, wipe clip and blur only (see follow()). While the camera is pushed in,
+   * a label that sits below the top safe band (y + 24 > safe.top) fades out so it never lands on
+   * zoomed UI; a label inside the band (y <= ~118) stays up as a "where are we" marker.
+   */
   function SectionLabel(o) {
-    const S = current, e = el('div', 'at-section', o.parent || S.world); place(e, { x: o.x == null ? 128 : o.x, y: o.y == null ? 128 : o.y });
+    const S = current, e = el('div', 'at-section', S.overlay);
+    const x = o.x == null ? 128 : o.x, y = o.y == null ? 128 : o.y;
+    place(e, { x, y });
     const num = el('span', 'num', e, esc(o.num)), rule = el('span', 'rule', e);
     const chars = [...o.text].map(ch => el('span', 'ch', e, esc(ch)));
-    const at = o.at || 0;
+    const at = o.at || 0, inBand = y + 24 <= S.safe.top - 8;
+    if (o.parent && o.parent !== S.world && o.parent !== S.overlay) follow(e, o.parent);
     return reg({
       el: e,
       update(t, S) {
@@ -381,9 +629,10 @@
         const pr = ease.easeOutExpo(progress(t, at + 0.12, at + 0.82));
         style(rule, { o: pr > 0 ? 1 : 0, sx: pr });
         chars.forEach((c, i) => show(c, t, { at: at + 0.3 + i * 0.022, dur: 0.5, y: 10, blur: 3 }));
-        // steps aside while the camera is zoomed, like the top chrome
-        const z = S.camera ? S.camera.state(t).s : 1, zk = 1 - ease.easeInOutCubic(clamp((z - 1.02) / 0.2));
-        e.style.opacity = ((1 - pout) * zk).toFixed(3); e.style.transform = `translateY(${(-10 * pout).toFixed(2)}px)`;
+        const zk = inBand ? 1 : 1 - S.zoom(t);
+        const v = (1 - pout) * zk;
+        e.style.opacity = v.toFixed(3); e.style.visibility = v > 0.001 ? 'visible' : 'hidden';
+        e.style.transform = 'none';   // never moves: it fades in place
       },
     });
   }
@@ -501,6 +750,15 @@
       const prev = last > 0 ? target(last - 1) : 0;
       return lerp(prev, target(last), ease.easeOutCubic(progress(t, L[last].at, L[last].at + 0.22)));
     }
+    function rectOf(idx, t, pad) {
+      const y = scrollAt(t), a = tops[idx[0]][0], b = tops[idx[idx.length - 1]][1];
+      const top = Math.max(a - y, 0), bot = Math.min(b - y, bodyH);
+      // width of the longest matched line (monospace advance 0.6em), capped at the body width
+      const fs = o.fontSize || 21, bodyW = origin[2] - 2 * padL;
+      const chars = Math.max(...idx.map(i => L[i].text.length + (L[i].kind === 'cmd' ? prompt.length + 1 : 0)));
+      const w = Math.min(bodyW, chars * fs * 0.6);
+      return [origin[0] + padL - pad, origin[1] + 44 + padT + top - pad, w + 2 * pad, bot - top + 2 * pad];
+    }
     return reg({
       el: e,
       /* rect(match, t, pad=12) -> world rect of the lines whose text matches, as scrolled at t
@@ -509,14 +767,21 @@
         const test = typeof match === 'function' ? match : x => match.test(x);
         const idx = []; L.forEach((ln, i) => { if (test(ln.text)) idx.push(i); });
         if (!idx.length) throw new Error('terminal rect: no line matches ' + match);
-        const y = scrollAt(t), a = tops[idx[0]][0], b = tops[idx[idx.length - 1]][1];
-        const top = Math.max(a - y, 0), bot = Math.min(b - y, bodyH);
-        // width of the longest matched line (monospace advance 0.6em), capped at the body width
-        const fs = o.fontSize || 21, bodyW = origin[2] - 2 * padL;
-        const chars = Math.max(...idx.map(i => L[i].text.length + (L[i].kind === 'cmd' ? prompt.length + 1 : 0)));
-        const w = Math.min(bodyW, chars * fs * 0.6);
-        return [origin[0] + padL - pad, origin[1] + 44 + padT + top - pad, w + 2 * pad, bot - top + 2 * pad];
+        return rectOf(idx, t, pad);
       },
+      /* park(match, t, {side='r', dx=40}) -> () => {x, y}: a Cursor waypoint that rests just right of the
+         matched line(s) as scrolled at t, clear of the lines around it (path: [{t, park: term.park(/402/, t)}]). */
+      park(match, t, po = {}) {
+        return () => {
+          const test = typeof match === 'function' ? match : x => match.test(x);
+          const idx = []; L.forEach((ln, i) => { if (test(ln.text)) idx.push(i); });
+          if (!idx.length) throw new Error('terminal park: no line matches ' + match);
+          const near = [];
+          for (let i = Math.max(0, idx[0] - 1); i <= Math.min(L.length - 1, idx[idx.length - 1] + 2); i++) if (!idx.includes(i) && L[i].at <= t && L[i].text.trim()) near.push(rectOf([i], t, 0));
+          return park(rectOf(idx, t, 0), Object.assign({ side: 'r', avoid: near }, po));
+        };
+      },
+
       layout() {
         origin = S.rect(e);
         // measure every line at full content so wrapped lines scroll correctly
@@ -610,11 +875,36 @@
   /* ---------- cursor ---------- */
   const ARROW = '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M6.2 3.6v21.3l5.1-4.9 3.4 7.8 3.6-1.5-3.3-7.7h7.1z" fill="#0B0A1A" stroke="#FFFFFF" stroke-width="1.8" stroke-linejoin="round"/></svg>';
   /*
-   * Cursor({path:[{t, x, y} | {t, at:'#sel', ax=0.5, ay=0.5, dx, dy}, click:true|secs, move:secs, arc], at, out,
-   *         size=1.35, overshoot=1, parent})
+   * park(rect | '#sel' | el | () => rect, {side='br', dx=40, dy=30, avoid:[rect | () => rect], relativeTo=world}) -> {x, y}
+   * Where the cursor rests while a value is being explained: beside it, never on it.
+   *  side 'br': hotspot dx right and dy below the value's bottom-right corner (a 50 px diagonal).
+   *  side 'r' : hotspot dx right of the value, tip level with its middle (for a line of text).
+   * avoid: other readable rects (the next line, a neighbouring cell); the arrow is pushed right
+   * until its body (about 30 x 44 px at size 1.35) clears every one of them.
+   */
+  function park(target, o = {}) {
+    const S = current;
+    const rr = x => (typeof x === 'function' ? x() : Array.isArray(x) ? x : S.rect(x, o.relativeTo || S.world));
+    const r = rr(target), side = o.side || 'br';
+    const dx = o.dx == null ? 40 : o.dx, dy = o.dy == null ? (side === 'r' ? 0 : 30) : o.dy;
+    let x = r[0] + r[2] + dx, y = side === 'r' ? r[1] + r[3] / 2 - 4 + dy : r[1] + r[3] + dy;
+    const av = (o.avoid || []).map(rr);
+    for (let n = 0; n < 8; n++) {
+      const b = [x - 4, y - 4, 34, 48];
+      const h = av.find(a => b[0] < a[0] + a[2] && a[0] < b[0] + b[2] && b[1] < a[1] + a[3] && a[1] < b[1] + b[3]);
+      if (!h) break;
+      x = h[0] + h[2] + 24;
+    }
+    return { x, y };
+  }
+  /*
+   * Cursor({path:[{t, x, y} | {t, at:'#sel', ax=0.5, ay=0.5, dx, dy} | {t, park: rect|'#sel'|el|()=>rect|()=>{x,y}, side, dx, dy, avoid},
+   *         click:true|secs, move:secs, arc], at, out, size=1.35, overshoot=1, parent})
    * The hotspot reaches each waypoint at its t. Moves follow a curved cubic bezier (arc = bow as a
    * fraction of distance, alternating side), eased in-out with a slight overshoot that settles.
-   * click:true clicks 0.08 s after arrival: press scale + ripple. Selectors resolve in layout().
+   * click:true clicks 0.08 s after arrival: press scale + ripple. Use `at` for a waypoint that clicks
+   * a control and `park` for one that rests while a value is explained (see AT.park). Selectors and
+   * functions resolve after every component's layout (postLayout), so term.rect() works anywhere.
    */
   function Cursor(o) {
     const S = current, parent = o.parent || S.world;
@@ -627,7 +917,12 @@
     function bez(p0, p1, p2, p3, u) { const v = 1 - u; return v * v * v * p0 + 3 * v * v * u * p1 + 3 * v * u * u * p2 + u * u * u * p3; }
     function resolve() {
       pts.forEach(p => {
-        if (p.at) { const r = S.rect(p.at, parent); p.x = r[0] + r[2] * (p.ax == null ? 0.5 : p.ax) + (p.dx || 0); p.y = r[1] + r[3] * (p.ay == null ? 0.5 : p.ay) + (p.dy || 0); }
+        if (p.park) {
+          const v = typeof p.park === 'function' ? p.park() : p.park;
+          const q = v && v.x != null && !Array.isArray(v) ? v : park(v, { side: p.side, dx: p.dx, dy: p.dy, avoid: p.avoid, relativeTo: parent });
+          p.x = q.x; p.y = q.y;
+        }
+        else if (p.at) { const r = S.rect(p.at, parent); p.x = r[0] + r[2] * (p.ax == null ? 0.5 : p.ax) + (p.dx || 0); p.y = r[1] + r[3] * (p.ay == null ? 0.5 : p.ay) + (p.dy || 0); }
       });
       clicks.length = 0;
       pts.forEach(p => { if (p.click) clicks.push({ t: p.t + (p.click === true ? 0.08 : p.click), x: p.x, y: p.y }); });
@@ -652,11 +947,12 @@
       }
       const z = pts[pts.length - 1]; return [z.x, z.y];
     }
+    let resolved = false;
     return reg({
       el: e,
-      layout: resolve,
+      postLayout() { resolve(); resolved = true; },
       update(t) {
-        if (!clicks.length && pts.some(p => p.click)) resolve();
+        if (!resolved) { resolve(); resolved = true; }
         const [x, y] = pos(t);
         let press = 0;
         for (const c of clicks) {
@@ -684,58 +980,113 @@
 
   /* ---------- camera ---------- */
   /*
-   * Camera({keys:[{t, to:'full' | [x,y,w,h] | '#sel', dur=0.8, ease=easeInOutCubic, pad=48}], target=S.world,
-   *         motionBlur=0.6, clamp=true})
+   * Camera({keys:[{t, to:'full' | [x,y,w,h] | '#sel' | () => rect, dur=0.65, ease=camera, pad=48, scale}],
+   *         target=S.world, motionBlur=0.35, safe=S.opts.safe, crop=true, panels})
    * Screen Studio style zoom/pan. Scale interpolates in log space, the focus point linearly, so a
-   * zoom reads as one smooth push. clamp keeps the world filling the frame. Velocity drives a
-   * sub-pixel blur (<= 1.2 px) during fast moves only.
+   * zoom reads as one smooth push.
+   *
+   * Safe area (enforced, not advisory): every resting key is solved so the target rect lands inside
+   * the safe area (default top 150 = brand bar + badge band, bottom 160 = caption, sides 40). The
+   * fit scale caps an explicit `scale`; the world-fill clamp (world edge never inside the frame) is
+   * applied first and then overridden wherever it would push the target into a reserved band.
+   * A key whose rect cannot fit even at 1x is recorded in S.camera.violations (AT.lint reports it).
+   *
+   * Crop guard (crop=true): while pushed in, any OTHER panel the frame cuts through (between 2% and
+   * 97% of its area on screen) fades to 12% and blurs, so a push-in ends on whole panels plus the
+   * subject, never on half a neighbour. Panels: `panels` selector (default .at-panel, .at-stat,
+   * .at-node, .at-head, .at-sub, .card, [data-at-panel]), outermost matches inside the camera target only.
    */
   function Camera(o) {
     const S = current, target = o.target || S.world;
     const keys = o.keys.map(k => Object.assign({ dur: 0.65, pad: 48 }, k)).sort((a, b) => a.t - b.t);
-    const full = { s: 1, cx: W / 2, cy: H / 2 };
+    const full = { s: 1, cx: W / 2, cy: H / 2, rect: null };
     const sf = Object.assign({ top: 0, bottom: 0, left: 0, right: 0 }, o.safe || S.opts.safe || {});
     const SW = W - sf.left - sf.right, SH = H - sf.top - sf.bottom;
     const SCX = sf.left + SW / 2, SCY = sf.top + SH / 2;
+    const violations = [];
     function stateFor(k) {
       if (k.to === 'full' || k.to == null) return full;
       const r = typeof k.to === 'function' ? k.to() : typeof k.to === 'string' ? S.rect(k.to, target) : k.to;
       // fit inside the safe area; an explicit scale is a ceiling, never a reason to cover the badge band
       const fit = Math.min(SW / (r[2] + 2 * k.pad), SH / (r[3] + 2 * k.pad));
       const s = Math.max(1, k.scale ? Math.min(k.scale, fit) : fit);
-      // focus point chosen so the rect centre lands on the safe-area centre
-      return { s, cx: r[0] + r[2] / 2 - (SCX - W / 2) / s, cy: r[1] + r[3] / 2 - (SCY - H / 2) / s };
+      // translate that puts the rect centre on the safe-area centre
+      let tx = SCX - s * (r[0] + r[2] / 2), ty = SCY - s * (r[1] + r[3] / 2);
+      // world fill first (no world edge inside the frame) ...
+      if (o.clamp !== false) { tx = clamp(tx, W - s * W, 0); ty = clamp(ty, H - s * H, 0); }
+      // ... then the safe area wins: the rect must sit inside it on every side
+      const lo = [sf.left - s * r[0], sf.top - s * r[1]], hi = [W - sf.right - s * (r[0] + r[2]), H - sf.bottom - s * (r[1] + r[3])];
+      if (lo[0] <= hi[0]) tx = clamp(tx, lo[0], hi[0]); else tx = (lo[0] + hi[0]) / 2;
+      if (lo[1] <= hi[1]) ty = clamp(ty, lo[1], hi[1]); else ty = (lo[1] + hi[1]) / 2;
+      const scr = [s * r[0] + tx, s * r[1] + ty, s * r[2], s * r[3]];
+      if (scr[1] < sf.top - 0.5 || scr[1] + scr[3] > H - sf.bottom + 0.5 || scr[0] < sf.left - 0.5 || scr[0] + scr[2] > W - sf.right + 0.5)
+        violations.push({ t: k.t, rect: r.map(v => Math.round(v)), screen: scr.map(v => Math.round(v)), why: 'target cannot fit the safe area (it is larger than the safe area or sits in a reserved band at 1x)' });
+      // express as focus point (cx, cy) so moves interpolate in the same space as before
+      return { s, cx: (W / 2 - tx) / s, cy: (H / 2 - ty) / s, rect: r };
     }
     let states = null;
+    const ensure = () => { if (!states) states = keys.map(stateFor); };
     function at(t) {
-      let cur = full;
+      let cur = full, rect = null;
       for (let i = 0; i < keys.length; i++) {
         const k = keys[i];
         if (t < k.t) break;
         const p = (k.ease || o.ease || ease.camera)(progress(t, k.t, k.t + k.dur));
         const nx = states[i];
         cur = { s: Math.exp(lerp(Math.log(cur.s), Math.log(nx.s), p)), cx: lerp(cur.cx, nx.cx, p), cy: lerp(cur.cy, nx.cy, p) };
+        rect = nx.rect || rect;   // zooming back out keeps protecting the last subject
       }
+      cur.rect = rect;
       return cur;
     }
-    function xf(st) {
-      let tx = W / 2 - st.s * st.cx, ty = H / 2 - st.s * st.cy;
-      if (o.clamp !== false) { tx = clamp(tx, W - st.s * W, 0); ty = clamp(ty, H - st.s * H, 0); }
-      return { tx, ty, s: st.s };
-    }
+    // Rest states are pre-solved (fill clamp + safe area). In-between frames are a straight
+    // interpolation of two valid states, so no clamp here: re-clamping mid-move is what used to
+    // shove a target into the badge band.
+    function xf(st) { return { tx: W / 2 - st.s * st.cx, ty: H / 2 - st.s * st.cy, s: st.s, rect: st.rect }; }
+    let panels = [];
     const cam = {
-      el: target,
-      layout() { states = keys.map(stateFor); },
-      state: t => { if (!states) states = keys.map(stateFor); return xf(at(t)); },
+      el: target, violations,
+      postLayout() {
+        states = keys.map(stateFor);
+        if (o.crop === false) return;
+        const sel = o.panels || '.at-panel, .at-stat, .at-node, .at-head, .at-sub, .card, [data-at-panel]';
+        const all = [...target.querySelectorAll(sel)];
+        panels = all.filter(e => !all.some(a => a !== e && a.contains(e))).map(e => ({ e, r: S.rect(e, target) }));
+      },
+      state: t => { ensure(); return xf(at(t)); },
       update(t) {
-        if (!states) states = keys.map(stateFor);
+        ensure();
         const a = xf(at(t)), b = xf(at(Math.max(0, t - 1 / 60)));
-        target.style.transform = (a.s === 1 && !a.tx && !a.ty) ? 'none' : `translate(${a.tx.toFixed(2)}px,${a.ty.toFixed(2)}px) scale(${a.s.toFixed(5)})`;
+        target.style.transform = (Math.abs(a.s - 1) < 1e-6 && Math.abs(a.tx) < 0.005 && Math.abs(a.ty) < 0.005) ? 'none' : `translate(${a.tx.toFixed(2)}px,${a.ty.toFixed(2)}px) scale(${a.s.toFixed(5)})`;
         const v = Math.hypot(a.tx - b.tx, a.ty - b.ty) + Math.abs(Math.log(a.s / b.s)) * 900;
         const mb = (o.motionBlur == null ? 0.35 : o.motionBlur) * clamp((v - 6) / 30, 0, 1.5);
         target.style.filter = mb > 0.08 ? `blur(${mb.toFixed(2)}px)` : 'none';
       },
     };
+    // crop guard runs after the scene's own hooks so it multiplies their final opacity
+    if (o.crop !== false) S.after(t => {
+      if (!panels.length) return;
+      const a = cam.state(t), tr = a.rect, z = ease.easeInOutCubic(clamp((a.s - 1.02) / 0.2));
+      for (const p of panels) {
+        // Multiply whatever the scene set this frame; if nobody touched the element since our last
+        // write, start again from the value we found then (no compounding on static elements).
+        const e = p.e, co = e.style.opacity, cf = e.style.filter;
+        const bo = p.wo != null && co === p.wo ? p.bo : co, bf = p.wf != null && cf === p.wf ? p.bf : cf;
+        p.wo = p.wf = null;
+        let k = 0;
+        if (z > 0.001 && !(tr && p.r[0] < tr[0] + tr[2] && tr[0] < p.r[0] + p.r[2] && p.r[1] < tr[1] + tr[3] && tr[1] < p.r[1] + p.r[3])) {
+          const r = p.r, x0 = a.s * r[0] + a.tx, y0 = a.s * r[1] + a.ty, x1 = x0 + a.s * r[2], y1 = y0 + a.s * r[3];
+          const vis = Math.max(0, Math.min(x1, W) - Math.max(x0, 0)) * Math.max(0, Math.min(y1, H) - Math.max(y0, 0)) / Math.max(1, (x1 - x0) * (y1 - y0));
+          if (vis > 0.02 && vis < 0.97) k = z * ease.smoothstep(clamp((0.97 - vis) / 0.25));
+        }
+        if (k <= 0.001) { if (co !== bo) e.style.opacity = bo; if (cf !== bf) e.style.filter = bf; continue; }
+        const op = bo === '' ? 1 : parseFloat(bo);
+        const ob = (bf || '').match(/blur\(([\d.]+)px\)/), rest = (bf && bf !== 'none' ? bf.replace(/\s*blur\([^)]*\)/g, '').trim() : '');
+        e.style.opacity = (op * lerp(1, 0.12, k)).toFixed(4);
+        e.style.filter = `${rest ? rest + ' ' : ''}blur(${((ob ? parseFloat(ob[1]) : 0) + 8 * k).toFixed(2)}px)`;
+        p.bo = bo; p.bf = bf; p.wo = e.style.opacity; p.wf = e.style.filter;
+      }
+    });
     if (target === S.world) S.camera = cam;
     return reg(cam);
   }
@@ -743,7 +1094,9 @@
   /* ---------- caption ---------- */
   /*
    * Caption({cues:[{at, end, text, hl:['word',...], gold:['$0.002']}], bottom=72, size=34, wordStep, parent=S.overlay})
-   * Loom-style caption pill. The pill sizes to the full cue, words fade up one by one.
+   * Loom-style kinetic caption. The pill grows with the words: its width eases from the first word
+   * to the full line as each word lands (never a wide empty pill around one word), staying centred;
+   * the line is left-aligned inside it, so each new word slides in at the growing right edge.
    */
   function Caption(o) {
     const S = current, parent = o.parent || S.overlay;
@@ -751,18 +1104,32 @@
       const e = el('div', 'at-caption', parent);
       if (o.size) e.style.fontSize = o.size + 'px';
       if (o.bottom != null) e.style.bottom = o.bottom + 'px';
-      const words = c.text.split(' ').map((w, i, a) => {
+      const line = el('span', 'line', e);
+      const parts = c.text.split(' ');
+      const words = parts.map((w, i) => {
         const cls = (c.gold || []).includes(w) ? 'w gold' : (c.hl || []).includes(w) ? 'w hl' : 'w';
-        return el('span', cls, e, esc(w + (i < a.length - 1 ? ' ' : '')));
+        const we = el('span', cls, line, esc(w));
+        if (i < parts.length - 1) line.appendChild(document.createTextNode(' '));
+        return we;
       });
       const step = o.wordStep || Math.min(0.085, (0.4 * (c.end - c.at)) / words.length);
-      return { c, e, words, step, outDur: 0.3 };
+      return { c, e, line, words, step, outDur: 0.3, rights: null, padX: 0 };
     });
     // never two pills at once: a cue followed closely fades out fast instead of overlapping
     const ord = cues.slice().sort((a, b) => a.c.at - b.c.at);
     for (let i = 0; i + 1 < ord.length; i++) ord[i].outDur = clamp(ord[i + 1].c.at - 0.08 - ord[i].c.end, 0.06, 0.3);
+    const wordP = (q, i, t) => { const t0 = q.c.at + i * q.step; return ease.easeOutCubic(progress(t, t0, t0 + 0.22)); };
     return reg({
       el: parent,
+      layout() {
+        for (const q of cues) {
+          // right edge of every word inside the line (layout units, transforms ignored)
+          q.rights = q.words.map(w => w.offsetLeft - q.line.offsetLeft + w.offsetWidth);
+          const cs = getComputedStyle(q.e);
+          q.padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + 2;
+          q.e.style.width = (q.padX + q.rights[q.rights.length - 1]).toFixed(1) + 'px';
+        }
+      },
       update(t) {
         for (const q of cues) {
           const pin = ease.easeOutExpo(progress(t, q.c.at - 0.08, q.c.at + 0.4));
@@ -770,11 +1137,16 @@
           const vis = ease.easeOutCubic(progress(t, q.c.at - 0.08, q.c.at + 0.2)) * (1 - pout);
           q.e.style.opacity = vis.toFixed(3); q.e.style.visibility = vis > 0.001 ? 'visible' : 'hidden';
           q.e.style.transform = `translateX(-50%) translateY(${((1 - pin) * 14 + pout * 6).toFixed(2)}px) scale(${(0.97 + 0.03 * pin).toFixed(4)})`;
+          if (q.rights) {
+            // width = first word (from 55%) + each later word's advance, weighted by its own reveal
+            let w = q.rights[0] * lerp(0.55, 1, wordP(q, 0, t));
+            for (let i = 1; i < q.words.length; i++) w += (q.rights[i] - q.rights[i - 1]) * wordP(q, i, t);
+            q.e.style.width = (q.padX + w).toFixed(1) + 'px';
+          }
           q.words.forEach((w, i) => {
-            const t0 = q.c.at + i * q.step;
-            const p = ease.easeOutCubic(progress(t, t0, t0 + 0.22));
-            w.style.opacity = (0.0 + p).toFixed(3);
-            w.style.transform = p < 1 ? `translateY(${((1 - p) * 8).toFixed(2)}px)` : 'none';
+            const p = wordP(q, i, t);
+            w.style.opacity = p.toFixed(3);
+            w.style.transform = p < 1 ? `translate(${((1 - p) * 10).toFixed(2)}px,${((1 - p) * 6).toFixed(2)}px)` : 'none';
             w.style.filter = p < 1 ? `blur(${((1 - p) * 3).toFixed(2)}px)` : 'none';
           });
         }
@@ -788,6 +1160,11 @@
    * Badge({text='SIMULATED · no funds moved', at, out, x, y, right, bottom, parent=S.overlay, size})
    * Gold pill. Enters on an underdamped spring (about 12% overshoot), then one shine sweep.
    * The part before " · " is set in tracked caps weight; the rest reads as a note.
+   * A frame badge (parent = overlay) lives in the reserved top band: default slot right 64, y 92;
+   * any y/bottom that would put it below safe.top is pulled back up into the band (the camera
+   * keeps every zoom target below that band, so the badge never covers a zoomed value).
+   * A badge mounted inside a panel (parent = a world element) is a label of that panel and is
+   * placed as given.
    */
   function Badge(o = {}) {
     const S = current, parent = o.parent || S.overlay;
@@ -795,6 +1172,14 @@
     const [k, ...rest] = text.split(' · ');
     const e = el('div', 'at-badge', parent, `${COIN}<span class="k">${esc(k)}</span>${rest.length ? `<span class="s">· ${esc(rest.join(' · '))}</span>` : ''}`);
     const sh = el('div', 'shine', e);
+    if (parent === S.overlay) {
+      o = Object.assign({}, o);
+      if (o.x == null && o.right == null) o.right = 64;
+      delete o.bottom;
+      const h = 42 * ((o.size || 19) / 19);
+      o.y = clamp(o.y == null ? 92 : o.y, 72, S.safe.top - 8 - h);
+      e.dataset.atBand = 'top';
+    }
     place(e, o);
     if (o.size) e.style.fontSize = o.size + 'px';
     e.style.transformOrigin = o.right != null ? '100% 50%' : '0 50%';
@@ -970,6 +1355,7 @@
     W, H, clamp, lerp, progress, ease, spring, tween, track, mix, rng, hash, el, esc, img, place, style, show, typed,
     scene, MeshBackground, Grain, Chrome, Progress, SectionLabel, Headline, Text, Terminal, Browser, Cursor, Camera,
     Caption, Badge, Ticker, Diagram, Source, Sources, dim, sfx, duck, swell, bezier,
+    Group, park, follow, presence, opacityOf, shown, lint,
     get current() { return current; },
   }, ease);
 })();

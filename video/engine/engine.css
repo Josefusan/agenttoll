@@ -113,7 +113,9 @@ body.at-preview { width: 100vw; height: 100vh; background: #000; }
 /* caption */
 .at-caption { position: absolute; left: 50%; bottom: 72px; max-width: 1440px; padding: 16px 28px 18px; border-radius: 16px;
   background: rgba(9,8,22,0.94); box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 20px 48px -16px rgba(0,0,0,0.6);
-  font: 500 34px/1.3 var(--sans); letter-spacing: -0.01em; color: var(--text); text-align: center; white-space: nowrap; }
+  font: 500 34px/1.3 var(--sans); letter-spacing: -0.01em; color: var(--text); text-align: left; white-space: nowrap; overflow: hidden; }
+/* the line keeps its full width inside a pill that grows to it (Caption sets the pill width per frame) */
+.at-caption .line { display: inline-block; white-space: pre; }
 .at-caption .w { display: inline-block; white-space: pre; }
 .at-caption .hl { color: var(--teal); }
 .at-caption .gold { color: var(--gold); }
@@ -151,3 +153,6 @@ body.at-preview { width: 100vw; height: 100vh; background: #000; }
 .at-chip { position: absolute; left: 0; top: 0; padding: 7px 12px; border-radius: 8px; white-space: nowrap;
   font: 600 16px/1 var(--mono); color: var(--text); background: rgba(9,8,22,0.92); box-shadow: 0 0 0 1px currentColor inset, 0 8px 20px -6px rgba(0,0,0,0.6); }
 .at-chip span { color: var(--text); }
+
+/* scene group (AT.Group): one full-frame shot */
+.at-grp { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 960px 540px; }
