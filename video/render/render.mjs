@@ -114,7 +114,7 @@ page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 page.on('requestfailed', r => errors.push('request failed: ' + r.url()));
 page.on('response', r => { if (r.status() >= 400) errors.push(`HTTP ${r.status()} ${r.url()}`); });
 await page.goto(url, { waitUntil: 'load' });
-await page.waitForFunction(() => typeof window.seek === 'function' && typeof window.DURATION === 'number', null, { timeout: 15000 });
+await page.waitForFunction(() => typeof window.seek === 'function' && typeof window.DURATION === 'number', null, { timeout: 90000 });
 const DURATION = await page.evaluate(() => window.DURATION);
 await page.evaluate(() => window.seek(0));
 if (errors.length) { console.error('page errors:\n  ' + errors.join('\n  ')); await browser.close(); srv && srv.close(); process.exit(1); }

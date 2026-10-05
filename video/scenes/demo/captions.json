@@ -1,6 +1,6 @@
 {
  "film": "AgentToll full product demo (video/scenes/demo/index.html)",
- "note": "Burned-in captions; music bed + UI sound from video/render/audio.mjs; no voiceover yet (script in video/vo/). Cue times are seconds from the start of their act; acts[].start is absolute. Every payment in this film is SIMULATED (local test facilitator, no funds moved). Words banned for the simulated variant by docs/launch/DEMO_VIDEO.md (on-chain, settled, live, real payment, transaction link, explorer, mainnet, revenue earned) are not used.",
+ "note": "Burned-in captions; music bed + UI sound from video/render/audio.mjs; no voiceover yet (script in video/vo/). Cue times are seconds from the start of their act; acts[].start is absolute. Every payment in this film is SIMULATED (local test facilitator, no funds moved). Words banned for the simulated variant by docs/launch/DEMO_VIDEO.md (on-chain, settled, live, real payment, transaction link, explorer, mainnet, revenue earned) are not used in captions. The dashboard's own product labels ('Live settlements', 'Settled') appear in screenshots; the push-in on the Settled tile carries a gold 'Settled = SIMULATED settlements · no funds moved' callout.",
  "duration": 171.2,
  "acts": [
   {
@@ -50,13 +50,23 @@
   },
   {
    "id": "a9",
-   "start": 141.8,
+   "start": 139.8,
    "title": "08 Same rules at the edge"
   },
   {
    "id": "a10",
-   "start": 150.8,
-   "title": "09 Proof, real facilitators, close"
+   "start": 148.8,
+   "title": "09 Proof"
+  },
+  {
+   "id": "a11",
+   "start": 154.1,
+   "title": "10 Wired to real facilitators"
+  },
+  {
+   "id": "a12",
+   "start": 166.75,
+   "title": "Close"
   }
  ],
  "cues": [
@@ -303,13 +313,13 @@
   {
    "act": "a8",
    "at": 5.6,
-   "end": 10.8,
+   "end": 8.4,
    "text": "Each simulated payment updates the totals and the feed as it arrives."
   },
   {
    "act": "a8",
-   "at": 11.3,
-   "end": 15.0,
+   "at": 9.3,
+   "end": 13.0,
    "text": "After 19 payments: $0.034, and the card says it outright: all of it simulated.",
    "gold": [
     "$0.034,"
@@ -317,14 +327,14 @@
   },
   {
    "act": "a8",
-   "at": 15.2,
-   "end": 18.8,
+   "at": 13.2,
+   "end": 16.8,
    "text": "By network: 100% Solana devnet. Base Sepolia, the backup rail, is not set up here."
   },
   {
    "act": "a8",
-   "at": 19.0,
-   "end": 22.6,
+   "at": 17.0,
+   "end": 20.6,
    "text": "The feed: 19 of 19 simulated. No transaction exists, so there is nothing to link.",
    "gold": [
     "simulated."
@@ -332,8 +342,8 @@
   },
   {
    "act": "a8",
-   "at": 22.8,
-   "end": 26.4,
+   "at": 20.8,
+   "end": 24.4,
    "text": "Agent traffic you are not billing yet, per agent, by name.",
    "hl": [
     "not",
@@ -343,8 +353,8 @@
   },
   {
    "act": "a8",
-   "at": 26.6,
-   "end": 30.4,
+   "at": 24.6,
+   "end": 28.4,
    "text": "Cash out: spendable $0.00, because every payment was simulated.",
    "gold": [
     "$0.00,"
@@ -352,8 +362,8 @@
   },
   {
    "act": "a8",
-   "at": 30.6,
-   "end": 34.0,
+   "at": 28.6,
+   "end": 32.0,
    "text": "Funds go to your own pay_to. AgentToll holds nothing.",
    "hl": [
     "pay_to."
@@ -361,8 +371,8 @@
   },
   {
    "act": "a8",
-   "at": 34.2,
-   "end": 37.0,
+   "at": 32.2,
+   "end": 35.0,
    "text": "The same dashboard on a phone."
   },
   {
@@ -387,9 +397,9 @@
    "text": "In the repo: 119 of 119 evals, 93 Rust tests, 69 pay-mcp tests, 70 Worker tests."
   },
   {
-   "act": "a10",
-   "at": 5.4,
-   "end": 7.6,
+   "act": "a11",
+   "at": 0.2,
+   "end": 1.8,
    "text": "Wired to the real PayAI and x402.org facilitators.",
    "hl": [
     "PayAI",
@@ -397,21 +407,21 @@
    ]
   },
   {
-   "act": "a10",
-   "at": 7.7,
-   "end": 10.2,
+   "act": "a11",
+   "at": 2.0,
+   "end": 5.2,
    "text": "PayAI, Solana devnet: an unfunded throwaway wallet, rejected as expected."
   },
   {
-   "act": "a10",
-   "at": 10.3,
-   "end": 12.8,
+   "act": "a11",
+   "at": 5.5,
+   "end": 8.5,
    "text": "x402.org, Base Sepolia: also rejected. The wallet holds no USDC."
   },
   {
-   "act": "a10",
-   "at": 13.0,
-   "end": 15.6,
+   "act": "a11",
+   "at": 9.0,
+   "end": 12.3,
    "text": "A funded wallet is the only missing piece.",
    "hl": [
     "funded"
