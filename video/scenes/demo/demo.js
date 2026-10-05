@@ -31,11 +31,8 @@
   /* ---------- small components ---------- */
   const sections = [];
   function Section(num, text, at, out) { const c = AT.SectionLabel({ num, text, at, out, x: 64, y: 98 }); sections.push(c.el); return c; }
-  S.every((t, S2) => {
-    const z = S2.camera ? S2.camera.state(t).s : 1, k = 1 - E.easeInOutCubic(AT.clamp((z - 1.005) / 0.12));
-    if (k < 1) for (const e of sections) { const o = parseFloat(e.style.opacity || '1') * k; e.style.opacity = o.toFixed(3); }
-  });
-  function Note(html, x, y, at, out) { return AT.Text({ html, x, y, at, out, cls: 'src-note', y0: 8 }); }
+  // Provenance lines live in the fixed overlay (never zoomed), one shared line bottom-left.
+  function Note(html, x, y, at, out) { return AT.Source({ html, at, out }); }
   function Ring(r, at, out, cls = '') {
     const e = el('div', 'ring ' + cls, W); AT.place(e, { x: r[0], y: r[1], w: r[2], h: r[3] });
     return S.add({ el: e, update(t) { show(e, t, { at, out, dur: 0.5, y: 0, blur: 0, scale: 1.08, ease: E.easeOutBack }); } });
@@ -177,19 +174,61 @@
   const camKeys = [];
   const cam = (t, to, o = {}) => camKeys.push(Object.assign({ t, to }, o));
 
-  /* ================================================================ A1 TITLE */
+  /* ================================================================ A0 COLD OPEN (6 s)
+     The hook first: the same URL, a person's browser gets the JSON free, Claude-User gets 402. */
   {
-    const out = A.a2 - 0.2;
-    Icon(160, 112, 104, 0.2, out);
-    AT.Headline({ lines: ['AgentToll', { text: 'full product demo', grad: true }], at: 0.4, out: out - 0.05, x: 156, y: 236, size: 132 });
-    AT.Badge({ at: 1.25, out, x: 160, y: 566, parent: W, size: 22 });
-    AT.Text({ html: 'Payments are <span class="gold">SIMULATED</span> on Solana devnet: a local test facilitator, no funds moved.<br>Terminal output, screens and the Claude transcript are captured from real runs.', at: 1.6, out, x: 160, y: 648, w: 1500 });
+    const a = A.a0, out = A.a1 - 0.25;
+    const og = J(CAP + 'origin/origin.json');
+    const api = pick(og.pages, p => p.name === 'api-quote', 'origin api');
+    const r402 = cap('claude-user-402');
+    const R = lines(r402.stdout);
+    const who = (html, x, y, at) => { const e = el('div', 'who', W, html); AT.place(e, { x, y }); S.add({ el: e, update(t) { show(e, t, { at, out, y: 10, blur: 4 }); } }); };
+    const pill = (html, cls, x, y, at) => {
+      const e = el('div', 'pill ' + cls, W, '<i></i>' + html); AT.place(e, { x, y });
+      S.add({ el: e, update(t) { const sp = AT.spring(t - at, 320, 18); AT.style(e, { o: E.easeOutCubic(progress(t, at, at + 0.15)) * (1 - E.easeInCubic(progress(t, out, out + 0.4))), s: AT.lerp(0.6, 1, sp), blur: 10 * E.easeInCubic(progress(t, out, out + 0.4)) }); } });
+    };
+    who('<b>PERSON</b> · Chrome', 64, 132, a + 0.15);
+    who('<b>AGENT</b> · Claude-User', 976, 132, a + 0.3);
+    const pb = PageBrowser({
+      x: 64, y: 170, w: 880, h: 560, s: 1.35, cropX: -16, pageH: 1080, at: a + 0.05, out,
+      tabs: [api.url.replace(/^https?:\/\//, '')], urls: [{ at: 0, text: api.url.replace(/^https?:\/\//, '') }],
+      pages: [{ src: CAP + 'origin/origin-api-quote.png', at: a + 0.35, fade: 0.3 }],
+      scroll: () => 22,   // the top 22 CSS px are Chrome's "Pretty-print" bar
+    });
+    pb.b.view.style.background = '#121212';
+    pill(`${api.status} OK`, 'ok', 772, 122, a + 0.75);
+    const hdrs = R.slice(0, R.indexOf(''));
+    const keepH = hdrs.filter(l => /^HTTP\/|^content-type|^payment-required|^x-agenttoll-verdict/.test(l));
+    const t0 = AT.Terminal({
+      x: 976, y: 170, w: 880, h: 560, title: 'zsh · an agent asks', at: a + 0.2, out, fontSize: 21, wrap: true,
+      lines: [
+        { cmd: r402.command, at: a + 0.75, dur: 1.0 },
+        { out: keepH.map(l => /^HTTP\//.test(l) ? [[l, 'yellow bold']] : /^payment-required/.test(l) ? [[l, 'clip dim']] : /^x-agenttoll/.test(l) ? [[l.replace(/ .*/, ' '), 'dim'], [l.replace(/^[^ ]+ /, ''), 'cyan bold']] : [[l, 'dim']]), at: a + 1.95, step: 0.06 },
+        { prompt: true, at: a + 2.3 },
+      ],
+    });
+    pill('402 Payment Required', 'pay', 1546, 122, a + 2.0);
+    AT.sfx(a + 0.75, 'pop', { gain: 0.6, pan: -0.4 });
+    AT.sfx(a + 1.95, 'thud', { gain: 0.9, pan: 0.3 });
+    cam(a + 2.35, () => t0.rect(/^HTTP\/1\.1 402|x-agenttoll-verdict/, a + 2.6, 14), { scale: 1.8, dur: 0.6 });
+    cam(a + 4.6, 'full', { dur: 0.55 });
+    Note(`screenshot · <b>video/captures/origin/origin-api-quote.png</b> · stdout · <b>video/captures/terminal/claude-user-402.json</b> (4 of its header lines)`, 0, 0, a + 0.4, out);
   }
 
-  /* ================================================================ A2 CONFIG + STACK */
+  /* ================================================================ A1 TITLE */
   {
-    const a = A.a2, out = A.a3 - 0.2;
-    Section('01', 'ONE CONFIG FILE', a + 0.1, out);
+    const a = A.a1, out = A.a2 - 0.2;
+    Icon(160, 112, 104, a + 0.15, out);
+    AT.Headline({ lines: ['AgentToll', { text: 'full product demo', grad: true }], at: a + 0.25, out: out - 0.05, x: 156, y: 236, size: 132 });
+    AT.Badge({ at: a + 0.9, out, x: 160, y: 566, parent: W, size: 22 });
+    AT.Text({ html: 'Payments are <span class="gold">SIMULATED</span> on Solana devnet: a local test facilitator, no funds moved.<br>Terminal output, screens and the Claude transcript are captured from real runs.', at: a + 1.1, out, x: 160, y: 648, w: 1500 });
+    AT.sfx(a + 0.15, 'lift', { gain: 0.7 });
+  }
+
+  /* ================================================================ A2 CONFIG + STACK (10 s) */
+  {
+    const a = A.a2, out = A.a3 - 0.2, codeOut = a + 7.75;
+    Section('01', 'ONE CONFIG FILE', a + 0.1, codeOut);
     const cfg = cap('demo-config');
     const L = lines(cfg.stdout);
     const at = (re, what) => must(L, l => re.test(l), what);
@@ -197,52 +236,49 @@
     const iRoutes = at(/^routes:/, 'routes'), iQuote = at(/price_usd: "0.002"/, 'price 0.002'), iFree = at(/price_usd: "0"$/, 'free price');
     const iMcp = at(/^mcp:/, 'mcp'), iSd = at(/search_docs:/, 'search_docs'), iGr = at(/generate_report:/, 'generate_report');
     const code = CodePanel({
-      x: 64, y: 140, w: 1000, h: 780, fs: 17, lh: 1.5, title: 'demo/agenttoll.demo.yaml', at: a + 0.2, out, lines: L,
+      x: 64, y: 140, w: 1000, h: 780, fs: 17, lh: 1.5, title: 'demo/agenttoll.demo.yaml', at: a + 0.15, out: codeOut, lines: L,
       price: [iQuote, iFree, iSd, iGr, at(/price_usd: "0.001"/, 'price 0.001'), L.findIndex((l, i) => i > at(/blog/, 'blog') && /price_usd/.test(l))],
-      scroll: [[a + 5.3, 0], [a + 6.1, 210, E.easeInOutCubic]],
+      scroll: [[a + 2.85, 0], [a + 3.4, 210, E.easeInOutCubic]],
       bands: [
-        { from: iNet, to: iFac, at: a + 3.0, out: a + 5.4 },
-        { from: iPay, to: iPay, at: a + 3.4, out: a + 5.4, gold: true },
-        { from: iRoutes, to: iFree, at: a + 5.6, out: a + 8.1 },
-        { from: iQuote, to: iQuote, at: a + 6.0, out: a + 8.1, gold: true },
-        { from: iMcp, to: iGr, at: a + 8.2, out: a + 10.4 },
-        { from: iSd, to: iGr, at: a + 8.5, out: a + 10.4, gold: true },
+        { from: iNet, to: iFac, at: a + 0.6, out: a + 2.9 },
+        { from: iPay, to: iPay, at: a + 0.9, out: a + 2.9, gold: true },
+        { from: iRoutes, to: iFree, at: a + 3.2, out: a + 5.3 },
+        { from: iQuote, to: iQuote, at: a + 3.5, out: a + 5.3, gold: true },
+        { from: iMcp, to: iGr, at: a + 5.4, out: a + 7.5 },
+        { from: iSd, to: iGr, at: a + 5.6, out: a + 7.5, gold: true },
       ],
     });
-    Note(`file · <b>demo/agenttoll.demo.yaml</b> (as captured in video/captures/terminal/demo-config.json)`, 64, 932, a + 0.6, out);
+    Note(`file · <b>demo/agenttoll.demo.yaml</b> (as captured in video/captures/terminal/demo-config.json)`, 0, 0, a + 0.4, codeOut);
     const ly = (i, t) => code.lineY(i, t);
     const LH = code.LH;
-    cam(a + 2.9, [64, ly(iNet, a + 3) - 6, 900, (iFac - iNet + 1) * LH + 12], { scale: 1.85, dur: 0.9 });
-    cam(a + 5.5, [64, ly(iRoutes, a + 7) - 6, 900, (iFree - iRoutes + 1) * LH + 12], { scale: 1.8, dur: 0.9 });
-    cam(a + 8.1, [64, ly(iMcp, a + 9) - 6, 900, (iGr - iMcp + 1) * LH + 12], { scale: 1.85, dur: 0.8 });
-    cam(a + 10.3, 'full', { dur: 0.8 });
+    cam(a + 0.5, [64, ly(iNet, a + 0.6) - 6, 900, (iFac - iNet + 1) * LH + 12], { scale: 1.85, dur: 0.6 });
+    cam(a + 3.0, [64, ly(iRoutes, a + 4) - 6, 900, (iFree - iRoutes + 1) * LH + 12], { scale: 1.8, dur: 0.6 });
+    cam(a + 5.35, [64, ly(iMcp, a + 6) - 6, 900, (iGr - iMcp + 1) * LH + 12], { scale: 1.85, dur: 0.6 });
+    cam(a + 7.05, 'full', { dur: 0.55 });
 
+    // 2 s insert: one command starts origin, gateway and the SIMULATED facilitator
     const st = cap('stack-only');
     const SL = lines(stripAnsi(st.stdout));
     const runIdx = must(SL, l => /Stack is running/.test(l), 'stack banner');
     AT.Terminal({
-      x: 1096, y: 140, w: 760, h: 780, title: 'zsh · repo root', at: a + 10.0, out, wrap: true, fontSize: 16,
+      x: 210, y: 170, w: 1500, h: 700, title: 'zsh · repo root', at: a + 7.75, out, wrap: true, fontSize: 21, keys: false,
       lines: [
-        { cmd: st.command, at: a + 10.8, dur: 1.7 },
-        { out: [[SL[0], 'dim']], at: a + 12.75 },
-        { blank: true, at: a + 13.05 },
-        { out: [[SL[runIdx], 'cyan bold']], at: a + 13.35 },
-        { out: SL.slice(runIdx + 1).map(l => [[l, /SIMULATED/.test(l) ? 'white' : null]]), at: a + 13.55, step: 0.12 },
-        { prompt: true, at: a + 13.95 },
+        { cmd: st.command, at: a + 8.0, dur: 0.5 },
+        { out: [[SL[0], 'dim']], at: a + 8.6 },
+        { blank: true, at: a + 8.62 },
+        { out: [[SL[runIdx], 'cyan bold']], at: a + 8.75 },
+        { out: SL.slice(runIdx + 1).map(l => [[l, /SIMULATED/.test(l) ? 'white' : null]]), at: a + 8.85, step: 0.04 },
       ],
     });
-    Note('stdout · <b>video/captures/terminal/stack-only.json</b>', 1096, 932, a + 10.6, out);
-    cam(a + 13.0, [1096, 140, 760, 560], { scale: 1.32, dur: 0.9 });
-    cam(A.a3 - 0.6, 'full', { dur: 0.7 });
+    Note('stdout · <b>video/captures/terminal/stack-only.json</b>', 0, 0, a + 7.9, out);
 
     AT.Cursor({
-      at: a + 0.6, out: out - 0.1,
+      at: a + 0.3, out: codeOut - 0.1,
       path: [
-        { t: a + 0.6, x: 1500, y: 960 },
-        { t: a + 3.3, x: 470, y: ly(iPay, a + 3) + LH * 0.55 },
-        { t: a + 6.4, x: 420, y: ly(iQuote, a + 7) + LH * 0.55, arc: -0.12 },
-        { t: a + 8.7, x: 470, y: ly(iSd, a + 9) + LH * 0.55 },
-        { t: a + 10.75, x: 1300, y: 300, click: true },
+        { t: a + 0.3, x: 1500, y: 960 },
+        { t: a + 1.1, x: 470, y: ly(iPay, a + 1) + LH * 0.55 },
+        { t: a + 3.7, x: 420, y: ly(iQuote, a + 4) + LH * 0.55, arc: -0.12 },
+        { t: a + 5.9, x: 470, y: ly(iSd, a + 6) + LH * 0.55 },
       ],
     });
   }
@@ -254,7 +290,7 @@
     const og = J(CAP + 'origin/origin.json');
     const home = pick(og.pages, p => p.name === 'home', 'origin home'), api = pick(og.pages, p => p.name === 'api-quote', 'origin api');
     const hostPath = u => u.replace(/^https?:\/\//, '');
-    PageBrowser({
+    const pb3 = PageBrowser({
       x: 64, y: 140, w: 880, h: 780, s: 1, cropX: 0, pageH: 1080, at: a + 0.2, out,
       tabs: ['New Tab'],
       urls: [
@@ -269,6 +305,7 @@
       ],
     });
     Note(`screenshots · <b>video/captures/origin/</b> · HTTP ${home.status} and ${api.status} through the gateway`, 64, 932, a + 1.2, out);
+    AT.dim(pb3.b.el, [[a + 7.8, out + 1]]);
     cam(a + 1.7, [64, 140, 760, 300], { scale: 2.0, dur: 0.9 });
     cam(a + 4.6, [64, 140, 900, 260], { scale: 2.0, dur: 0.7 });
     cam(a + 7.6, 'full', { dur: 0.8 });
@@ -286,7 +323,7 @@
     const D = lines(dec.stdout);
     const t1 = a + 8.6, t2 = a + 12.1;
     AT.Terminal({
-      x: 976, y: 140, w: 880, h: 780, title: 'zsh · an agent asks', at: a + 7.7, out, wrap: true, fontSize: 16,
+      x: 976, y: 140, w: 880, h: 780, title: 'zsh · an agent asks', at: a + 7.7, out, wrap: true, fontSize: 18,
       lines: [
         { cmd: r402.command, at: t1, dur: 1.25 },
         { out: R.slice(0, blankAt).map(hdr), at: t1 + 1.45, step: 0.05 },
@@ -301,7 +338,7 @@
     cam(t1 + 1.6, [976, 150, 880, 330], { scale: 1.75, dur: 0.9 });
     cam(t2 - 0.2, 'full', { dur: 0.7 });
     cam(t2 + 2.2, [976, 520, 880, 380], { scale: 1.6, dur: 0.9 });
-    cam(A.a4 - 0.6, 'full', { dur: 0.7 });
+    cam(A.a4 - 1.0, 'full', { dur: 0.6 });
     Callout('2000 atomic = <b>$0.002</b>', 1392, 618, t2 + 2.6, out - 0.2, 'gold sm');
 
     AT.Cursor({
@@ -333,7 +370,7 @@
     });
     Note('stdout · <b>video/captures/terminal/well-known.json</b>', 310, 932, a + 0.8, out);
     cam(a + 3.9, [310, 470, 1300, 440], { scale: 1.4, dur: 1.0 });
-    cam(A.a5 - 0.6, 'full', { dur: 0.7 });
+    cam(A.a5 - 1.0, 'full', { dur: 0.6 });
   }
 
   /* ================================================================ A5 BUYER CLI PAYS */
@@ -356,7 +393,7 @@
       ],
     });
     const col = l => /^status:/.test(l) ? [[l, 'green bold']] : /^paid:/.test(l) ? [[l, 'green']] : /^tx:/.test(l) ? [['tx:     ', null], [l.replace(/^tx:\s+/, ''), 'gold bold']] : /^note:/.test(l) ? [[l, 'yellow']] : [[l, null]];
-    AT.Terminal({
+    const t5 = AT.Terminal({
       x: 64, y: 232, w: 880, h: 688, title: 'zsh · buyer', at: a + 0.2, out, wrap: true, fontSize: 17,
       lines: [
         { cmd: pay.command, at: a + 0.7, dur: 1.5 },
@@ -375,6 +412,10 @@
       ],
     });
     Note('screenshots · <b>video/captures/dashboard/</b> states 02 then 03', 976, 932, a + 0.9, out);
+    AT.dim(dash.b.el, [[a + 0.5, tPay + 0.3]], { o: 0.35, blur: 4 });
+    AT.dim(t5.el, [[tPay + 0.7, a + 12.7]], { o: 0.35, blur: 4 });
+    AT.sfx(tPay, 'tick', { gain: 0.6 });
+    AT.sfx(tPay + 0.6, 'coin', { gain: 1 });
     const row = dash.rect([B03.live_feed_first_row.x, B03.live_feed_first_row.y, B03.live_feed_first_row.width, B03.live_feed_first_row.height], 0, 4);
     const kpi = dash.rect([B03.kpi_revenue.x, B03.kpi_revenue.y, B03.kpi_revenue.width, B03.kpi_revenue.height], 0, 4);
     const badge = B03.live_feed_first_row_simulated_badge;
@@ -429,8 +470,8 @@
       p1: a + 0.6, c1: a + 3.0, r1: a + 3.5, say1: a + 4.3, c2: a + 5.0, rc2: a + 5.5, fin1: a + 6.6,
       p2: a + 8.3, c3: a + 10.7, err: a + 12.9, say2: a + 13.9, c4: a + 15.0, rc4: a + 15.4, fin2: a + 16.4,
     };
-    AT.Terminal({
-      x: 64, y: 140, w: 1150, h: 780, title: 'claude -p --model sonnet · MCP: agenttoll-pay', at: a + 0.15, out, wrap: true, fontSize: 16, prompt: '>',
+    const t6 = AT.Terminal({
+      x: 64, y: 140, w: 1150, h: 780, title: 'claude -p --model sonnet · MCP: agenttoll-pay', at: a + 0.15, out, wrap: true, fontSize: 19, prompt: '>',
       lines: [
         { out: [['Run 1 · ', 'dim bold'], [session, 'dim']], at: a + 0.35 },
         { cmd: r1.prompt, at: T.p1, dur: 2.1, color: 'white' },
@@ -493,11 +534,16 @@
       ],
     });
     Note('<b>video/captures/terminal/pay-mcp-session.json</b> · 22:19 UTC', 1246, 932, tl + 0.4, out);
+    AT.dim(card, [[a + 1.0, T.rc2 - 0.1], [T.say2 + 0.4, T.err + 2.3]], { o: 0.4, blur: 3 });
+    AT.dim(t6.el, [[T.err + 2.5, T.fin2 - 0.2], [tl + 0.2, out + 1]], { o: 0.35, blur: 4 });
+    AT.sfx(T.rc2, 'coin', { gain: 0.8 });
+    AT.sfx(T.err, 'deny', { gain: 1 });
+    AT.sfx(tl + 1.1, 'deny', { gain: 0.6 });
     cam(T.err - 0.3, [64, 470, 1150, 450], { scale: 1.55, dur: 0.9 });
     cam(T.err + 2.6, [1246, 140, 610, 460], { scale: 1.75, dur: 0.9 });
     cam(T.fin2 + 0.2, 'full', { dur: 0.8 });
     cam(tl + 1.0, [1246, 680, 610, 250], { scale: 1.9, dur: 0.9 });
-    cam(A.a7 - 0.6, 'full', { dur: 0.7 });
+    cam(A.a7 - 1.0, 'full', { dur: 0.6 });
   }
 
   /* ================================================================ A7 MCP */
@@ -509,8 +555,8 @@
     const iGr = must(TL, l => /Generate a market report/.test(l), 'generate_report desc');
     const iFree = must(TL, l => /A free tool/.test(l), 'free desc');
     const descCol = l => /"description"/.test(l) ? [[l, /Paid tool/.test(l) ? 'gold' : 'white']] : /"name"/.test(l) ? [[l, 'cyan']] : [[l, null]];
-    AT.Terminal({
-      x: 64, y: 140, w: 880, h: 780, title: 'zsh · MCP discovery', at: a + 0.15, out, wrap: true, fontSize: 15,
+    const t7 = AT.Terminal({
+      x: 64, y: 140, w: 880, h: 780, title: 'zsh · MCP discovery', at: a + 0.15, out, wrap: true, fontSize: 17,
       lines: [
         { cmd: tl.command, at: a + 0.6, dur: 1.3 },
         { out: TL.slice(0, iGr - 1).map(descCol), at: a + 2.1, step: 0.02 },
@@ -526,13 +572,15 @@
     const CH = lines(ch.stdout);
     const chCol = l => /"isError": true/.test(l) ? [[l, 'yellow bold']] : /"amount"/.test(l) ? [[l, 'gold bold']] : [[l, /"text"/.test(l) ? 'dim' : null]];
     AT.Terminal({
-      x: 976, y: 140, w: 880, h: 780, title: 'zsh · tools/call without payment', at: a + 4.3, out, wrap: true, fontSize: 15,
+      x: 976, y: 140, w: 880, h: 780, title: 'zsh · tools/call without payment', at: a + 4.3, out, wrap: true, fontSize: 17,
       lines: [
         { cmd: ch.command, at: a + 4.9, dur: 1.3 },
         { out: CH.map(chCol), at: a + 6.4, step: 0.016 },
       ],
     });
     Note('stdout · <b>video/captures/terminal/mcp-search-docs-challenge.json</b>', 976, 932, a + 4.9, out);
+    AT.dim(t7.el, [[a + 4.5, out + 1]]);
+    AT.sfx(a + 10.5, 'coin', { gain: 0.8 });
     cam(a + 7.2, [976, 300, 880, 260], { scale: 1.85, dur: 0.9 });
     cam(a + 9.4, 'full', { dur: 0.7 });
 
@@ -600,7 +648,7 @@
     cam(a + 26.3, 'full', { dur: 0.6 });
     cam(a + 27.3, R('cash_out', 1160, 8), { scale: 1.85, dur: 0.9 });
     Ring(R('cash_out_spendable', 1160, 6), a + 28.0, a + 33.4, 'gold');
-    cam(a + 33.4, 'full', { dur: 0.7 });
+    cam(a + 32.75, 'full', { dur: 0.6 });
     const P = (n, sc, fx = 0.5, fy = 0.5) => { const r = R(n, sc, 0); return { x: r[0] + r[2] * fx, y: r[1] + r[3] * fy }; };
     AT.Cursor({
       at: tour + 0.2, out: tourOut - 0.1,
@@ -658,7 +706,7 @@
     });
     Note('from <b>workers/agenttoll-edge/README.md</b>', 1196, 664, a + 0.9, out);
     cam(a + 3.6, [64, 300, 1100, 300], { scale: 1.6, dur: 0.9 });
-    cam(A.a10 - 0.6, 'full', { dur: 0.7 });
+    cam(A.a10 - 1.0, 'full', { dur: 0.6 });
   }
 
   /* ================================================================ A10 PROOF, HANDSHAKES, CLOSE */
@@ -687,11 +735,11 @@
     const hs = load(ROOT + 'docs/assets/real-facilitator-handshake.md');
     const HL = lines(hs);
     const line = (pre, what) => pick(HL, l => l.startsWith(pre), what);
-    const h0 = a + 5.3, hOut = a + 11.15;
+    const h0 = a + 5.3, hOut = a + 15.7;
     Section('10', 'WIRED TO REAL FACILITATORS', h0, hOut);
     const errCol = l => { const m = l.match(/^(.*"error":")([^"]+)(".*)$/); return m ? [[m[1], null], [m[2], 'red bold'], [m[3], null]] : [[l, null]]; };
     const hand = (x, title, cmdPre, buyer, body, conn, t0) => AT.Terminal({
-      x, y: 170, w: 880, h: 300, title, at: t0, out: hOut, wrap: true, fontSize: 16,
+      x, y: 150, w: 880, h: 420, title, at: t0, out: hOut, wrap: true, fontSize: 18,
       lines: [
         { cmd: line(cmdPre, title + ' cmd').replace(/\s*\\$/, ''), at: t0 + 0.4, dur: 0.7 },
         { out: [[line(buyer, title + ' buyer'), 'dim']], at: t0 + 1.25 },
@@ -702,13 +750,30 @@
         { out: [['gateway log: ', 'dim'], [line(conn, title + ' conn'), 'cyan']], at: t0 + 1.7 },
       ],
     });
-    hand(64, 'PayAI facilitator · Solana devnet', 'BUYER_SOLANA_KEYPAIR=~/agenttoll-scratch/throwaway-buyer.json', 'buyer E1vu', 'body:   {"x402Version":2,"error":"invalid_exact_svm', 'DEBUG reqwest::connect: starting new connection \'Some("facilitator.payai.network")', h0);
-    hand(976, 'x402.org facilitator · Base Sepolia', 'BUYER_EVM_PRIVATE_KEY=$(cat', 'buyer 0x6CAdd', 'body:   {"x402Version":2,"error":"invalid_exact_evm', 'DEBUG reqwest::connect: starting new connection \'Some("x402.org")', h0 + 0.25);
+    const hS = hand(64, 'PayAI facilitator · Solana devnet', 'BUYER_SOLANA_KEYPAIR=~/agenttoll-scratch/throwaway-buyer.json', 'buyer E1vu', 'body:   {"x402Version":2,"error":"invalid_exact_svm', 'DEBUG reqwest::connect: starting new connection \'Some("facilitator.payai.network")', h0);
+    const hB = hand(976, 'x402.org facilitator · Base Sepolia', 'BUYER_EVM_PRIVATE_KEY=$(cat', 'buyer 0x6CAdd', 'body:   {"x402Version":2,"error":"invalid_exact_evm', 'DEBUG reqwest::connect: starting new connection \'Some("x402.org")', h0 + 0.25);
     Note('verbatim lines · <b>docs/assets/real-facilitator-handshake.md</b> · unfunded throwaway wallets, no transaction exists', 64, 484, h0 + 0.6, hOut);
-    AT.Text({ html: 'Both facilitators were reached and rejected the unfunded wallets, as expected.<br><span style="color:var(--text)">Settlement on devnet waits on funded wallets.</span>', x: 64, y: 560, w: 1500, at: h0 + 2.2, out: hOut });
+    // the outbound connection to the real facilitator, in teal, on each panel
+    for (const h of [hS, hB]) {
+      let hl = null;
+      S.every(t => {
+        if (!hl) { const ln = [...h.el.querySelectorAll('.ln')].find(l => l.textContent.includes('starting new connection')); if (ln) { ln.style.position = 'relative'; hl = el('div', 'lnhl teal', ln); } }
+        if (hl) hl.style.opacity = E.easeOutCubic(progress(t, h0 + 2.2, h0 + 2.5)).toFixed(3);
+      });
+    }
+    Callout('Expected: unfunded throwaway wallet → the real facilitator rejects it.', 64, 586, h0 + 2.4, hOut);
+    Callout('Expected: unfunded throwaway wallet → the real facilitator rejects it.', 976, 586, h0 + 5.1, hOut);
+    cam(h0 + 2.0, [64, 150, 880, 480], { scale: 1.9, dur: 0.6 });
+    cam(h0 + 4.75, [976, 150, 880, 480], { scale: 1.9, dur: 0.6 });
+    cam(h0 + 7.35, 'full', { dur: 0.55 });
+    AT.sfx(h0 + 1.75, 'deny', { gain: 0.5, pan: -0.4 });
+    AT.sfx(h0 + 2.0, 'deny', { gain: 0.5, pan: 0.4 });
+    AT.Text({ html: 'Both real facilitators were reached and rejected the unfunded wallets, as expected.<br><span style="color:var(--text)">A funded wallet is the only missing piece.</span>', x: 64, y: 680, w: 1700, at: h0 + 7.9, out: hOut });
 
     // close
-    const c0 = a + 11.4;
+    const c0 = a + 15.95;
+    AT.sfx(c0, 'lift', { gain: 0.7 });
+    AT.swell(c0 - 0.2, END, -1);
     Icon(160, 150, 104, c0 - 0.1);
     AT.Headline({ lines: ['Agents already use your product.', { text: 'Now you can bill them.', grad: true }], at: c0, x: 156, y: 300, size: 100 });
     AT.Text({ html: '<b>github.com/Josefusan/agenttoll</b>  ·  MIT  ·  Colosseum Crypto World\'s Fair', x: 160, y: 560, at: c0 + 0.9, cls: 'closeline' });
@@ -717,7 +782,11 @@
   }
 
   /* SIMULATED badge: on screen through every act that shows a payment (04 to 07). */
-  AT.Badge({ at: A.a5 + 0.25, out: A.a9 + 0.25, right: 64, y: 92 });   // leaves only after the phone (last payment frame) has faded out
+  const BADGE = AT.Badge({ at: A.a5 + 0.25, out: A.a9 + 0.25, right: 64, y: 92 });   // leaves only after the phone (last payment frame) has faded out
+  S.requireBadge(BADGE, [[A.a5 + 0.5, A.a9 - 0.1]]);
+  // music sits lower under the dense acts; act changes get a soft whoosh
+  AT.duck(A.a5, A.a9, -4);
+  C.acts.slice(1).forEach(x => AT.sfx(x.start - 0.15, 'whoosh', { gain: 0.45 }));
 
   AT.Camera({ keys: camKeys, motionBlur: 0.6 });
   const cues = C.cues.map(c => Object.assign({}, c, { at: A[c.act] + c.at, end: A[c.act] + c.end }));
