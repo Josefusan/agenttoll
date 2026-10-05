@@ -4,179 +4,239 @@
 <meta charset="utf-8">
 <title>AgentToll pitch insert</title>
 <!--
-  The 70 s middle of the 2:30 pitch cut: 04 Why now, 05 Who buys, 06 Business model (PLAN),
-  07 Distribution (PLAN). The pitch film is assembled by video/render/edl.mjs from EDL.json:
-  hero 0-43.35 s, this insert, hero 43.4-68.95 s (Claude pays, refusal), hero 77.95-90.5 s
-  (proof, close). Every line on screen is quoted from docs/launch/PITCH_VIDEO.md,
-  docs/COLOSSEUM_SUBMISSION.md or docs/KNOWLEDGE_BASE.md (ids shown on screen). Anything about
-  money AgentToll might make carries a gold PLAN badge: there are no customers and no revenue.
+  The new sections of the pitch cut, 48 s, in two parts that video/render/edl.mjs splices between
+  hero segments (video/scenes/pitch/EDL.json):
+    part 1, 0-36.4 s:  06 Why now, 07 Who buys, 08 Business model (PLAN), 09 Distribution (PLAN)
+    part 2, 37.4-48 s: 11 What's next (PLAN), team card
+  Every line on screen is quoted from docs/launch/PITCH_VIDEO.md, docs/COLOSSEUM_SUBMISSION.md,
+  docs/KNOWLEDGE_BASE.md, docs/launch/STABLE_URL.md or docs/assets/real-facilitator-handshake.md
+  (ids and files shown on screen). Anything about money AgentToll might make, or work not done yet,
+  carries a gold PLAN badge: there are no customers and no revenue. No unexplained proper nouns:
+  the landing-page service is described, not named.
 -->
 <link rel="stylesheet" href="../../engine/engine.css">
 <script src="../../engine/timeline.js"></script>
 <style>
-  .grp { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 960px 540px; }
-  .kcard { position: absolute; width: 812px; height: 300px; padding: 30px 36px; border-radius: 22px; background: rgba(14,12,32,0.9);
+  .kcard { position: absolute; width: 528px; height: 336px; padding: 30px 34px; border-radius: 22px; background: rgba(14,12,32,0.92);
     box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 1px 0 rgba(255,255,255,0.06) inset, 0 40px 80px -28px rgba(0,0,0,0.7); }
+  .kcard .ring { position: absolute; inset: 0; border-radius: 22px; padding: 2px; background: var(--grad); opacity: 0;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
   .kcard .id { font: 600 15px/1 var(--mono); letter-spacing: 0.2em; color: var(--teal); }
-  .kcard .big { margin-top: 18px; font: 800 64px/1 var(--sans); letter-spacing: -0.035em; white-space: nowrap;
+  .kcard .big { margin-top: 18px; font: 800 58px/1 var(--sans); letter-spacing: -0.035em; white-space: nowrap;
     background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; display: inline-block; }
   .kcard .tx { margin-top: 18px; font: 500 25px/1.38 var(--sans); color: var(--text); letter-spacing: -0.01em; }
-  .kcard .so { position: absolute; left: 36px; bottom: 24px; font: 400 15px/1 var(--mono); color: var(--dim); }
-  .closer { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 40px/1.3 var(--sans); color: var(--text); letter-spacing: -0.02em; }
-  .closer .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .kcard .so { position: absolute; left: 34px; bottom: 24px; font: 400 15px/1 var(--mono); color: var(--dim); }
+  .closer { position: absolute; left: 0; width: 1920px; text-align: center; }
 
-  .btable { position: absolute; left: 128px; width: 1664px; }
-  .brow { position: relative; display: grid; grid-template-columns: 420px 1fr; align-items: center; min-height: 112px; padding: 0 36px;
-    border-radius: 18px; background: rgba(14,12,32,0.86); box-shadow: 0 0 0 1px rgba(255,255,255,0.07); margin-bottom: 18px; }
-  .brow .b { font: 700 32px/1.15 var(--sans); color: var(--text); letter-spacing: -0.02em; }
-  .brow .w { font: 400 26px/1.4 var(--sans); color: var(--muted); }
-  .brow .w code { font: 500 0.9em var(--mono); color: var(--text); }
-  .honest { position: absolute; font: 500 22px/1.4 var(--mono); color: var(--muted); letter-spacing: 0.02em; }
+  .honest { position: absolute; font: 500 22px/1.4 var(--mono); color: var(--muted); letter-spacing: 0.02em; white-space: nowrap; }
   .honest b { color: var(--text); }
+  .bgrid { position: absolute; left: 128px; width: 1664px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .bcard { position: relative; display: flex; gap: 26px; align-items: flex-start; height: 210px; padding: 32px 34px; border-radius: 20px;
+    background: rgba(14,12,32,0.9); box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 30px 60px -28px rgba(0,0,0,0.7); }
+  .bcard svg { flex: none; width: 60px; height: 60px; padding: 12px; border-radius: 16px; background: rgba(45,212,191,0.10);
+    box-shadow: 0 0 0 1px rgba(45,212,191,0.4) inset; stroke: var(--teal); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .bcard .b { font: 700 34px/1.15 var(--sans); color: var(--text); letter-spacing: -0.02em; }
+  .bcard .w { margin-top: 12px; font: 400 25px/1.38 var(--sans); color: var(--muted); }
+  .bcard .w code { font: 500 0.9em var(--mono); color: var(--text); }
 
-  .plan { position: absolute; left: 128px; width: 1664px; }
-  .plan .hdr { font: 700 30px/1.3 var(--sans); color: var(--text); letter-spacing: -0.01em; margin-bottom: 26px; }
-  .plan .hdr .gd { color: var(--gold); }
-  .pl { position: relative; display: flex; gap: 26px; align-items: baseline; padding: 24px 32px; margin-bottom: 16px; border-radius: 16px;
-    background: rgba(14,12,32,0.86); box-shadow: 0 0 0 1px rgba(255,255,255,0.07); }
-  .pl .n { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 17px/1 var(--mono);
-    color: var(--ink); background: var(--teal); transform: translateY(-4px); }
-  .pl .t { font: 400 26px/1.42 var(--sans); color: var(--muted); }
-  .pl .t b { color: var(--text); font-weight: 700; }
+  .tiers { position: absolute; left: 0; width: 1920px; display: flex; justify-content: center; gap: 40px; }
+  .tier { width: 800px; padding: 40px 44px 44px; border-radius: 24px; background: rgba(14,12,32,0.92); box-shadow: 0 0 0 1px rgba(255,255,255,0.09), 0 40px 80px -28px rgba(0,0,0,0.7); }
+  .tier .tg { font: 600 18px/1 var(--mono); letter-spacing: 0.2em; color: var(--teal); }
+  .tier .hv { margin-top: 22px; font: 800 72px/1.04 var(--sans); letter-spacing: -0.04em; color: var(--text); }
+  .tier .hv.g { font-size: 56px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tier .tx { margin-top: 20px; font: 500 28px/1.4 var(--sans); color: var(--muted); }
 
-  .wf { position: absolute; left: 0; width: 1920px; text-align: center; }
-  .wf .s { margin-top: 34px; font: 400 30px/1.5 var(--sans); color: var(--muted); }
-  .wf .s code { font: 600 0.9em var(--mono); color: var(--text); }
-  .flowrow { position: absolute; left: 0; width: 1920px; display: flex; justify-content: center; align-items: center; gap: 26px; }
-  .fnode { padding: 22px 30px; border-radius: 18px; background: rgba(16,14,36,0.92); box-shadow: 0 0 0 1px rgba(255,255,255,0.09); text-align: left; }
-  .fnode .tg { font: 600 13px/1 var(--mono); letter-spacing: 0.18em; color: var(--teal); }
-  .fnode .tt { margin-top: 10px; font: 700 28px/1.1 var(--sans); color: var(--text); white-space: nowrap; }
-  .farr { font: 400 34px/1 var(--mono); color: var(--dim); }
+  .flow { position: absolute; left: 0; width: 1920px; display: flex; justify-content: center; align-items: center; gap: 0; }
+  .fnode { width: 440px; padding: 30px 36px; border-radius: 22px; background: rgba(16,14,36,0.94); box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 30px 70px -30px rgba(0,0,0,0.8); }
+  .fnode.gw { box-shadow: 0 0 0 1.5px rgba(139,92,246,0.7) inset, 0 0 44px rgba(139,92,246,0.3), 0 30px 70px -30px rgba(0,0,0,0.8); }
+  .fnode .tg { font: 600 16px/1 var(--mono); letter-spacing: 0.18em; color: var(--teal); }
+  .fnode .tt { margin-top: 14px; font: 700 40px/1.1 var(--sans); color: var(--text); letter-spacing: -0.02em; white-space: nowrap; }
+  .farr { position: relative; width: 150px; height: 4px; margin: 0 14px; border-radius: 2px; background: rgba(255,255,255,0.14); }
+  .farr .hd { position: absolute; top: -9px; width: 0; height: 0; border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
+  .farr.l .hd { left: -6px; border-right: 16px solid rgba(255,255,255,0.3); }
+  .farr.r .hd { right: -6px; border-left: 16px solid rgba(255,255,255,0.3); }
+  .farr .pk { position: absolute; top: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 18px var(--teal); opacity: 0; }
+  .wf { position: absolute; left: 0; width: 1920px; text-align: center; font: 400 30px/1.5 var(--sans); color: var(--muted); }
+  .wf code { font: 600 0.9em var(--mono); color: var(--text); }
+
+  .nrows { position: absolute; left: 128px; width: 1664px; }
+  .nr { position: relative; display: flex; gap: 26px; align-items: center; height: 84px; padding: 0 32px; margin-bottom: 16px; border-radius: 18px;
+    background: rgba(14,12,32,0.9); box-shadow: 0 0 0 1px rgba(255,255,255,0.07); }
+  .nr .n { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font: 700 18px/1 var(--mono); color: var(--ink); background: var(--teal); }
+  .nr .t { font: 400 29px/1.3 var(--sans); color: var(--muted); white-space: nowrap; }
+  .nr .t b { color: var(--text); font-weight: 700; }
+  .missing { position: absolute; left: 0; width: 1920px; text-align: center; font: 800 46px/1.2 var(--sans); letter-spacing: -0.025em;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .missing-src { position: absolute; left: 0; width: 1920px; text-align: center; font: 400 16px/1 var(--mono); color: var(--dim); }
+
+  .team-tag { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 18px/1 var(--mono); letter-spacing: 0.3em; color: var(--teal); }
+  .team-sub { position: absolute; left: 0; width: 1920px; text-align: center; font: 500 36px/1.35 var(--sans); color: var(--muted); letter-spacing: -0.015em; }
+  .team-sub b { color: var(--text); font-weight: 600; }
+  .team-gh { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 28px/1 var(--mono); color: var(--teal); }
 </style>
 </head>
 <body>
 <div id="stage"></div>
 <script>
 'use strict';
-const S = AT.scene({ duration: 70, progress: false, seed: 23 });
+const S = AT.scene({ duration: 48, progress: false, seed: 23 });
 const { el, style, show, progress, ease, lerp, spring } = AT;
 const W = 1920;
 const node = (html, cls, parent, pos) => { const e = el('div', cls, parent, html); AT.place(e, pos || {}); return e; };
 const anim = (e, o) => { S.every(t => show(e, t, o)); return e; };
 const center = h => { h.el.style.width = W + 'px'; h.el.style.left = '0px'; h.el.style.textAlign = 'center'; for (const ln of h.el.querySelectorAll('.line')) ln.style.margin = '0 auto'; return h; };
-// scenes enter clean and leave with a short blur-out to the background
-const groups = [];
-function group(t0, t1) { const e = el('div', 'grp', S.world); groups.push({ e, t0, t1 }); return e; }
-S.every(t => {
-  for (const g of groups) {
-    const live = t >= g.t0 && t <= g.t1;
-    g.e.style.display = live ? 'block' : 'none'; if (!live) continue;
-    const p = ease.easeOutCubic(progress(t, g.t0, g.t0 + 0.7)), q = ease.easeInCubic(progress(t, g.t1 - 0.45, g.t1));
-    g.e.style.opacity = (ease.easeOutCubic(progress(t, g.t0, g.t0 + 0.4)) * (1 - q)).toFixed(4);
-    g.e.style.transform = `scale(${(lerp(0.96, 1, p) * (1 + 0.02 * q)).toFixed(5)})`;
-    const b = (1 - p) * 10 + q * 18; g.e.style.filter = b > 0.1 ? `blur(${b.toFixed(2)}px)` : 'none';
-  }
-});
-const camKeys = [];
+// Shots are AT.Group: each dissolves under the next one as the next becomes readable (no empty
+// frame), the last one holds. EDL cut points sit where only one shot is on screen: 36.4 and 37.4.
 
-/* ================================================================== 04 WHY NOW (0 - 25) */
-const g4 = group(0, 25.2);
-AT.SectionLabel({ parent: g4, num: '04', text: 'WHY NOW', at: 0.2, x: 128, y: 120 });
-AT.Headline({ parent: g4, lines: ['The rails just landed.'], at: 0.35, x: 122, y: 166, size: 72 });
+/* ================================================================== 06 WHY NOW (0 - 15.3)
+   Frame 0 is already composed (it follows the hero's how-it-works on a crossfade). Three cards,
+   no camera moves: the card being read gets a gradient ring, the others step back. */
+const gNow = AT.Group({ name: 'now', t0: 0, t1: 15.9, enter: 'none', drift: 0.012 }).e;
+AT.SectionLabel({ parent: gNow, num: '06', text: 'WHY NOW', at: -1, x: 128, y: 120 });
+const nowHead = AT.Headline({ parent: gNow, lines: ['The rails just landed.'], at: -1, x: 122, y: 166, size: 72 });
 const CARDS = [
-  { id: 'KB-MKT-01', big: '≈ $3.3M', tx: 'USDC settled over x402 on Solana in one week. Solana took the top spot for x402 agent payments.', so: 'docs/KNOWLEDGE_BASE.md · solanacompass.com', at: 2.4 },
-  { id: 'KB-SOL-03', big: '2026-09-30', tx: 'PayAI opened x402 batch settlement on Solana in public preview: a mainnet path for sub-cent traffic.', so: 'docs/KNOWLEDGE_BASE.md · solanacompass.com', at: 6.6 },
-  { id: 'KB-MKT-01', big: 'Waitlist only', tx: 'Cloudflare opened a waitlist for an x402 Monetization Gateway on 2026-07-01, for Cloudflare customers only.', so: 'docs/KNOWLEDGE_BASE.md · explainx.ai', at: 10.8 },
-  { id: 'KB-PAY-06', big: 'Agent wallets', tx: "Coinbase's own Payments MCP already pays x402 on Solana, so agent wallets exist today.", so: 'docs/KNOWLEDGE_BASE.md · docs.cdp.coinbase.com', at: 15.0 },
+  { id: 'KB-SOL-03', big: 'Sep 30, 2026', tx: 'PayAI opened x402 batch settlement on Solana in public preview: a mainnet path for sub-cent traffic.', so: 'docs/KNOWLEDGE_BASE.md · solanacompass.com', on: [0.3, 3.45] },
+  { id: 'KB-MKT-01', big: 'Waitlist only', tx: 'Cloudflare opened a waitlist for an x402 Monetization Gateway on 2026-07-01, for Cloudflare customers only.', so: 'docs/KNOWLEDGE_BASE.md · explainx.ai', on: [3.45, 7.45] },
+  { id: 'KB-PAY-06', big: 'Agent wallets', tx: "Coinbase's own Payments MCP already pays x402 on Solana, so agent wallets exist today.", so: 'docs/KNOWLEDGE_BASE.md · docs.cdp.coinbase.com', on: [7.45, 11.2] },
 ];
 CARDS.forEach((c, i) => {
-  const x = i % 2 ? 1000 : 108, y = i < 2 ? 300 : 630;
-  const e = node(`<div class="id">${c.id}</div><div class="big">${c.big}</div><div class="tx">${c.tx}</div><div class="so">${c.so}</div>`, 'kcard', g4, { x, y });
-  e.id = 'card' + i;
-  S.every(t => show(e, t, { at: c.at, dur: 0.8, y: 30, blur: 10, scale: 0.97 }));
-  AT.sfx(c.at, 'tick', { gain: 0.7 });
-  camKeys.push({ t: c.at + 0.25, to: '#card' + i, scale: 1.7, dur: 0.6 }, { t: c.at + 3.4, to: 'full', dur: 0.55 });
+  const e = node(`<div class="ring"></div><div class="id">${c.id}</div><div class="big">${c.big}</div><div class="tx">${c.tx}</div><div class="so">${c.so}</div>`, 'kcard', gNow, { x: 128 + i * 568, y: 330 });
+  const ring = e.querySelector('.ring');
+  S.every(t => {
+    show(e, t, { at: 0.05 + i * 0.12, dur: 0.7, y: 28, blur: 8, scale: 0.97 });
+    ring.style.opacity = (ease.easeOutCubic(progress(t, c.on[0], c.on[0] + 0.3)) * (1 - ease.easeInCubic(progress(t, c.on[1], c.on[1] + 0.3)))).toFixed(3);
+  });
+  // the other cards step back while one is read; all of them step back for the closing line
+  const away = CARDS.map((d, j) => (j === i ? null : d.on)).filter(Boolean);
+  AT.dim(e, away, { o: 0.5, blur: 0, ramp: 0.3 });
+  AT.dim(e, [[11.2, 99]], { o: 0.1, blur: 8, ramp: 0.5 });
+  AT.sfx(c.on[0] + 0.05, 'tick', { gain: 0.6 });
 });
-center(AT.Headline({ parent: g4, lines: ['The open, self-hosted, non-custodial version', { text: 'was not built. So we built it.', grad: true }], at: 20.2, y: 380, size: 64, stagger: 0.04 }));
-for (const i of [0, 1, 2, 3]) AT.dim(document.getElementById('card' + i), [[19.9, 99]], { o: 0.1, blur: 8, ramp: 0.6 });
+AT.dim(nowHead.el, [[11.2, 99]], { o: 0.15, blur: 6, ramp: 0.5 });
+center(AT.Headline({ parent: gNow, lines: ['The open, self-hosted, non-custodial version', { text: 'was not built. So we built it.', grad: true }], at: 11.45, y: 400, size: 66, stagger: 0.035 }));
 
-/* ================================================================== 05 WHO BUYS (25 - 40) */
-const g5 = group(24.9, 40.2);
-AT.SectionLabel({ parent: g5, num: '05', text: 'WHO BUYS', at: 25.1, x: 128, y: 120 });
-AT.Headline({ parent: g5, lines: ['Sellers whose product', { text: 'agents already use.', grad: true }], at: 25.25, x: 122, y: 166, size: 64 });
+/* ================================================================== 07 WHO BUYS (15 - 23.4)
+   Four buyer types as a 2x2 of icon cards that build together; the honesty line sits above them. */
+const gWho = AT.Group({ name: 'who', t0: 15.0, t1: 23.8 }).e;
+AT.SectionLabel({ parent: gWho, num: '07', text: 'WHO BUYS', at: 15.15, x: 128, y: 120 });
+AT.Headline({ parent: gWho, lines: ['Sellers whose product', { text: 'agents already use.', grad: true }], at: 15.2, x: 122, y: 160, size: 60, stagger: 0.04 });
+anim(node('<b>Buyer types, not customers.</b> No customers and no revenue yet.', 'honest', gWho, { x: 128, y: 322 }), { at: 15.9, y: 8, blur: 3 });
+const ICON = {
+  api: '<path d="M9 7 4 12l5 5M15 7l5 5-5 5"/>',
+  doc: '<path d="M7 3h7l4 4v14H7zM14 3v4h4M9.5 12h6M9.5 15.5h6"/>',
+  mcp: '<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/>',
+  agency: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
+};
 const BUYERS = [
-  ['API or data founder', 'A price per call any agent can pay in seconds, no signup, no key issuing'],
-  ['Publisher or docs site', 'Agents pay to read, people read free, plus a report of the agent traffic they are not billing yet'],
-  ['MCP server author', 'A price per tool; <code>initialize</code> and <code>tools/list</code> stay free'],
-  ['Agency', "Agent revenue as a line item on every client site, funds to the client's own address"],
+  ['api', 'API or data founder', 'A price per call any agent can pay in seconds, no signup, no key issuing'],
+  ['doc', 'Publisher or docs site', 'Agents pay to read, people read free, plus a report of unbilled agent traffic'],
+  ['mcp', 'MCP server author', 'A price per tool; <code>initialize</code> and <code>tools/list</code> stay free'],
+  ['agency', 'Agency', "Agent revenue as a line item on every client site, funds to the client's own address"],
 ];
-const bt = node('', 'btable', g5, { y: 372 });
-BUYERS.forEach(([b, w], i) => {
-  const r = el('div', 'brow', bt, `<div class="b">${b}</div><div class="w">${w}</div>`);
-  S.every(t => show(r, t, { at: 27.0 + i * 1.7, dur: 0.7, x: -30, y: 0, blur: 8 }));
-  AT.sfx(27.0 + i * 1.7, 'tick', { gain: 0.5 });
+const bg = node('', 'bgrid', gWho, { y: 372 });
+BUYERS.forEach(([ic, b, w], i) => {
+  const r = el('div', 'bcard', bg, `<svg viewBox="0 0 24 24">${ICON[ic]}</svg><div><div class="b">${b}</div><div class="w">${w}</div></div>`);
+  S.every(t => show(r, t, { at: 15.55 + i * 0.12, dur: 0.7, y: 26, blur: 8, scale: 0.97 }));
 });
-anim(node('<b>Buyer types, not customers.</b> No customers and no revenue yet.', 'honest', g5, { x: 128, y: 920 }), { at: 34.6, y: 10, blur: 4 });
+AT.sfx(15.55, 'tick', { gain: 0.55 });
 
-/* ================================================================== 06 BUSINESS MODEL, PLAN (40 - 60) */
-const g6 = group(39.9, 60.2);
-AT.SectionLabel({ parent: g6, num: '06', text: 'BUSINESS MODEL', at: 40.1, x: 128, y: 120 });
-AT.Headline({ parent: g6, lines: ['How we make money:', { text: 'a plan, no revenue yet.', grad: true }], at: 40.25, x: 122, y: 166, size: 64 });
-const PLAN = [
-  ['Hosted AgentToll:', "we run gateway and dashboard; flat monthly tier plus a fee on settled volume, billed off-chain. pay_to stays the founder's."],
-  ['Payout destinations:', "the founder's own off-ramp account as pay_to, with a threshold sweeper."],
-  ['Agency bundle:', 'AgentToll on every Website Factory site, dashboard per client, line item on the retainer.'],
-  ['Pro dashboard:', 'multi-site, exports, alerts, the unbilled-traffic report.'],
+/* ================================================================== 08 BUSINESS MODEL, PLAN (23 - 31.6)
+   Two tier cards revealed by a left-to-right wipe (a different build from 07's stagger). */
+const gBiz = AT.Group({ name: 'biz', t0: 23.0, t1: 31.9 }).e;
+AT.SectionLabel({ parent: gBiz, num: '08', text: 'BUSINESS MODEL', at: 23.15, x: 128, y: 120 });
+AT.Headline({ parent: gBiz, lines: ['How we make money:', { text: 'a plan, no revenue yet.', grad: true }], at: 23.2, x: 122, y: 160, size: 60, stagger: 0.04 });
+{
+  const tiers = node(`<div class="tier"><div class="tg">OPEN-SOURCE CORE</div><div class="hv">Free</div><div class="tx">MIT and non-custodial.<br>No take rate in the gateway.</div></div>
+    <div class="tier"><div class="tg">HOSTED EDITION</div><div class="hv g">Flat tier + a fee on settled volume</div><div class="tx">Billed off-chain.<br>pay_to stays the founder's.</div></div>`, 'tiers', gBiz, { y: 380 });
+  [...tiers.children].forEach((c, i) => S.every(t => {
+    const p = ease.easeInOutCubic(progress(t, 23.7 + i * 0.45, 24.5 + i * 0.45));
+    c.style.clipPath = p >= 1 ? 'none' : `inset(-40px ${(100 - p * 100).toFixed(2)}% -40px -40px round 24px)`;
+    c.style.opacity = p > 0 ? '1' : '0';
+  }));
+  AT.sfx(23.7, 'whoosh', { gain: 0.35, pan: -0.3 });
+}
+AT.Badge({ text: 'PLAN · no revenue yet', at: 23.4, out: 31.5, right: 64, y: 96 });
+
+/* ================================================================== 09 DISTRIBUTION, PLAN (30.7 - 36.4)
+   The flow at 2.5x with a packet on the payout leg; no product names the viewer has to look up. */
+const gDist = AT.Group({ name: 'dist', t0: 30.7, t1: 37.3, drift: 0.03 }).e;
+AT.SectionLabel({ parent: gDist, num: '09', text: 'DISTRIBUTION', at: 30.85, x: 128, y: 120 });
+center(AT.Headline({ parent: gDist, lines: ['We already ship landing pages', { text: 'to small businesses.', grad: true }], at: 30.9, y: 176, size: 72, stagger: 0.035 }));
+const flow = node(`<div class="fnode"><div class="tg">CLIENT SITE</div><div class="tt">Vercel origin</div></div>
+  <div class="farr l"><div class="hd"></div></div>
+  <div class="fnode gw"><div class="tg">GATEWAY</div><div class="tt">AgentToll</div></div>
+  <div class="farr r"><div class="hd"></div><div class="pk"></div></div>
+  <div class="fnode"><div class="tg">PAY_TO</div><div class="tt">client's address</div></div>`, 'flow', gDist, { y: 456 });
+{
+  const kids = [...flow.children], order = [2, 1, 3, 0, 4];   // build from the gateway outward
+  order.forEach((k, n) => S.every(t => show(kids[k], t, { at: 31.4 + n * 0.1, dur: 0.6, y: 20, blur: 6, scale: 0.95 })));
+  const pk = flow.querySelector('.pk');
+  S.every(t => {
+    const c = (t - 32.3) / 1.4, ph = c - Math.floor(c), live = t >= 32.3 && t < 36.5;
+    pk.style.opacity = live ? (Math.sin(Math.PI * ph)).toFixed(3) : '0';
+    pk.style.left = (ph * 134).toFixed(1) + 'px';
+  });
+}
+anim(node('Plan: the gateway in front of each client site, <code>pay_to</code> set to the client\'s own address.', 'wf', gDist, { y: 690 }), { at: 32.0, y: 14, blur: 6 });
+AT.Badge({ text: 'PLAN · no client site runs AgentToll yet', at: 31.2, out: 36.9, right: 64, y: 96 });
+
+/* ================================================================== 11 WHAT'S NEXT, PLAN (36.5 - 44.6) */
+const gNext = AT.Group({ name: 'next', t0: 36.5, t1: 45.3 }).e;
+AT.SectionLabel({ parent: gNext, num: '11', text: "WHAT'S NEXT", at: 36.65, x: 128, y: 120 });
+AT.Headline({ parent: gNext, lines: ['From devnet to mainnet:', { text: 'the plan.', grad: true }], at: 36.7, x: 122, y: 160, size: 60, stagger: 0.04 });
+const NEXT = [
+  ['Fund the devnet buyer:', 'the first real settlement, with a Solana Explorer link.'],
+  ['A named Cloudflare tunnel:', 'a permanent public URL for the gateway.'],
+  ['Mainnet through PayAI batch settlement:', 'sub-cent traffic settled as channel claims.'],
+  ['First design partners:', 'the landing pages we already ship.'],
 ];
-const pl = node(`<div class="hdr"><span class="gd">PLAN.</span> Open-source core stays free. No take rate in the gateway.</div>`, 'plan', g6, { y: 360 });
-anim(pl.querySelector('.hdr'), { at: 41.6, y: 12, blur: 6 });
-PLAN.forEach(([k, v], i) => {
-  const r = el('div', 'pl', pl, `<span class="n">${i + 1}</span><span class="t"><b>${k}</b> ${v}</span>`);
-  S.every(t => show(r, t, { at: 43.0 + i * 3.4, dur: 0.7, y: 20, blur: 8 }));
-  AT.sfx(43.0 + i * 3.4, 'tick', { gain: 0.5 });
+const nr = node('', 'nrows', gNext, { y: 330 });
+NEXT.forEach(([k, v], i) => {
+  const r = el('div', 'nr', nr, `<span class="n">${i + 1}</span><span class="t"><b>${k}</b> ${v}</span>`);
+  S.every(t => show(r, t, { at: 37.0 + i * 0.14, dur: 0.6, x: -24, y: 0, blur: 6 }));
 });
-AT.Badge({ text: 'PLAN · no revenue yet', at: 40.6, out: 59.9, right: 64, y: 96 });
+AT.sfx(37.0, 'tick', { gain: 0.5 });
+anim(node('A funded wallet is the only missing piece.', 'missing', gNext, { y: 744 }), { at: 41.0, dur: 0.8, y: 18, blur: 8 });
+anim(node('docs/assets/real-facilitator-handshake.md', 'missing-src', gNext, { y: 808 }), { at: 41.3, y: 6, blur: 2 });
+AT.Badge({ text: 'PLAN · next steps, not done yet', at: 36.9, out: 44.7, right: 64, y: 96 });
 
-/* ================================================================== 07 DISTRIBUTION, PLAN (60 - 70) */
-const g7 = group(59.9, 70);
-AT.SectionLabel({ parent: g7, num: '07', text: 'DISTRIBUTION', at: 60.1, x: 128, y: 120 });
-center(AT.Headline({ parent: g7, lines: ['Website Factory ships the sites.', { text: 'AgentToll rides along.', grad: true }], at: 60.3, y: 230, size: 84, stagger: 0.05 }));
-const fr = node(`<div class="fnode"><div class="tg">CLIENT SITE</div><div class="tt">Vercel origin</div></div><div class="farr">←</div>
-  <div class="fnode"><div class="tg">GATEWAY</div><div class="tt">AgentToll</div></div><div class="farr">→</div>
-  <div class="fnode"><div class="tg">pay_to</div><div class="tt">the client's address</div></div>`, 'flowrow', g7, { y: 520 });
-anim(fr, { at: 62.0, y: 24, blur: 8 });
-const wf = node(`<div class="s">Gateway on the agency VPS or the Worker edition, in front of the client's Vercel origin. <code>pay_to</code> = the client's address.</div>`, 'wf', g7, { y: 680 });
-anim(wf, { at: 63.0, y: 14, blur: 6 });
-AT.Badge({ text: 'PLAN · no client site runs AgentToll yet', at: 60.6, out: 69.6, right: 64, y: 96 });
+/* ================================================================== TEAM (44.5 - 48) */
+const gTeam = AT.Group({ name: 'team', t0: 44.5, t1: 48 }).e;
+anim(node('TEAM', 'team-tag', gTeam, { y: 300 }), { at: 44.6, y: 10, blur: 4 });
+center(AT.Headline({ parent: gTeam, lines: [{ text: 'Joseph Clark', grad: true }], at: 44.65, y: 350, size: 120 }));
+anim(node('Solo builder. <b>Runs an AI landing-page service.</b>', 'team-sub', gTeam, { y: 524 }), { at: 45.0, y: 16, blur: 6 });
+anim(node('github.com/Josefusan', 'team-gh', gTeam, { y: 612 }), { at: 45.25, y: 12, blur: 4 });
+AT.sfx(44.6, 'lift', { gain: 0.5 });
 
-AT.Camera({ keys: camKeys });
-AT.sfx(24.9, 'whoosh', { gain: 0.45 });
-AT.sfx(39.9, 'whoosh', { gain: 0.45 });
-AT.sfx(59.9, 'whoosh', { gain: 0.45 });
+AT.sfx(15.0, 'whoosh', { gain: 0.45 });
+AT.sfx(23.0, 'whoosh', { gain: 0.45 });
+AT.sfx(30.7, 'whoosh', { gain: 0.45 });
+AT.sfx(36.5, 'whoosh', { gain: 0.45 });
+AT.sfx(44.5, 'whoosh', { gain: 0.45 });
 
 for (const [html, at, out] of [
-  ['<b>Why now:</b> docs/KNOWLEDGE_BASE.md (KB-MKT-01, KB-SOL-03, KB-PAY-06) · docs/COLOSSEUM_SUBMISSION.md · re-check each figure on submit day', 2.6, 24.8],
-  ['<b>Who buys:</b> docs/launch/PITCH_VIDEO.md (buyer types, not customers)', 26.0, 39.8],
-  ['<b>Plan:</b> docs/launch/PITCH_VIDEO.md · docs/COLOSSEUM_SUBMISSION.md (business model, plan)', 41.0, 59.8],
-  ['<b>Distribution (plan):</b> docs/launch/PITCH_VIDEO.md · docs/COLOSSEUM_SUBMISSION.md (go-to-market)', 61.0, 69.8],
+  ['<b>Why now:</b> docs/KNOWLEDGE_BASE.md (KB-SOL-03, KB-MKT-01, KB-PAY-06) · docs/COLOSSEUM_SUBMISSION.md · re-check each figure on submit day', 0.3, 14.9],
+  ['<b>Who buys:</b> docs/launch/PITCH_VIDEO.md (buyer types, not customers)', 15.6, 22.8],
+  ['<b>Plan:</b> docs/COLOSSEUM_SUBMISSION.md (business model, plan) · docs/launch/PITCH_VIDEO.md', 23.6, 30.6],
+  ['<b>Distribution (plan):</b> docs/COLOSSEUM_SUBMISSION.md ("We run … an AI landing-page service", go-to-market)', 31.2, 36.4],
+  ['<b>Next (plan):</b> README.md (real devnet payments) · docs/launch/STABLE_URL.md (named tunnel) · KB-SOL-03 · docs/COLOSSEUM_SUBMISSION.md (next)', 37.1, 44.4],
+  ['<b>Team:</b> docs/COLOSSEUM_SUBMISSION.md (built by Joseph Clark as a solo builder)', 45.0, 48],
 ]) AT.Source({ html, at, out });
 
 AT.Caption({ cues: [
-  { at: 0.6, end: 2.3, text: 'Why now? The rails just landed.' },
-  { at: 2.6, end: 6.4, text: 'Solana took the top spot for x402 agent payments: about $3.3M USDC in one week.' },
-  { at: 6.8, end: 10.6, text: 'PayAI opened batch settlement on Solana in public preview on September 30.' },
-  { at: 11.0, end: 14.8, text: 'Cloudflare announced a gateway in July: waitlist-only, tied to its network.' },
-  { at: 15.2, end: 19.6, text: "Agents already hold wallets: Coinbase's Payments MCP pays x402 on Solana." },
-  { at: 20.4, end: 24.6, text: 'The open, self-hosted version was not built. So we built it.' },
-  { at: 25.6, end: 29.0, text: 'Who buys: four kinds of seller whose product agents already use.' },
-  { at: 29.2, end: 34.2, text: 'None of them need a billing system. They need one YAML file and an address.' },
-  { at: 34.6, end: 39.6, text: 'These are buyer types, not customers.' },
-  { at: 40.6, end: 43.6, text: 'How we make money. This is a plan: there is no revenue yet.', gold: ['plan:'] },
-  { at: 43.8, end: 49.6, text: 'The core stays free and non-custodial. We charge for convenience and scale.' },
-  { at: 49.8, end: 55.4, text: 'Hosted, payout destinations, an agency bundle, a pro dashboard.' },
-  { at: 55.6, end: 59.6, text: 'Never by standing between the seller and their funds.' },
-  { at: 60.6, end: 64.6, text: 'Distribution: Website Factory already ships sites to businesses.' },
-  { at: 64.8, end: 69.6, text: "The plan: AgentToll in front of them, pay_to set to each client's own address.", gold: ['plan:'] },
+  { at: 0.2, end: 3.4, text: 'Why now? PayAI batch settlement on Solana, Sep 30.' },
+  { at: 3.5, end: 7.4, text: 'Cloudflare announced a gateway in July: waitlist-only, tied to its network.' },
+  { at: 7.5, end: 11.4, text: "Agents already hold wallets: Coinbase's Payments MCP pays x402 on Solana." },
+  { at: 11.5, end: 15.4, text: 'The open, self-hosted version was not built. So we built it.' },
+  { at: 15.5, end: 19.4, text: 'Who buys: four kinds of seller whose product agents already use.' },
+  { at: 19.5, end: 23.1, text: 'Buyer types, not customers. No customers and no revenue yet.' },
+  { at: 23.3, end: 26.9, text: "We charge for convenience, never by holding the seller's funds.", hl: ['convenience,'] },
+  { at: 27.0, end: 30.9, text: 'Free core. Hosted: flat tier plus a fee on settled volume.', hl: ['Free', 'Hosted:'] },
+  { at: 31.0, end: 34.2, text: 'Distribution: we already ship landing pages to small businesses.' },
+  { at: 34.3, end: 36.8, text: "Plan: each client's pay_to, their own address.", gold: ['Plan:'] },
+  { at: 36.9, end: 40.9, text: "What's next, as a plan: a funded devnet settlement, then mainnet.", gold: ['plan:'] },
+  { at: 41.0, end: 44.0, text: 'A funded wallet is the only missing piece.' },
+  { at: 44.8, end: 47.6, text: 'Built by Joseph Clark, a solo builder.' },
 ] });
 </script>
 </body>

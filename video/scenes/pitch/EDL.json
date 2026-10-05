@@ -1,11 +1,78 @@
 {
   "name": "agenttoll-pitch",
-  "note": "2:30 pitch cut for the Colosseum pitch-video field (2:00-3:00). Hero segments render with ?noprogress&cut=pitch (no progress bar; section labels renumbered 08-10 after the 04-07 insert). Joseph's on-camera open and close (10 s each, docs/launch/PITCH_VIDEO.md) are recorded separately and go before and after this cut.",
+  "note": "Pitch cut for the Colosseum pitch-video field (2:00-3:00). Story order: cold open 402, the problem, same URL; the product working (Claude pays, the cap refuses, MCP per tool) by 0:57; why x402 + why Solana; how a real payment flows; why now, who buys, business model (PLAN), distribution (PLAN); proof; what's next (PLAN) + team; close. Hero segments render with ?noprogress&cut=pitch (no progress bar; section labels renumbered for this order). Each join after the first is a 0.4 s crossfade (edl.mjs) with a whoosh, so no seam is a hard cut and no frame is empty. The render is about 2:03; Joseph's two 10 s on-camera slots (see slots, and video/vo/VO_SCRIPT.md) are spliced before and after it, for about 2:23.",
   "fps": 60,
+  "xfade": 0.4,
+  "slots": [
+    {
+      "id": "joseph-open",
+      "seconds": 10,
+      "where": "before segment 0",
+      "rendered": false,
+      "script": "docs/launch/PITCH_VIDEO.md 0:00 (problem, on camera); video/vo/VO_SCRIPT.md"
+    },
+    {
+      "id": "joseph-close",
+      "seconds": 10,
+      "where": "after the last segment",
+      "rendered": false,
+      "script": "docs/launch/PITCH_VIDEO.md 2:50 (close and ask, on camera); video/vo/VO_SCRIPT.md"
+    }
+  ],
   "segments": [
-    { "scene": "video/scenes/hero/index.html", "query": "noprogress&cut=pitch", "from": 0, "to": 43.35 },
-    { "scene": "video/scenes/pitch/index.html", "from": 0, "to": 70 },
-    { "scene": "video/scenes/hero/index.html", "query": "noprogress&cut=pitch", "from": 44.22, "to": 68.95 },
-    { "scene": "video/scenes/hero/index.html", "query": "noprogress&cut=pitch", "from": 77.95, "to": 90.5 }
+    {
+      "scene": "video/scenes/hero/index.html",
+      "query": "noprogress&cut=pitch",
+      "from": 0,
+      "to": 25.75,
+      "what": "00 cold open, 01 problem, 02 same URL"
+    },
+    {
+      "scene": "video/scenes/hero/index.html",
+      "query": "noprogress&cut=pitch",
+      "from": 44.3,
+      "to": 76.0,
+      "what": "03 using it (Claude pays, refused:per_call), 04 MCP per tool"
+    },
+    {
+      "scene": "video/scenes/hero/index.html",
+      "query": "noprogress&cut=pitch",
+      "from": 26.3,
+      "to": 32.15,
+      "what": "why x402, why Solana"
+    },
+    {
+      "scene": "video/scenes/hero/index.html",
+      "query": "noprogress&cut=pitch",
+      "from": 37.6,
+      "to": 43.35,
+      "what": "05 how a real payment flows (diagram trimmed to the settle leg + holds nothing)"
+    },
+    {
+      "scene": "video/scenes/pitch/index.html",
+      "from": 0,
+      "to": 36.4,
+      "what": "06 why now, 07 who buys, 08 business model (PLAN), 09 distribution (PLAN)"
+    },
+    {
+      "scene": "video/scenes/hero/index.html",
+      "query": "noprogress&cut=pitch",
+      "from": 80.4,
+      "to": 86.25,
+      "what": "10 proof"
+    },
+    {
+      "scene": "video/scenes/pitch/index.html",
+      "from": 37.4,
+      "to": 48,
+      "what": "11 what's next (PLAN), team"
+    },
+    {
+      "scene": "video/scenes/hero/index.html",
+      "query": "noprogress&cut=pitch",
+      "from": 87.25,
+      "to": 91.5,
+      "what": "close"
+    }
   ]
 }

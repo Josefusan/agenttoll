@@ -1,74 +1,98 @@
 [
   {
-    "start": 2.6,
-    "end": 5.3,
+    "start": 2.5,
+    "end": 5.9,
     "text": "Agents already use your product. Now you can bill them.",
     "kind": "title"
   },
   {
     "start": 5.1,
-    "end": 9.2,
+    "end": 8.9,
     "text": "Agents read. Founders pay.",
     "kind": "title"
   },
   {
-    "start": 5.6,
-    "end": 8.8,
+    "start": 5.4,
+    "end": 8.6,
     "text": "Agents read your site all day. They pay nothing.",
     "kind": "caption"
   },
   {
     "start": 6.3,
-    "end": 9.2,
+    "end": 8.9,
     "text": "Until now the choices were block them or absorb it.",
     "kind": "title"
   },
   {
-    "start": 9.3,
-    "end": 13.7,
-    "text": "The dashboard counts them: 8 agent requests on routes with no price.",
+    "start": 7.85,
+    "end": 9.0,
+    "text": "7 agent reads · $0 billed",
+    "kind": "title"
+  },
+  {
+    "start": 9.4,
+    "end": 13.2,
+    "text": "8 agent requests, no price: $0.016 left on the table.",
     "kind": "caption"
   },
   {
-    "start": 14.6,
-    "end": 18.0,
+    "start": 14.5,
+    "end": 17.3,
     "text": "Same URL. A person gets the data, free.",
     "kind": "caption"
   },
   {
-    "start": 18.2,
-    "end": 21.8,
+    "start": 17.4,
+    "end": 20.9,
     "text": "An agent gets 402 Payment Required, with a price.",
     "kind": "caption"
   },
   {
-    "start": 22.0,
+    "start": 21.0,
     "end": 25.6,
     "text": "People: free. Agents: $0.002.",
     "kind": "caption"
   },
   {
-    "start": 26.15,
-    "end": 29.4,
+    "start": 26.05,
+    "end": 28.2,
     "text": "x402: the web's 402 status code, finally paid.",
     "kind": "title"
   },
   {
-    "start": 26.3,
-    "end": 29.15,
-    "text": "x402: the web's 402 status code, finally paid.",
+    "start": 26.1,
+    "end": 27.85,
+    "text": "Open protocol: HTTP and MCP.",
     "kind": "caption"
   },
   {
-    "start": 29.55,
+    "start": 28.2,
+    "end": 33.0,
+    "text": "≈ $3.3M USDC settled over x402 on Solana in one week. Solana took the top spot for agent payments.",
+    "kind": "title"
+  },
+  {
+    "start": 28.3,
     "end": 32.0,
-    "text": "On Solana the agent only holds USDC.",
+    "text": "Solana leads x402: about $3.3M USDC settled in one week.",
     "kind": "caption"
   },
   {
-    "start": 29.7,
-    "end": 32.35,
-    "text": "USDC on Solana: the facilitator pays the fee, the agent only holds USDC.",
+    "start": 29.0,
+    "end": 33.0,
+    "text": "KB-SOL-03 PayAI batch settlement: a mainnet path for sub-cent traffic",
+    "kind": "title"
+  },
+  {
+    "start": 29.35,
+    "end": 33.0,
+    "text": "KB-SOL-02 The agent only holds USDC: the facilitator pays the fee",
+    "kind": "title"
+  },
+  {
+    "start": 32.3,
+    "end": 44.3,
+    "text": "03 HOW A REAL PAYMENT FLOWS",
     "kind": "title"
   },
   {
@@ -79,14 +103,14 @@
   },
   {
     "start": 35.4,
-    "end": 37.7,
+    "end": 37.55,
     "text": "The facilitator verifies. The origin answers.",
     "kind": "caption"
   },
   {
-    "start": 37.8,
-    "end": 40.3,
-    "text": "It settles. USDC goes to your pay_to.",
+    "start": 37.65,
+    "end": 40.35,
+    "text": "Funded wallet: USDC settles to your pay_to.",
     "kind": "caption"
   },
   {
@@ -97,7 +121,7 @@
   },
   {
     "start": 40.45,
-    "end": 43.6,
+    "end": 44.3,
     "text": "Funds go to your pay_to. AgentToll holds nothing.",
     "kind": "title"
   },
@@ -151,55 +175,79 @@
   },
   {
     "start": 70.2,
-    "end": 73.6,
+    "end": 73.5,
     "text": "MCP servers sell per tool. tools/list carries each price.",
     "kind": "caption"
   },
   {
-    "start": 73.8,
-    "end": 77.1,
+    "start": 73.65,
+    "end": 76.1,
     "text": "initialize and tools/list stay free. search_docs: $0.005.",
     "kind": "caption"
   },
   {
-    "start": 77.4,
-    "end": 86.2,
-    "text": "The repo grades itself.",
+    "start": 76.3,
+    "end": 80.4,
+    "text": "HOW AGENTTOLL MAKES MONEY. Open-source core: Free. MIT, self-hosted, non-custodial. No take rate in the gateway. Hosted edition: Flat tier + volume fee. A fee on settled volume, billed off-chain. pay_to stays the founder's. PLAN · NO REVENUE YET",
     "kind": "title"
   },
   {
-    "start": 78.95,
-    "end": 83.15,
-    "text": "119 of 119 evals pass. 93 Rust tests. 21 Worker parity tests.",
+    "start": 76.6,
+    "end": 79.4,
+    "text": "The plan: free open-source core, paid hosted edition.",
     "kind": "caption"
   },
   {
-    "start": 80.8,
-    "end": 86.2,
+    "start": 79.8,
+    "end": 87.2,
+    "text": "The repo grades itself. Run it yourself.",
+    "kind": "title"
+  },
+  {
+    "start": 81.2,
+    "end": 85.2,
+    "text": "119 of 119 evals. 93 Rust, 69 pay-mcp, 70 Worker tests.",
+    "kind": "caption"
+  },
+  {
+    "start": 82.6,
+    "end": 87.2,
     "text": "Talks to the real PayAI and x402.org facilitators. Settlement waits on funded devnet and testnet wallets.",
     "kind": "title"
   },
   {
-    "start": 83.3,
-    "end": 86.1,
-    "text": "Devnet and testnet only. Demo payments are simulated.",
-    "kind": "caption"
-  },
-  {
-    "start": 86.7,
-    "end": 90.5,
+    "start": 86.9,
+    "end": 91.5,
     "text": "Agents already use your product. Now you can bill them.",
     "kind": "title"
   },
   {
-    "start": 87.2,
-    "end": 90.5,
+    "start": 87.3,
+    "end": 91.5,
     "text": "github.com/Josefusan/agenttoll",
     "kind": "title"
   },
   {
-    "start": 87.5,
-    "end": 90.5,
+    "start": 87.4,
+    "end": 90.9,
+    "text": "Open source. One command, no wallet needed.",
+    "kind": "caption"
+  },
+  {
+    "start": 87.6,
+    "end": 91.5,
+    "text": "Run it: KEEP=1 bash scripts/demo-local.sh",
+    "kind": "title"
+  },
+  {
+    "start": 87.85,
+    "end": 91.5,
+    "text": "Devnet and testnet only. Every payment in this film was simulated.",
+    "kind": "title"
+  },
+  {
+    "start": 88.1,
+    "end": 91.5,
     "text": "COLOSSEUM CRYPTO WORLD'S FAIR",
     "kind": "title"
   }
