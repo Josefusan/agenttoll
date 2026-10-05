@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-04T22:26:57+00:00",
+  "generated_utc": "2026-10-05T01:06:40+00:00",
   "stack": "STACK_ONLY=1 GATEWAY_PORT=8502 ADMIN_PORT=8503 ORIGIN_PORT=4100 FACILITATOR_PORT=4120 CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash scripts/demo-local.sh  (build, config, keypairs, token), then CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash video/captures/tools/stack-clean.sh (same binaries/config, no curl probe, empty ledger)",
   "dashboard": "dashboard: apps/dashboard copied to ~/agenttoll-scratch/film-dash, NEXT_PUBLIC_GATEWAY_URL=http://127.0.0.1:8502 next build, AGENTTOLL_ADMIN_URL=http://127.0.0.1:8503 AGENTTOLL_ADMIN_TOKEN=\"$(cat .demo/admin-token)\" next start -H 127.0.0.1 -p 3502",
   "ports": {
@@ -390,24 +390,24 @@
       "what": "What a human browser sees at the gateway: api-quote (1920x1080 @2x)",
       "how": "Real browser load through the gateway with a desktop Chrome UA (200, no 402).",
       "command": "node video/captures/tools/dash_capture.mjs origin",
-      "bytes": 49055,
-      "sha256": "ab2ab8fe6fe47118bc37d6a3c292402cee28ff51a31d62a81c6beac9f8f664c8"
+      "bytes": 49592,
+      "sha256": "7b2c57b3c0fb1066444dbef5677bac5ce52ba1de14a73cd237745ac616eaad9a"
     },
     {
       "path": "origin/origin-blog-hello.png",
       "what": "What a human browser sees at the gateway: blog-hello (1920x1080 @2x)",
       "how": "Real browser load through the gateway with a desktop Chrome UA (200, no 402).",
       "command": "node video/captures/tools/dash_capture.mjs origin",
-      "bytes": 41329,
-      "sha256": "b3ff4b6e1d0419cbe083fd5193a41e9407bb188f4513d8f63a90fe404fc35bf6"
+      "bytes": 50389,
+      "sha256": "c044c3b01f67b3f54018e0244dbe0ab4bc30bcb1393e5b8005717b41052037d3"
     },
     {
       "path": "origin/origin-home.png",
       "what": "What a human browser sees at the gateway: home (1920x1080 @2x)",
       "how": "Real browser load through the gateway with a desktop Chrome UA (200, no 402).",
       "command": "node video/captures/tools/dash_capture.mjs origin",
-      "bytes": 46643,
-      "sha256": "864bc71fe5698bf4d24d5cde0d335b56cb8cde9133280a3489c98f117d23d7b7"
+      "bytes": 57722,
+      "sha256": "f31ecc4fa3d2316c82727c69bf8ec2411145f8d91bc624b0bfcd2aca5959b5a5"
     },
     {
       "path": "origin/origin.json",
@@ -415,7 +415,7 @@
       "how": "Real browser load through the gateway with a desktop Chrome UA.",
       "command": "node video/captures/tools/dash_capture.mjs origin",
       "bytes": 1532,
-      "sha256": "5d1a970ac128b1d4a37eda3c1eb426d7057ca236a1a5ee7fc162619e9ba24d13"
+      "sha256": "d4fc3622c61a3eca2db354816d736f69b6a3d4a963db4a2dad5865bb9fc2b1a2"
     },
     {
       "path": "terminal/admin-stats.json",
@@ -530,6 +530,14 @@
       "sha256": "e163e0d3ac339da4f89db539027355b86a710d1c373f680f63194cef50318e63"
     },
     {
+      "path": "terminal/stack-only.json",
+      "what": "STACK_ONLY=1 scripts/demo-local.sh on the film spare ports: origin + SIMULATED facilitator + gateway with an empty ledger (stopped with tmux kill-session after the banner)",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "STACK_ONLY=1 GATEWAY_PORT=8502 ADMIN_PORT=8503 ORIGIN_PORT=4100 FACILITATOR_PORT=4120 CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash scripts/demo-local.sh",
+      "bytes": 1239,
+      "sha256": "da6ea421e51f9bd6909d0830b4d1a80478c04d0a5492ec7975d173d80bbd8380"
+    },
+    {
       "path": "terminal/well-known.json",
       "what": "The public price list agents read before spending",
       "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
@@ -566,8 +574,8 @@
       "what": "Capture tooling (rerunnable)",
       "how": "Source",
       "command": null,
-      "bytes": 13838,
-      "sha256": "0f20014133af595637dede0fe6f2dafa3daba4438f6bda85d1183d2ba258ddf9"
+      "bytes": 14155,
+      "sha256": "59354abe8b04c667954e144c79f1b52b1aea3b961a6c78da55624dd0222f76a5"
     },
     {
       "path": "tools/pay_mcp_driver.mjs",

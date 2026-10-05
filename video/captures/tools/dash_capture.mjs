@@ -166,8 +166,10 @@ async function mobile(state) {
 }
 
 async function origin() {
-  const b = await browser();
-  const ctx = await b.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2, userAgent: HUMAN_UA, locale: "en-US" });
+  // Dark mode, as a person with a dark OS theme sees it: the demo origin's pages declare
+  // color-scheme: dark, and forced dark gives Chrome's built-in JSON viewer a dark page too.
+  const b = await chromium.launch({ args: ["--font-render-hinting=none", "--disable-lcd-text", "--enable-features=WebContentsForceDark"] });
+  const ctx = await b.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2, userAgent: HUMAN_UA, locale: "en-US", colorScheme: "dark" });
   const page = await ctx.newPage();
   const dir = join(OUT, "origin");
   mkdirSync(dir, { recursive: true });
