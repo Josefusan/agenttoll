@@ -28,7 +28,7 @@ if [ -n "$IN" ]; then
   OUT=$IN
 else
 [ -n "$FRAMES" ] && [ -n "$OUT" ] || { echo "usage: encode.sh --frames DIR --fps N --out FILE.mp4 [...] | --in FILE.mp4 --gif FILE.gif" >&2; exit 2; }
-first=$(ls "$FRAMES" | grep -E '^f_[0-9]{6}\.(png|jpg)$' | sort | head -1)
+first=$(ls "$FRAMES" | grep -E '^f_[0-9]{6}\.(png|jpg)$' | sort | sed -n 1p)  # sed reads all input: head -1 SIGPIPEs sort under pipefail on >5k frames
 [ -n "$first" ] || { echo "no frames in $FRAMES" >&2; exit 1; }
 ext=${first##*.}; start=$((10#${first:2:6}))
 n=$(ls "$FRAMES" | grep -cE "^f_[0-9]{6}\.$ext$")
