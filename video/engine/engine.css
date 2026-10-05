@@ -37,6 +37,16 @@ body.at-preview { width: 100vw; height: 100vh; background: #000; }
 .at-chrome .sep { color: var(--dim); margin: 0 0.35em; }
 .at-chrome .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); margin-right: 14px; vertical-align: 2px; box-shadow: 0 0 12px rgba(45,212,191,0.8); }
 
+/* top band behind chrome + badge while the camera is zoomed */
+.at-topscrim { position: absolute; left: 0; top: 0; width: 1920px; height: 176px; pointer-events: none; visibility: hidden;
+  background: linear-gradient(180deg, rgba(7,6,15,0.94) 0%, rgba(7,6,15,0.86) 52%, rgba(7,6,15,0) 100%); }
+
+/* provenance line: fixed overlay, bottom-left above the progress bar, never zoomed */
+.at-src { position: absolute; left: 64px; bottom: 14px; max-width: 1792px; font: 500 14px/1.4 var(--mono); letter-spacing: 0.02em; color: var(--dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.at-src .it b { color: var(--muted); font-weight: 600; }
+.at-src .it:not(.first)::before { content: "  ·  "; white-space: pre; color: #4A4770; }
+
 /* progress */
 .at-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,0.06); }
 .at-progress .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 1920px; background: var(--grad); transform-origin: 0 0; }
@@ -69,7 +79,7 @@ body.at-preview { width: 100vw; height: 100vh; background: #000; }
 .at-term .body { position: absolute; left: 0; right: 0; top: 44px; bottom: 0; padding: 20px 28px; overflow: hidden; }
 .at-term .scroll { will-change: auto; }
 .at-term .ln { font: 400 var(--fs, 21px)/var(--lh, 1.6) var(--mono); color: var(--t-text); white-space: pre; min-height: calc(var(--fs, 21px) * var(--lh, 1.6)); }
-.at-term .ln.wrap { white-space: pre-wrap; word-break: break-all; }
+.at-term .ln.wrap { white-space: pre-wrap; word-break: normal; overflow-wrap: anywhere; }
 .at-term .pr { color: var(--t-cyan); font-weight: 600; }
 .at-term .caret { display: inline-block; width: 0.6em; height: 1.15em; vertical-align: -0.2em; background: var(--t-cyan); margin-left: 1px; border-radius: 1px; }
 .c-green { color: var(--t-green); } .c-yellow { color: var(--t-yellow); } .c-red { color: var(--t-red); } .c-blue { color: var(--t-blue); }

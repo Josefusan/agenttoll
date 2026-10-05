@@ -43,6 +43,22 @@
     easeOutBack: (u, s = 1.70158) => 1 + (s + 1) * Math.pow(u - 1, 3) + s * Math.pow(u - 1, 2),
     smoothstep: u => u * u * (3 - 2 * u),
   };
+  /* bezier(x1, y1, x2, y2) -> easing, same curve as CSS cubic-bezier(). */
+  function bezier(x1, y1, x2, y2) {
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const X = u => ((ax * u + bx) * u + cx) * u, dX = u => (3 * ax * u + 2 * bx) * u + cx, Y = u => ((ay * u + by) * u + cy) * u;
+    return x => {
+      if (x <= 0) return 0; if (x >= 1) return 1;
+      let u = x;
+      for (let i = 0; i < 8; i++) { const d = X(u) - x; if (Math.abs(d) < 1e-6) break; const dd = dX(u); if (Math.abs(dd) < 1e-6) break; u -= d / dd; }
+      let lo = 0, hi = 1; u = clamp(u);
+      for (let i = 0; i < 30 && Math.abs(X(u) - x) > 1e-6; i++) { if (X(u) < x) lo = u; else hi = u; u = (lo + hi) / 2; }
+      return Y(u);
+    };
+  }
+  ease.bezier = bezier;
+  /* Screen Studio style move: fast start, long soft landing. One curve for every camera move. */
+  ease.camera = bezier(0.22, 1, 0.36, 1);
 
   /* Closed-form damped spring from 0 to 1, released at dt = 0 (seconds), zero initial velocity. */
   function spring(dt, stiffness = 170, damping = 26, mass = 1) {
@@ -138,7 +154,12 @@
   /* ---------- scene ---------- */
   let current = null;
   function scene(opts = {}) {
-    const o = Object.assign({ duration: 8, background: true, grain: true, chrome: true, progress: true, vignette: true, seed: 7 }, opts);
+    const o = Object.assign({ duration: 8, background: true, grain: true, chrome: true, progress: true, vignette: true, seed: 7,
+      // Camera safe area: zoom targets are fitted inside it, clear of the top chrome + badge band
+      // and the caption pill, so a compliance badge or a caption never lands on the subject.
+      safe: { top: 150, bottom: 150, left: 40, right: 40 } }, opts);
+    const qs = new URLSearchParams(location.search);
+    if (qs.has('noprogress')) o.progress = false;
     // flat mode (?flat or {flat:true}) is for the GIF cut: no grain, frozen mesh, so unchanged
     // background pixels stay identical between frames and the palette/diff encoder can skip them.
     o.flat = o.flat || new URLSearchParams(location.search).has('flat');
@@ -149,7 +170,14 @@
     const world = el('div', 'at-world', stage);
     const vignette = o.vignette ? el('div', 'at-vignette', stage) : null;
     const overlay = el('div', 'at-overlay', stage);
-    const S = { duration: o.duration, stage, bg, world, overlay, vignette, comps: [], fns: [], viewScale: 1, opts: o };
+    const S = { duration: o.duration, stage, bg, world, overlay, vignette, comps: [], fns: [], checks: [], viewScale: 1, opts: o,
+      cues: { sfx: [], duck: [], swell: [] } };
+    // Sound cues live on the timeline next to the pictures they belong to. render.mjs --cues
+    // dumps window.AT_CUES and video/render/audio.mjs turns it into the music bed + SFX track.
+    window.AT_CUES = { get duration() { return S.duration; }, sfx: S.cues.sfx, duck: S.cues.duck, swell: S.cues.swell };
+    // A dark band behind the top chrome and the badge while the camera is zoomed: whatever UI is
+    // under the badge is dimmed, so the badge never sits on readable text.
+    const topScrim = el('div', 'at-topscrim', overlay);
     S.add = c => { S.comps.push(c); return c; };
     S.every = fn => { S.fns.push(fn); return fn; };
     /* rect(target, relativeTo=world) -> [x, y, w, h] at rest layout (call from a layout() hook). */
@@ -163,6 +191,7 @@
     window.DURATION = o.duration;
     if (o.background) MeshBackground({ parent: bg, seed: o.seed, freeze: o.flat ? 0 : null });
     if (o.chrome) Chrome(o.chrome === true ? {} : o.chrome);
+    S.sources = Sources();
     if (o.progress) Progress(o.progress === true ? {} : o.progress);
     if (o.grain) Grain(o.grain === true ? {} : o.grain);
 
@@ -185,7 +214,18 @@
       S.t = t;
       for (const c of S.comps) c.update(t, S);
       for (const fn of S.fns) fn(t, S);
+      const z = S.camera ? S.camera.state(t).s : 1, zk = ease.easeInOutCubic(clamp((z - 1.02) / 0.25));
+      topScrim.style.opacity = zk.toFixed(3); topScrim.style.visibility = zk > 0.001 ? 'visible' : 'hidden';
+      for (const ck of S.checks) ck(t, S);
     };
+    /* requireBadge(badge, [[t0, t1], ...]): the render fails if the badge is not fully visible
+       at any frame inside a range (every frame that shows a payment must carry it). */
+    S.requireBadge = (badge, ranges) => S.checks.push(t => {
+      for (const [a, b] of ranges) if (t >= a && t <= b) {
+        const op = parseFloat(badge.el.style.opacity || '0');
+        if (!(op >= 0.98) || badge.el.style.visibility === 'hidden') throw new Error(`SIMULATED badge not visible at t=${t.toFixed(3)} (opacity ${op}); required ${a}-${b}`);
+      }
+    });
     window.seek = async t => {
       await getReady();
       S.frame(t);
@@ -218,6 +258,52 @@
     return S;
   }
   const reg = c => { if (!current) throw new Error('AT.scene() must be called first'); return current.add(c); };
+
+  /* ---------- sound cues ---------- */
+  /* sfx(t, kind, {gain=1, pan=0}) kinds: thud riser lift coin deny click key tick whoosh swell pop */
+  function sfx(t, kind, o = {}) { const S = current; S.cues.sfx.push({ t: +t.toFixed(4), kind, gain: o.gain == null ? 1 : o.gain, pan: o.pan || 0 }); }
+  /* duck(t0, t1, db=-5): music bed lowered under dense passages. swell(t0, t1): end lift. */
+  function duck(t0, t1, db = -5) { current.cues.duck.push({ t0, t1, db }); }
+  function swell(t0, t1, db = -1) { current.cues.swell.push({ t0, t1, db }); }
+
+  /*
+   * dim(el, [[t0, t1], ...], {o=0.3, blur=6, ramp=0.35}): the inactive pane of a two-pane shot
+   * steps back (opacity and blur multiply whatever the element's own reveal set this frame).
+   */
+  function dim(e, ranges, o = {}) {
+    const k0 = o.o == null ? 0.3 : o.o, b0 = o.blur == null ? 6 : o.blur, rp = o.ramp == null ? 0.35 : o.ramp;
+    current.every(t => {
+      let d = 0;
+      for (const [a, b] of ranges) d = Math.max(d, ease.easeInOutCubic(progress(t, a, a + rp)) * (1 - ease.easeInOutCubic(progress(t, b, b + rp))));
+      if (d <= 0.001) return;
+      const op = parseFloat(e.style.opacity === '' ? '1' : e.style.opacity);
+      e.style.opacity = (op * lerp(1, k0, d)).toFixed(4);
+      const f = e.style.filter && e.style.filter !== 'none' ? e.style.filter + ' ' : '';
+      e.style.filter = f + `blur(${(b0 * d).toFixed(2)}px)`;
+    });
+  }
+
+  /*
+   * Sources(): one provenance line pinned bottom-left above the progress bar, outside the camera.
+   * Source({html, at, out}) adds an item; items that are on screen together share the line,
+   * separated by a dot. While the camera is zoomed the line fades to 40%.
+   */
+  function Sources() {
+    const S = current, box = el('div', 'at-src', S.overlay), items = [];
+    S.add({ el: box, update(t) {
+      const z = S.camera ? S.camera.state(t).s : 1, zk = lerp(1, 0.4, ease.easeInOutCubic(clamp((z - 1.02) / 0.25)));
+      let first = true;
+      for (const it of items) {
+        const v = ease.easeOutCubic(progress(t, it.at, it.at + 0.35)) * (it.out == null ? 1 : 1 - ease.easeInCubic(progress(t, it.out, it.out + 0.3)));
+        if (v <= 0.001) { it.e.style.display = 'none'; continue; }
+        it.e.style.display = 'inline';
+        it.e.classList.toggle('first', first); first = false;
+        it.e.style.opacity = (v * zk).toFixed(3);
+      }
+    } });
+    return { add(o) { const e = el('span', 'it', box, o.html); e.style.display = 'none'; items.push({ e, at: o.at || 0, out: o.out }); return e; } };
+  }
+  function Source(o) { return current.sources.add(o); }
 
   /* ---------- background, grain, chrome, progress ---------- */
   /* MeshBackground({parent, seed, intensity=1, freeze:null|t}): brand radial base + 4 slow drifting colour fields. */
@@ -289,13 +375,15 @@
     const at = o.at || 0;
     return reg({
       el: e,
-      update(t) {
+      update(t, S) {
         const pout = o.out == null ? 0 : ease.easeInCubic(progress(t, o.out, o.out + 0.4));
         show(num, t, { at, dur: 0.6, y: 10, blur: 4 });
         const pr = ease.easeOutExpo(progress(t, at + 0.12, at + 0.82));
         style(rule, { o: pr > 0 ? 1 : 0, sx: pr });
         chars.forEach((c, i) => show(c, t, { at: at + 0.3 + i * 0.022, dur: 0.5, y: 10, blur: 3 }));
-        e.style.opacity = String(1 - pout); e.style.transform = `translateY(${(-10 * pout).toFixed(2)}px)`;
+        // steps aside while the camera is zoomed, like the top chrome
+        const z = S.camera ? S.camera.state(t).s : 1, zk = 1 - ease.easeInOutCubic(clamp((z - 1.02) / 0.2));
+        e.style.opacity = ((1 - pout) * zk).toFixed(3); e.style.transform = `translateY(${(-10 * pout).toFixed(2)}px)`;
       },
     });
   }
@@ -362,7 +450,10 @@
    *                   {out:['l1','l2'], at, step=0.035}, {blank:true, at}, {prompt:true, at} ]})
    * Commands type per character with seeded human jitter; outputs appear whole. Colors:
    * green yellow red blue magenta cyan dim white bold. Body auto-scrolls (eased) to keep the newest line.
-   * Text is literal (no markup), so real transcript output is safe to paste in.
+   * Text is literal (no markup), so real transcript output is safe to paste in. wrap:true wraps at
+   * word boundaries (long tokens break only when they cannot fit).
+   * focus:[{at, out, match: RegExp | (text) => bool, dimTo=0.25}] dims every other line.
+   * keys:true (default) registers a soft key sound per typed character.
    */
   function Terminal(o) {
     const S = current, e = el('div', 'at-panel at-term', o.parent || S.world); place(e, o);
@@ -390,22 +481,49 @@
         }
         if (spec.dur) { const k = spec.dur / Math.max(acc, 1e-6); for (let i = 0; i < times.length; i++) times[i] *= k; acc = spec.dur; }
         L.push({ kind: 'cmd', text, at: spec.at, times: times.map(x => x + spec.at), end: spec.at + acc, cls: spec.color });
+        if (o.keys !== false && text.length) { const ts = times.map(x => x + spec.at); const step = Math.max(1, Math.round(ts.length / Math.max(1, (acc * 14)))); for (let i = 0; i < ts.length; i += step) sfx(ts[i], 'key', { gain: 0.8 + 0.4 * R() }); }
       }
     }
+    for (const ln of L) ln.text = ln.kind === 'cmd' ? ln.text : (ln.segs || []).map(x => x[0]).join('');
+    const focus = (o.focus || []).map(f => Object.assign({ dimTo: 0.25 }, f, { test: typeof f.match === 'function' ? f.match : (x => f.match.test(x)) }));
     function segs(v, color) { return typeof v === 'string' ? [[v, color]] : v; }
     L.sort((a, b) => a.at - b.at);
     for (const ln of L) {
       ln.el = el('div', 'ln' + (o.wrap ? ' wrap' : ''), sc);
       if (ln.kind === 'out') ln.el.innerHTML = ln.segs.map(([s, c]) => c ? `<span class="${c.split(' ').map(x => 'c-' + x).join(' ')}">${esc(s)}</span>` : esc(s)).join('');
     }
-    let tops = [], bodyH = 0;
+    let tops = [], bodyH = 0, padL = 28, padT = 20, origin = null;
+    function scrollAt(t) {
+      let last = -1;
+      L.forEach((ln, i) => { if (t >= ln.at) last = i; });
+      if (last < 0 || !bodyH) return 0;
+      const target = i => Math.max(0, tops[i][1] - bodyH);
+      const prev = last > 0 ? target(last - 1) : 0;
+      return lerp(prev, target(last), ease.easeOutCubic(progress(t, L[last].at, L[last].at + 0.22)));
+    }
     return reg({
       el: e,
+      /* rect(match, t, pad=12) -> world rect of the lines whose text matches, as scrolled at t
+         (for Camera keys: {to: () => term.rect(/402/, 47)}). */
+      rect(match, t, pad = 12) {
+        const test = typeof match === 'function' ? match : x => match.test(x);
+        const idx = []; L.forEach((ln, i) => { if (test(ln.text)) idx.push(i); });
+        if (!idx.length) throw new Error('terminal rect: no line matches ' + match);
+        const y = scrollAt(t), a = tops[idx[0]][0], b = tops[idx[idx.length - 1]][1];
+        const top = Math.max(a - y, 0), bot = Math.min(b - y, bodyH);
+        // width of the longest matched line (monospace advance 0.6em), capped at the body width
+        const fs = o.fontSize || 21, bodyW = origin[2] - 2 * padL;
+        const chars = Math.max(...idx.map(i => L[i].text.length + (L[i].kind === 'cmd' ? prompt.length + 1 : 0)));
+        const w = Math.min(bodyW, chars * fs * 0.6);
+        return [origin[0] + padL - pad, origin[1] + 44 + padT + top - pad, w + 2 * pad, bot - top + 2 * pad];
+      },
       layout() {
+        origin = S.rect(e);
         // measure every line at full content so wrapped lines scroll correctly
         for (const ln of L) if (ln.kind === 'cmd') ln.el.innerHTML = `<span class="pr">${esc(prompt)} </span>${esc(ln.text)}`;
         const st = getComputedStyle(body);
         bodyH = body.clientHeight - parseFloat(st.paddingTop) - parseFloat(st.paddingBottom);
+        padL = parseFloat(st.paddingLeft); padT = parseFloat(st.paddingTop);
         const b0 = sc.getBoundingClientRect().top;
         tops = L.map(ln => { const r = ln.el.getBoundingClientRect(); return [(r.top - b0) / S.viewScale, (r.bottom - b0) / S.viewScale]; });
       },
@@ -429,13 +547,18 @@
             (caretOn ? '<span class="caret"></span>' : '');
         });
         // eased auto-scroll: target keeps the newest visible line inside the body
-        let y = 0;
-        if (last >= 0 && bodyH) {
-          const target = i => Math.max(0, tops[i][1] - bodyH);
-          const prev = last > 0 ? target(last - 1) : 0;
-          y = lerp(prev, target(last), ease.easeOutCubic(progress(t, L[last].at, L[last].at + 0.22)));
-        }
+        const y = scrollAt(t);
         sc.style.transform = y ? `translateY(${(-y).toFixed(2)}px)` : 'none';
+        if (focus.length) {
+          for (const ln of L) {
+            let k = 1;
+            for (const f of focus) {
+              const v = ease.easeInOutCubic(progress(t, f.at, f.at + 0.35)) * (f.out == null ? 1 : 1 - ease.easeInOutCubic(progress(t, f.out, f.out + 0.35)));
+              if (v > 0 && !f.test(ln.text)) k = Math.min(k, lerp(1, f.dimTo, v));
+            }
+            ln.el.style.opacity = k < 0.999 ? k.toFixed(3) : '';
+          }
+        }
       },
     });
   }
@@ -498,6 +621,7 @@
     const e = el('div', 'at-cursor', parent, ARROW);
     const size = o.size || 1.35, ov = o.overshoot == null ? 1 : o.overshoot;
     const pts = o.path.map(p => Object.assign({}, p));
+    for (const p of pts) if (p.click) sfx(p.t + (p.click === true ? 0.08 : p.click), 'click');
     const clicks = [];
     const ripples = [];
     function bez(p0, p1, p2, p3, u) { const v = 1 - u; return v * v * v * p0 + 3 * v * v * u * p1 + 3 * v * u * u * p2 + u * u * u * p3; }
@@ -568,13 +692,19 @@
    */
   function Camera(o) {
     const S = current, target = o.target || S.world;
-    const keys = o.keys.map(k => Object.assign({ dur: 0.8, pad: 48 }, k)).sort((a, b) => a.t - b.t);
+    const keys = o.keys.map(k => Object.assign({ dur: 0.65, pad: 48 }, k)).sort((a, b) => a.t - b.t);
     const full = { s: 1, cx: W / 2, cy: H / 2 };
+    const sf = Object.assign({ top: 0, bottom: 0, left: 0, right: 0 }, o.safe || S.opts.safe || {});
+    const SW = W - sf.left - sf.right, SH = H - sf.top - sf.bottom;
+    const SCX = sf.left + SW / 2, SCY = sf.top + SH / 2;
     function stateFor(k) {
       if (k.to === 'full' || k.to == null) return full;
-      const r = typeof k.to === 'string' ? S.rect(k.to, target) : k.to;
-      const s = k.scale || Math.min(W / (r[2] + 2 * k.pad), H / (r[3] + 2 * k.pad));
-      return { s: Math.max(1, s), cx: r[0] + r[2] / 2, cy: r[1] + r[3] / 2 };
+      const r = typeof k.to === 'function' ? k.to() : typeof k.to === 'string' ? S.rect(k.to, target) : k.to;
+      // fit inside the safe area; an explicit scale is a ceiling, never a reason to cover the badge band
+      const fit = Math.min(SW / (r[2] + 2 * k.pad), SH / (r[3] + 2 * k.pad));
+      const s = Math.max(1, k.scale ? Math.min(k.scale, fit) : fit);
+      // focus point chosen so the rect centre lands on the safe-area centre
+      return { s, cx: r[0] + r[2] / 2 - (SCX - W / 2) / s, cy: r[1] + r[3] / 2 - (SCY - H / 2) / s };
     }
     let states = null;
     function at(t) {
@@ -582,7 +712,7 @@
       for (let i = 0; i < keys.length; i++) {
         const k = keys[i];
         if (t < k.t) break;
-        const p = (k.ease || ease.easeInOutCubic)(progress(t, k.t, k.t + k.dur));
+        const p = (k.ease || o.ease || ease.camera)(progress(t, k.t, k.t + k.dur));
         const nx = states[i];
         cur = { s: Math.exp(lerp(Math.log(cur.s), Math.log(nx.s), p)), cx: lerp(cur.cx, nx.cx, p), cy: lerp(cur.cy, nx.cy, p) };
       }
@@ -602,7 +732,7 @@
         const a = xf(at(t)), b = xf(at(Math.max(0, t - 1 / 60)));
         target.style.transform = (a.s === 1 && !a.tx && !a.ty) ? 'none' : `translate(${a.tx.toFixed(2)}px,${a.ty.toFixed(2)}px) scale(${a.s.toFixed(5)})`;
         const v = Math.hypot(a.tx - b.tx, a.ty - b.ty) + Math.abs(Math.log(a.s / b.s)) * 900;
-        const mb = (o.motionBlur == null ? 0.6 : o.motionBlur) * clamp((v - 4) / 30, 0, 2);
+        const mb = (o.motionBlur == null ? 0.35 : o.motionBlur) * clamp((v - 6) / 30, 0, 1.5);
         target.style.filter = mb > 0.08 ? `blur(${mb.toFixed(2)}px)` : 'none';
       },
     };
@@ -626,14 +756,17 @@
         return el('span', cls, e, esc(w + (i < a.length - 1 ? ' ' : '')));
       });
       const step = o.wordStep || Math.min(0.085, (0.4 * (c.end - c.at)) / words.length);
-      return { c, e, words, step };
+      return { c, e, words, step, outDur: 0.3 };
     });
+    // never two pills at once: a cue followed closely fades out fast instead of overlapping
+    const ord = cues.slice().sort((a, b) => a.c.at - b.c.at);
+    for (let i = 0; i + 1 < ord.length; i++) ord[i].outDur = clamp(ord[i + 1].c.at - 0.08 - ord[i].c.end, 0.06, 0.3);
     return reg({
       el: parent,
       update(t) {
         for (const q of cues) {
           const pin = ease.easeOutExpo(progress(t, q.c.at - 0.08, q.c.at + 0.4));
-          const pout = ease.easeInCubic(progress(t, q.c.end, q.c.end + 0.3));
+          const pout = ease.easeInCubic(progress(t, q.c.end, q.c.end + q.outDur));
           const vis = ease.easeOutCubic(progress(t, q.c.at - 0.08, q.c.at + 0.2)) * (1 - pout);
           q.e.style.opacity = vis.toFixed(3); q.e.style.visibility = vis > 0.001 ? 'visible' : 'hidden';
           q.e.style.transform = `translateX(-50%) translateY(${((1 - pin) * 14 + pout * 6).toFixed(2)}px) scale(${(0.97 + 0.03 * pin).toFixed(4)})`;
@@ -682,8 +815,9 @@
 
   /* ---------- ticker ---------- */
   /*
-   * Ticker({to, from=0, at, dur=1.4, decimals=0, prefix, suffix, format(v), label, x, y, card=true, size, parent})
-   * Number counts up with easeOutExpo in tabular figures, then a small spring pop on landing.
+   * Ticker({to, from=0, at, dur=1.4, decimals=0, prefix, suffix, format(v), label, x, y, card=true, size, parent, count=false})
+   * Default: the final value from its first visible frame, landing with a scale-in, blur and glow,
+   * so no frame (pause, thumbnail) ever shows a partial count. count:true counts up instead.
    * card:false returns a bare inline number (.at-num) you can style yourself.
    */
   function Ticker(o) {
@@ -698,6 +832,16 @@
     return reg({
       el: e,
       update(t) {
+        if (!o.count) {
+          show(e, t, { at: at - 0.25, out: o.out, y: 20, blur: 6, dur: 0.7 });
+          num.textContent = fmt(o.to);
+          const sp = spring(t - at, 260, 18), p = clamp(sp, 0, 1.2);
+          num.style.transformOrigin = '0 70%';
+          num.style.transform = `scale(${lerp(0.86, 1, p).toFixed(4)})`;
+          num.style.filter = t < at + 0.5 ? `blur(${(10 * (1 - ease.easeOutCubic(progress(t, at - 0.1, at + 0.35)))).toFixed(2)}px)` : 'none';
+          num.style.opacity = ease.easeOutCubic(progress(t, at - 0.1, at + 0.2)).toFixed(3);
+          return;
+        }
         show(e, t, { at: at - 0.25, out: o.out, y: 20, blur: 6, dur: 0.7 });
         const p = ease.easeOutExpo(progress(t, at, at + dur));
         const v = from + (o.to - from) * p;
@@ -825,7 +969,7 @@
   window.AT = Object.assign({
     W, H, clamp, lerp, progress, ease, spring, tween, track, mix, rng, hash, el, esc, img, place, style, show, typed,
     scene, MeshBackground, Grain, Chrome, Progress, SectionLabel, Headline, Text, Terminal, Browser, Cursor, Camera,
-    Caption, Badge, Ticker, Diagram,
+    Caption, Badge, Ticker, Diagram, Source, Sources, dim, sfx, duck, swell, bezier,
     get current() { return current; },
   }, ease);
 })();

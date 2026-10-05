@@ -9,7 +9,9 @@
 // Options: --from s --to s (default 0..DURATION), --scale 1 (device scale; 0.5 = 960x540 preview),
 //          --format jpeg|png (default jpeg), --quality 95, --root DIR (server root, default: repo root),
 //          --port 3510 (shard k listens on port+k-1; falls back to an ephemeral port if busy),
-//          --flat (adds ?flat: no grain, frozen mesh; use for the GIF cut).
+//          --flat (adds ?flat: no grain, frozen mesh; use for the GIF cut),
+//          --query 'a=1&b' (extra URL params, e.g. noprogress or cut=pitch),
+//          --cues FILE (write the scene's sound cues as JSON and exit; see audio.mjs).
 // Frames are named f_000000.<ext> by global index round(t*fps), so shards share one directory.
 // Prints one JSON summary line on stdout ({"frames":N,"seconds":S,"fps":F,...}).
 import http from 'node:http';
@@ -39,13 +41,13 @@ function parse(argv) {
 }
 const args = parse(process.argv.slice(2));
 const expand = p => p && p.replace(/^~(?=$|\/)/, os.homedir());
-if (args.help || !args.scene || !args.out) {
+if (args.help || !args.scene || (!args.out && !args.cues)) {
   console.error('usage: render.mjs --scene <file|url> --out <dir> [--fps 30|60] [--from s --to s] [--scale 1] [--format jpeg|png] [--quality 95] [--shard k/n | --jobs n] [--times a,b,c]');
   process.exit(2);
 }
-args.out = path.resolve(expand(args.out));
+if (args.out) args.out = path.resolve(expand(args.out));
 args.root = path.resolve(expand(args.root));
-fs.mkdirSync(args.out, { recursive: true });
+if (args.out) fs.mkdirSync(args.out, { recursive: true });
 
 // --jobs n: fan out n shard processes of this script and aggregate.
 if (args.jobs && args.jobs > 1 && !args.shard) {
@@ -98,6 +100,7 @@ else {
 }
 
 if (args.flat) url += (url.includes('?') ? '&' : '?') + 'flat';
+if (args.query) url += (url.includes('?') ? '&' : '?') + args.query;
 const { chromium } = require(PW);
 const browser = await chromium.launch({
   args: ['--force-color-profile=srgb', '--font-render-hinting=none', '--disable-lcd-text', '--hide-scrollbars',
@@ -115,6 +118,14 @@ await page.waitForFunction(() => typeof window.seek === 'function' && typeof win
 const DURATION = await page.evaluate(() => window.DURATION);
 await page.evaluate(() => window.seek(0));
 if (errors.length) { console.error('page errors:\n  ' + errors.join('\n  ')); await browser.close(); srv && srv.close(); process.exit(1); }
+if (args.cues) {
+  // --cues FILE: dump the scene's sound cues (window.AT_CUES) for video/render/audio.mjs, no frames.
+  const cues = await page.evaluate(() => JSON.parse(JSON.stringify(window.AT_CUES || { sfx: [], duck: [], swell: [] })));
+  cues.duration = DURATION; cues.scene = url;
+  fs.writeFileSync(path.resolve(expand(args.cues)), JSON.stringify(cues, null, 1) + '\n');
+  console.log(JSON.stringify({ cues: path.resolve(expand(args.cues)), sfx: cues.sfx.length, duration: DURATION }));
+  await browser.close(); srv && srv.close(); process.exit(0);
+}
 const cdp = await ctx.newCDPSession(page);
 const ext = args.format === 'png' ? 'png' : 'jpg';
 
