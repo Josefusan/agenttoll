@@ -144,7 +144,10 @@
     sc.style.setProperty('--fs', o.fs + 'px'); sc.style.setProperty('--lh', String(o.lh));
     const LH = o.fs * o.lh, PAD = 18;
     const bands = (o.bands || []).map(b => { const d = el('div', 'band' + (b.gold ? ' gold' : ''), sc); d.style.top = (PAD + b.from * LH) + 'px'; d.style.height = ((b.to - b.from + 1) * LH) + 'px'; d.style.transformOrigin = '0 50%'; return { b, d }; });
-    o.lines.forEach((ln, i) => { const r = el('div', 'ln', sc); el('span', 'no', r, String(i + 1)); el('span', 'tx', r, yamlHTML(ln, (o.price || []).includes(i))); });
+    const rows = o.lines.map((ln, i) => { const r = el('div', 'ln', sc); el('span', 'no', r, String(i + 1)); el('span', 'tx', r, yamlHTML(ln, (o.price || []).includes(i))); return r; });
+    // focus: while a (non-gold) band is up, the lines outside it dim, so a push-in reads as one block
+    // and the lines the camera half-crops at the frame edges stay quiet
+    const focus = (o.bands || []).filter(b => !b.gold);
     const scr = o.scroll ? track(o.scroll) : () => 0;
     return S.add({
       el: e, LH,
@@ -152,6 +155,9 @@
       update(t) {
         show(e, t, { at: o.at, out: o.out, y: 32, blur: 10, scale: 0.985, dur: 0.8 });
         sc.style.transform = `translateY(${(-scr(t)).toFixed(2)}px)`;
+        let fw = 0, fb = null;
+        for (const b of focus) { const w = E.easeOutCubic(progress(t, b.at, b.at + 0.35)) * (1 - E.easeInCubic(progress(t, b.out, b.out + 0.35))); if (w > fw) { fw = w; fb = b; } }
+        rows.forEach((r, i) => { const v = fb && (i < fb.from || i > fb.to) ? (1 - 0.7 * fw).toFixed(3) : '1'; if (r.style.opacity !== v) r.style.opacity = v; });
         bands.forEach(({ b, d }) => {
           const v = E.easeOutCubic(progress(t, b.at, b.at + 0.35)) * (1 - E.easeInCubic(progress(t, b.out, b.out + 0.35)));
           d.style.opacity = v.toFixed(3); d.style.visibility = v > 0.001 ? 'visible' : 'hidden'; d.style.transform = `scaleX(${(0.97 + 0.03 * v).toFixed(4)})`;
@@ -182,7 +188,7 @@
   }
   function Info(o) {
     const e = el('div', 'info', W, `<div class="tag">${esc(o.tag)}</div><div class="hd">${esc(o.title)}</div><ul>${o.items.map(i => `<li class="${i.warn ? 'warn' : ''}">${i.html}</li>`).join('')}</ul>`);
-    AT.place(e, o);
+    AT.place(e, o); e.setAttribute('data-at-panel', '');   // the camera's crop guard fades it when a push-in half-crops it
     return S.add({ el: e, update(t) { show(e, t, { at: o.at, out: o.out, y: 24, blur: 8, dur: 0.8 }); } });
   }
 
@@ -323,7 +329,6 @@
     AT.dim(pb3.b.el, [[a + 7.4, out + 1]]);
     cam(a + 0.5, [64, 140, 760, 300], { scale: 2.0, dur: 0.9 });
     cam(a + 4.6, [64, 140, 900, 260], { scale: 2.0, dur: 0.7 });
-    cam(a + 7.0, 'full', { dur: 0.7 });
 
     const r402 = cap('claude-user-402');
     const hdr = l => {
@@ -336,23 +341,24 @@
     const blankAt = R.indexOf('');
     const dec = cap('payment-required-decoded');
     const D = lines(dec.stdout);
-    const t1 = a + 7.5, t2 = a + 12.1;
+    const t1 = a + 7.2, t2 = a + 12.1;    // the command is pre-rolled as the window comes up
     const t3 = AT.Terminal({
       x: 976, y: 140, w: 880, h: 780, title: 'zsh · an agent asks', at: a + 6.9, out, wrap: true, fontSize: 18,
       lines: [
-        { cmd: r402.command, at: t1, dur: 1.0 },
-        { out: R.slice(0, blankAt).map(hdr), at: t1 + 1.15, step: 0.05 },
-        { blank: true, at: t1 + 1.5 },
-        { out: R.slice(blankAt + 1).map(l => [[l, 'dim']]), at: t1 + 1.55 },
+        { cmd: r402.command, at: t1, dur: 0.6 },
+        { out: R.slice(0, blankAt).map(hdr), at: t1 + 0.75, step: 0.05 },
+        { blank: true, at: t1 + 1.1 },
+        { out: R.slice(blankAt + 1).map(l => [[l, 'dim']]), at: t1 + 1.15 },
         { cmd: dec.command, at: t2, dur: 1.5 },
         { out: D.map(l => /"amount"|"network"|"payTo"/.test(l) ? [[l, 'white bold']] : [[l, null]]), at: t2 + 1.7, step: 0.03 },
         { prompt: true, at: t2 + 2.5 },
       ],
     });
     Note('stdout · <b>video/captures/terminal/claude-user-402.json</b>, <b>payment-required-decoded.json</b>', 976, 932, t1, out);
-    // the terminal alone: the status line and the verdict, then the decoded quote
-    cam(t1 + 1.2, () => t3.rect(/^HTTP\/|x-agenttoll-verdict/, t1 + 1.6, 14), { scale: 1.75, dur: 0.9 });
-    cam(t2 - 0.2, 'full', { dur: 0.7 });
+    // the terminal alone from the moment it is up: the typed command, the status line and the
+    // verdict, then the decode command, then the decoded quote (no wide frame in between)
+    cam(a + 7.3, () => t3.rect(/^HTTP\/|x-agenttoll-verdict/, t1 + 1.6, 14), { scale: 1.75, dur: 1.0 });
+    cam(t2 - 0.2, () => t3.rect(/json\.tool/, t2 + 1.6, 18), { scale: 1.6, dur: 0.7 });
     const qk = t2 + 2.6;
     cam(t2 + 2.2, () => t3.rect(/"(network|amount|asset|payTo)"/, qk, 16), { scale: 1.6, dur: 0.9 });
     cam(A.a4 - 1.0, 'full', { dur: 0.6 });
@@ -360,14 +366,12 @@
     Leader(t3, /"amount": "\d+"/, qk, '2000 atomic = <b>$0.002</b>', qk + 0.4, out - 0.2);
 
     AT.Cursor({
-      at: a + 0.4, out: t1 + 0.6,
+      at: a + 0.4, out: a + 6.3,
       path: [
         { t: a + 0.4, x: 640, y: 700 },
         { t: a + 3.8, x: 470, y: 330 },
         { t: a + 4.65, x: 420, y: 208, click: true },
-        { t: a + 5.5, x: 600, y: 390 },             // eased off the URL and the JSON after the click
-        { t: t1 - 0.2, x: 1400, y: 560, click: true },
-        { t: t1 + 0.5, x: 1560, y: 760 },
+        { t: a + 5.5, x: 600, y: 390 },             // eased off the URL and the JSON after the click, then gone
       ],
     });
   }
@@ -382,13 +386,14 @@
       // pre-rolled: the command is typed while the window comes up, output starts right after the cut
       x: 310, y: 140, w: 1300, h: 780, title: 'zsh · discovery', at: a - 0.6, out, fontSize: 17, keys: false,
       lines: [
-        { cmd: wk.command, at: a - 0.5, dur: 0.8 },
-        { out: K.map(l => /priceUsd|"0\.0|"match"/.test(l) ? [[l, /priceUsd|"0\.0/.test(l) ? 'gold' : 'white']] : [[l, null]]), at: a + 0.45, step: 0.028 },
+        { cmd: wk.command, at: a - 0.6, dur: 0.5 },
+        { out: K.map(l => /priceUsd|"0\.0|"match"/.test(l) ? [[l, /priceUsd|"0\.0/.test(l) ? 'gold' : 'white']] : [[l, null]]), at: a + 0.0, step: 0.028 },
         { prompt: true, at: a + 2.0 },
       ],
     });
     Note('stdout · <b>video/captures/terminal/well-known.json</b>', 310, 932, a + 0.3, out);
-    cam(a + 2.3, [310, 470, 1300, 440], { scale: 1.4, dur: 1.0 });
+    cam(a + 0.7, [310, 230, 1300, 400], { scale: 1.4, dur: 0.9 });
+    cam(a + 2.6, [310, 470, 1300, 440], { scale: 1.4, dur: 1.0 });
     cam(A.a5 - 1.0, 'full', { dur: 0.6 });
   }
 
@@ -444,6 +449,10 @@
     const row = dash.rect([B03.live_feed_first_row.x, B03.live_feed_first_row.y, B03.live_feed_first_row.width, B03.live_feed_first_row.height], 0, 4);
     const kpi = dash.rect([B03.kpi_revenue.x, B03.kpi_revenue.y, B03.kpi_revenue.width, B03.kpi_revenue.height], 0, 4);
     Ring(row, tDash + 0.45, a + 10.9);
+    // the feed card's own heading reads "Live settlements": a gold note right of it says what that means here
+    const lh = B03.live_feed_simulated_count_badge, lp = dash.pt(520, lh.y + 4);   // on the heading's line, clear of the subline below
+    const lsc = Callout('= SIMULATED settlements · no funds moved', lp[0], lp[1] - 9, tDash + 0.7, a + 10.9, 'gold wsm');
+    Object.assign(lsc.el.style, { fontSize: '9.5px', padding: '4px 6px', borderRadius: '5px' });
     cam(tDash, row, { scale: 2.6, dur: 0.9 });
     Ring(kpi, a + 11.0, a + 12.6, 'gold');
     cam(a + 10.8, kpi, { scale: 2.3, dur: 0.9 });
@@ -453,7 +462,7 @@
       at: tDash + 0.2, out: a + 12.6,
       path: [
         { t: tDash + 0.2, x: 1500, y: 980 },
-        { t: tDash + 1.1, x: row[0] + row[2] * 0.62, y: row[1] + row[3] + 34 },   // below the row, in the empty feed
+        { t: tDash + 1.1, x: row[0] + row[2] * 0.8, y: row[1] + row[3] + 30 },   // below the row, in the empty feed
         { t: a + 11.4, x: kq[0], y: kq[1] },   // inside the tile, right of $0.002 and clear of the subline
       ],
     });
@@ -609,22 +618,22 @@
     });
     Note('stdout · <b>video/captures/terminal/mcp-tools-list.json</b>', 64, 932, a + 0.3, out);
     cam(a + 1.2, [64, 330, 880, 360], { scale: 1.75, dur: 0.9 });
-    cam(a + 4.5, 'full', { dur: 0.7 });
+    cam(a + 4.5, [976, 170, 880, 400], { scale: 1.6, dur: 0.8 });   // pan straight onto the unpaid call
 
     const ch = cap('mcp-search-docs-challenge');
     const CH = lines(ch.stdout);
     const chCol = l => /"isError": true/.test(l) ? [[l, 'yellow bold']] : /"amount"/.test(l) ? [[l, 'gold bold']] : [[l, /"text"/.test(l) ? 'dim' : null]];
     AT.Terminal({
-      x: 976, y: 170, w: 880, h: 750, title: 'zsh · tools/call without payment', at: a + 4.3, out, wrap: true, fontSize: 17,
+      x: 976, y: 170, w: 880, h: 750, title: 'zsh · tools/call without payment', at: a + 4.3, out, wrap: true, fontSize: 17, keys: false,
       lines: [
-        { cmd: ch.command, at: a + 4.9, dur: 1.3 },
-        { out: CH.map(chCol), at: a + 6.4, step: 0.016 },
+        { cmd: ch.command, at: a + 4.35, dur: 0.7 },
+        { out: CH.map(chCol), at: a + 5.2, step: 0.016 },
       ],
     });
-    Note('stdout · <b>video/captures/terminal/mcp-search-docs-challenge.json</b>', 976, 932, a + 4.9, out);
+    Note('stdout · <b>video/captures/terminal/mcp-search-docs-challenge.json</b>', 976, 932, a + 4.5, out);
     AT.dim(t7.el, [[a + 4.5, out + 1]]);
     AT.sfx(a + 10.5, 'coin', { gain: 0.8 });
-    cam(a + 7.2, [976, 330, 880, 260], { scale: 1.85, dur: 0.9 });
+    cam(a + 6.8, [976, 330, 880, 260], { scale: 1.85, dur: 0.9 });
     cam(a + 9.4, 'full', { dur: 0.7 });
 
     // the paid call's row on the dashboard (state 04 crop)
@@ -656,6 +665,10 @@
     // revenue + paid-requests tiles (CSS px of the 1248 px recording), then the feed rows
     cam(a + 0.6, live.rect([16, 80, 600, 150], 0, 6), { scale: 2.0, dur: 0.9 });
     cam(a + 4.3, live.rect([16, 800, 805, 280], FEED, 6), { scale: 1.6, dur: 0.9 });
+    // the recorded card heading reads "Live settlements"; screen-space note beside it once the push-in has landed
+    const lsn = el('div', 'callout gold', S.overlay, '= SIMULATED settlements · no funds moved');
+    lsn.setAttribute('data-at-chrome', ''); lsn.style.fontSize = '19px'; AT.place(lsn, { x: 470, y: 282 });   // measured on the 110 s still: heading at about (173-430, 300)
+    S.add({ el: lsn, update(t) { show(lsn, t, { at: a + 5.4, out: recOut - 0.7, dur: 0.4, y: 0, blur: 4 }); } });
     cam(recOut - 0.5, 'full', { dur: 0.6 });
 
     // (b) the tour, on the final state (19 payments)
@@ -676,11 +689,13 @@
     Ring(R('kpi_revenue_simulated_caveat', 0, 5), a + 10.2, a + 12.9, 'gold');
     // By network: the bar and the "$0.034 100% · 19×" row (CSS y 246-376). The SETTLEMENT HEALTH
     // tiles below it ("Settled 19") stay in frame at this scale, so they carry a callout.
-    cam(a + 13.3, big.rect([1173, 246, 395, 130], 230, 8), { scale: 1.75, dur: 1.0 });
+    cam(a + 13.3, big.rect([1173, 246, 395, 290], 230, 8), { scale: 1.75, dur: 1.0 });
     const hb = big.rect([1185, 486, 370, 30], 230, 0);
     Callout('Settled = SIMULATED settlements · no funds moved', hb[0], hb[1], a + 14.0, a + 16.9, 'gold sm');
     const feedHead = [B.live_feed_card.x, B.live_feed_card.y, B.live_feed_card.width, 150];
     cam(a + 17.6, big.rect(feedHead, 785, 8), { scale: 1.9, dur: 0.9 });
+    const fp = big.pt(530, B.live_feed_simulated_count_badge.y + B.live_feed_simulated_count_badge.height / 2, 785);
+    Callout('= SIMULATED settlements · no funds moved', fp[0], fp[1] - 12, a + 18.0, a + 20.6, 'gold wsm');
     Ring(R('live_feed_simulated_count_badge', 785, 6), a + 18.3, a + 20.6, 'gold');
     const ub = R('unbilled_panel', 785, 8);
     cam(a + 20.8, [ub[0], ub[1], ub[2], 420], { scale: 1.9, dur: 0.9 });   // the unbilled list itself, not the wide two-card view
@@ -845,6 +860,13 @@
   C.acts.slice(1).forEach(x => AT.sfx(x.start - 0.15, 'whoosh', { gain: 0.45 }));
 
   AT.Camera({ keys: camKeys, motionBlur: 0.6 });
+  // While the camera is pushed in, a dark band under the caption keeps half-cropped lines at the
+  // bottom edge from reading through or beside the caption pill (the engine dims the top band).
+  {
+    const bs = el('div', 'botscrim', null); bs.setAttribute('data-at-chrome', '');
+    const ts = S.overlay.querySelector('.at-topscrim'); S.overlay.insertBefore(bs, ts ? ts.nextSibling : S.overlay.firstChild);
+    S.add({ el: bs, update(t) { const z = S.zoom(t); bs.style.opacity = z.toFixed(3); bs.style.visibility = z > 0.001 ? 'visible' : 'hidden'; } });
+  }
   const cues = C.cues.map(c => Object.assign({}, c, { at: A[c.act] + c.at, end: A[c.act] + c.end }));
   for (let i = 0; i + 1 < cues.length; i++) if (cues[i + 1].at < cues[i].end + 0.42) cues[i].end = cues[i + 1].at - 0.42;   // never two pills at once
   AT.Caption({ cues, size: 30, bottom: 40 });

@@ -100,3 +100,10 @@ Preview in a desktop browser: open `video/scenes/demo/index.html?t=58` or `?play
 - Receipt cue keeps the buyer terminal in focus; no push-in frames the Settled tile without the gold SIMULATED callout.
 - Cursor never rests on the value a shot explains (YAML cursor removed; parked beside values elsewhere).
 - Windows on the right of payment acts start at y 170, below the badge band.
+- The YAML viewer dims every line outside the active band while it is pushed in, so the zoomed block reads alone.
+- Act 02 goes straight from the browser push-in to the terminal push-in (command pre-rolled, the 402 prints as the camera lands); the decode command gets its own push-in instead of a wide frame.
+- Act 03 output starts on the cut and the camera pushes in at 0.7 s (tool prices), then pans to the routes.
+- Act 06: the unpaid `tools/call` is pre-rolled and framed on its own (no wide frame with a dimmed pane and a bare `$ curl`).
+- Every push-in that frames the dashboard's own "Live settlements" heading carries a gold note beside it, "= SIMULATED settlements · no funds moved" (act 04 row, act 07 live segment, act 07 feed stop); the By-network stop frames the Settled tiles together with their gold callout, above the caption.
+- While the camera is pushed in, a dark band under the caption (scene-level, `.botscrim`) pairs with the engine's top scrim, so half-cropped lines never read beside the caption pill or the eyebrow.
+- The Worker info card joins the camera's crop guard (`data-at-panel`).
