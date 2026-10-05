@@ -1,0 +1,11 @@
+{
+  "name": "agenttoll-pitch",
+  "note": "2:30 pitch cut for the Colosseum pitch-video field (2:00-3:00). Hero segments render with ?noprogress&cut=pitch (no progress bar; section labels renumbered 08-10 after the 04-07 insert). Joseph's on-camera open and close (10 s each, docs/launch/PITCH_VIDEO.md) are recorded separately and go before and after this cut.",
+  "fps": 60,
+  "segments": [
+    { "scene": "video/scenes/hero/index.html", "query": "noprogress&cut=pitch", "from": 0, "to": 43.35 },
+    { "scene": "video/scenes/pitch/index.html", "from": 0, "to": 70 },
+    { "scene": "video/scenes/hero/index.html", "query": "noprogress&cut=pitch", "from": 44.22, "to": 68.95 },
+    { "scene": "video/scenes/hero/index.html", "query": "noprogress&cut=pitch", "from": 77.95, "to": 90.5 }
+  ]
+}
