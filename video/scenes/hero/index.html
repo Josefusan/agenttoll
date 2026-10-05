@@ -141,7 +141,7 @@
 <script>
 'use strict';
 const PITCH = new URLSearchParams(location.search).get('cut') === 'pitch';
-const NUM = n => (PITCH ? { '04': '08', '05': '09', '06': '10' }[n] || n : n);   // pitch cut: the pitch insert owns 04-07
+const NUM = n => (PITCH ? { '04': '08', '05': '09', '06': '09' }[n] || n : n);   // pitch cut: the pitch insert owns 04-07
 const TICKS = [5, 14, 26, 32, 43.4, 68.9, 77.1, 86];
 const S = AT.scene({ duration: 90.5, progress: { ticks: TICKS }, seed: 11 });
 const { el, style, show, progress, ease, lerp, clamp, spring, tween } = AT;

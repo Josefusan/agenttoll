@@ -70,5 +70,5 @@ Sound: `video/render/audio.mjs` synthesizes the bed and UI sounds from the cues 
 - **Cold open command.** The plan's `$ ./agenttoll --explain` doesn't exist: there is no such binary or flag in the repo. The cold open types the real ClaudeBot curl and shows its real `402`.
 - **Different ports.** The Claude runs used gateway port 28402 (earlier run, transcript), while the film-stack captures used 8502. Both ports appear exactly as captured.
 - **Dashboard rows.** Scene 04 doesn't fake a row "landing": it shows a crop of the real row from the screenshot taken right after the Claude run. Scene 05 shows both rows.
-- **Pitch cut.** `?cut=pitch` renumbers 04-06 as 08-10 for `video/scenes/pitch/EDL.json`.
+- **Pitch cut.** `?cut=pitch` renumbers 04 as 08 and 06 as 09 (05 is not in the cut) for `video/scenes/pitch/EDL.json`.
 - **Mid-transition frames.** In those frames the camera and the Ken Burns drift scale real screenshots. No pixels inside a screenshot are edited.
