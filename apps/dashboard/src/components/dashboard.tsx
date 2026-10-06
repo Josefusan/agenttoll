@@ -9,6 +9,7 @@ import { isSimulated, settlementStatus } from "@/lib/types";
 import { Breakdown } from "./breakdown";
 import { Badge, Card } from "./card";
 import { CashOut } from "./cash-out";
+import { DemoBanner } from "./demo-banner";
 import { EmptyState, ErrorState } from "./empty-state";
 import { Header } from "./header";
 import { Kpi } from "./kpi";
@@ -35,6 +36,8 @@ export function Dashboard({ payoutsUrl, gatewayUrl }: { payoutsUrl: string; gate
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
+      <DemoBanner />
+      <h1 className="sr-only">AgentToll revenue dashboard</h1>
       <Header feed={feed} lastEventAt={lastEventAt} now={now} />
 
       {load.kind === "loading" && <Skeleton />}
