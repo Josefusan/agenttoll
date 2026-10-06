@@ -166,7 +166,7 @@ Prices are quoted strings (`"0.002"`); the money path is integer-only. The full 
 
 1. Create two devnet wallets: `agenttoll-buyer --new-solana-keypair buyer.json` and the same for `payto.json`. Each command prints the address.
 2. Fund **both** addresses with devnet USDC at [faucet.circle.com](https://faucet.circle.com) (Solana Devnet). Funding `pay_to` also creates its USDC account. No SOL is needed; the facilitator pays fees.
-3. Use `agenttoll.example.yaml` (facilitator `https://facilitator.payai.network`), then run `agenttoll-buyer <url>`. It prints the Solana Explorer link for the settlement.
+3. Use `demo/real-pay.yaml` - the same config on the spare ports (origin `4300`, gateway `8702`, admin `8703`) so a real payment cannot collide with a running demo (`4000`/`8402`/`8403`). Export `AGENTTOLL_SOLANA_PAYTO` with the address you funded, then run `agenttoll-buyer http://127.0.0.1:8702/api/quote`. It prints the Solana Explorer link for the settlement.
 
 Before any funding, [docs/assets/real-facilitator-handshake.md](docs/assets/real-facilitator-handshake.md) records this same path against the real PayAI facilitator on devnet with an unfunded throwaway wallet: the facilitator rejects the payment, so no transaction exists, and the rejection is the evidence that the wire format and verify path are real.
 
