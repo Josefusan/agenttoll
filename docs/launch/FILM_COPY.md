@@ -18,9 +18,10 @@ Narrator disclosure. Put this sentence, unchanged, in the description of **every
 
 > Narrated by an AI voice (Kokoro TTS) presented as Joseph's AI assistant. Payments shown are SIMULATED on Solana devnet; no funds moved.
 
-Chapters are marked "TBC after final render". Re-time them against the final file before pasting; do
-not paste invented timestamps. Tag Colosseum, x402, Solana and PayAI only because this is their tech
-and their hackathon.
+Chapters below are timed against the final render: durations from `ffprobe` on the three MP4s, and
+boundaries from each film's own `captions.json` / `EDL.json` and the hero `SHOTLIST.md`. YouTube
+format: the first chapter is `0:00`, there are at least three, and each is at least 10 s long. Tag
+Colosseum, x402, Solana and PayAI only because this is their tech and their hackathon.
 
 ---
 
@@ -43,14 +44,11 @@ Built solo for the Colosseum Crypto World's Fair (Solana track, Base as a second
 testnet only; no customers, no revenue yet.
 
 Chapters:
-0:00 Problem
-TBC after final render: Demo clip
-TBC after final render: Why now
-TBC after final render: Who buys
-TBC after final render: Distribution (Website Factory)
-TBC after final render: Business model (PLAN, no revenue yet)
-TBC after final render: What the accelerator money builds
-TBC after final render: Close and ask
+0:00 The problem: agents read, founders pay
+0:25 Using it: Claude pays, and the cap refuses
+0:57 Why x402, and why Solana
+1:07 Why now, who buys, and the business model (PLAN)
+2:11 Proof, what's next and the founder card
 
 Repo: github.com/Josefusan/agenttoll
 
@@ -90,13 +88,14 @@ no funds moved and nothing went on chain. To take real devnet payments, see the 
 "Real devnet payments".
 
 Chapters:
-0:00 One command, no wallet
-TBC after final render: A human gets the page free
-TBC after final render: An agent gets 402 with a price
-TBC after final render: The buyer CLI pays $0.002
-TBC after final render: MCP-native challenge and tools/list prices
-TBC after final render: The founder dashboard
-TBC after final render: What is real and what is simulated
+0:00 Cold open: one command, no wallet
+0:20 Same URL, two answers: a human 200, an agent 402
+0:40 A price list for agents
+1:07 Claude pays, within caps
+1:31 MCP servers sell per tool
+1:45 The founder's dashboard
+2:20 Same rules at the edge
+2:34 Wired to real facilitators, and close
 
 Repo: github.com/Josefusan/agenttoll
 
@@ -136,11 +135,12 @@ customers, no revenue yet. Payments shown are simulated by the facilitator that 
 no funds moved.
 
 Chapters:
-0:00 Agents already read your product
-TBC after final render: Humans free, agents pay
-TBC after final render: One YAML file
-TBC after final render: The dashboard
-TBC after final render: Close
+0:00 Cold open: an agent gets a 402
+0:13 The problem: agents read free
+0:26 Why x402, why Solana, and how a payment flows
+0:43 Using it: Claude pays (and the cap refuses)
+1:08 MCP servers sell per tool
+1:19 Proof, the plan, and close
 
 Repo: github.com/Josefusan/agenttoll
 
@@ -161,7 +161,7 @@ Narrated by an AI voice (Kokoro TTS) presented as Joseph's AI assistant. Payment
 
 ## Before uploading
 
-- Re-time every "TBC after final render" chapter against the final file.
+- Chapter times are set against the final render; if a film is re-rendered, re-check them.
 - Confirm the narrator disclosure sentence is in all three descriptions, unchanged.
 - Confirm each film's on-screen label reads `simulated settlement, no funds moved` on every payment
   shot, and that no film says on-chain.
