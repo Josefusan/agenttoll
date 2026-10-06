@@ -11,6 +11,12 @@ Scene source: `video/scenes/hero/index.html`. On-screen captions and title lines
   - **Long values truncated:** these use `…` (`solana:EtWTRABZ…qa1`, `G3r9m7Ej…JtmoUt`), and the `payment-required` base64 line fades out at the panel edge.
   - **Tool-call formatting:** in the Claude panels, the arguments of each tool call are printed as compact JSON on one line, and each result is shown as a few `"key": value` pairs copied verbatim from the result JSON. The labels `→`, `└` and `Claude` are presentation, not CLI output.
 - **Plain truth only.** The film claims no revenue, users, customers or traction. Sources appear on screen as footnotes.
+- **Variant-B wording, deliberately.** `docs/launch/DEMO_VIDEO.md` bans eight words for a demo with no funded settlement: on-chain, settled, live, real payment, transaction link, explorer, mainnet, revenue earned. Five appear on screen here. None asserts that *this* demo settled, and the gold `SIMULATED · no funds moved` badge is on without a break from 32.4 s to 77.2 s, so the words never stand alone:
+  - 26.75–33 s: the Solana market figure "about $3.3M settled in one week" (KB-MKT-01, other people's volume) and the PayAI chip "a mainnet path for sub-cent traffic" (KB-SOL-03 — the rail we are *not* on).
+  - 32.3–44.3 s: the section label "03 HOW A REAL PAYMENT FLOWS" — how the protocol works, not a payment that happened.
+  - 38.02–43.33 s: "With a funded wallet, USDC settles to your pay_to after the origin succeeds." — conditional, and the diagram is labelled as the protocol.
+  - 76.3–80.4 s: the PLAN card, "a fee on settled volume" — a priced plan, not revenue earned.
+  The pitch cut reuses these segments and inherits the same wording. The demo film uses none of the banned words.
 
 ## Scenes
 

@@ -78,7 +78,7 @@ video/render/encode.sh --frames ~/agenttoll-scratch/frames/demo-preview --fps 10
 EVERY=2 video/render/sheet.sh ~/agenttoll-scratch/film-out/demo-preview.mp4 ~/vps-audit/film-shots/demo-preview
 # final master (not done by this stage): 30 fps, scale 1, about 5,025 frames
 node video/render/render.mjs --scene video/scenes/demo/index.html --fps 30 --out ~/agenttoll-scratch/frames/demo --jobs 3
-video/render/encode.sh --frames ~/agenttoll-scratch/frames/demo --fps 30 --out ~/agenttoll-scratch/film-out/agenttoll-demo.mp4 --crf 18 --clean
+video/render/encode.sh --frames ~/agenttoll-scratch/frames/demo --fps 30 --out ~/agenttoll-scratch/film-out/agenttoll-full-demo.mp4 --crf 18 --clean
 ```
 
 At 30 fps the master is about 5,025 frames. At the engine's measured rate under load, 2.6–3.9 frames/s with 2–3 shards, that is about 22–32 minutes. Before seeking, the video layer waits for the `seeked` event on the WebM, so the same `t` always gives the same frame.
