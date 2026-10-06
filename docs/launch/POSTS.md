@@ -135,8 +135,8 @@ Post when the demo video exists. Structure: problem, 30 s clip, three bullets, r
 
 ### X thread (DRAFT)
 
-Six posts, each 280 characters or fewer (count in brackets). Replace `<FILM_URL>` with the unlisted
-YouTube links from `docs/launch/FILM_COPY.md`. Do not post before the film and its artifact exist.
+Six posts, each 280 characters or fewer (count in brackets). The unlisted YouTube links are in place
+(recorded in `docs/launch/FILM_COPY.md`). Do not post before the film and its artifact exist.
 Keep the SIMULATED line in every post that shows a payment.
 
 1/ AI agents read your site, your API, your MCP server all day. You pay for the bandwidth and the content. They pay nothing. Block or absorb were the only two options.
@@ -144,12 +144,12 @@ Keep the SIMULATED line in every post that shows a payment.
 AgentToll adds a third: an open-source proxy that charges agents per request in USDC and keeps people free.
 [273]
 
-2/ 90 seconds on what AgentToll does: <FILM_URL>
+2/ 90 seconds on what AgentToll does: https://www.youtube.com/watch?v=Yv9R690Vy5s
 
 A person loads the page free. An agent gets a 402, pays $0.002 in USDC within the caps its owner set, and gets the data.
 
 [SIMULATED settlement in this film; no funds moved.]
-[221]
+[232]
 
 3/ Three things:
 
@@ -166,10 +166,10 @@ One command, no wallet: bash scripts/demo-local.sh
 
 5/ Status: devnet and testnet only. No customers, no revenue yet. Every payment in the demo is simulated by the facilitator that ships with the repo.
 
-Full demo: <FILM_URL>
+Full demo: https://www.youtube.com/watch?v=nyrIfNXOOe8
 
 Built solo with AI coding agents, for the Colosseum Crypto World's Fair (Solana track).
-[258]
+[269]
 
 6/ Ask: put it in front of something agents already read and tell me what breaks. Issues and PRs open. If you run an MCP server and want per-tool prices, I want to hear from you.
 [175]
@@ -181,9 +181,9 @@ AI agents read the sites we ship through Website Factory all day. The owner pays
 So I built AgentToll for the Colosseum Crypto World's Fair: an open-source proxy you put in front of a site, API or MCP server. People browse free. Agents get an HTTP 402 with a price and pay per request in USDC over x402.
 
 The three films:
-- Pitch (2:30): <FILM_URL>
-- Full demo: <FILM_URL>
-- 90 seconds: <FILM_URL>
+- Pitch (2:30): https://www.youtube.com/watch?v=moqrTnDGUT0
+- Full demo: https://www.youtube.com/watch?v=nyrIfNXOOe8
+- 90 seconds: https://www.youtube.com/watch?v=Yv9R690Vy5s
 
 In the repo: a Rust gateway (per-route and per-MCP-tool prices in one YAML file, x402 v2 over HTTP and the MCP-native transport, settle only after the origin succeeds, discovery at /.well-known/agenttoll.json), pay-mcp (a wallet for Claude with hard per-call and per-day caps), a founder dashboard with a live settlement feed and a report of agent traffic you are not billing yet, and a Cloudflare Worker edition sharing the core via WASM.
 
