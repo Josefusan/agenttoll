@@ -19,6 +19,7 @@ Agent Skills layout (`<name>/SKILL.md` with `name` + `description` frontmatter).
 | [hackathon-distribution](hackathon-distribution/SKILL.md) | Build-in-public posts | launch |
 | [skillbox-router](skillbox-router/SKILL.md) | Route a task to skills (vendored from Skillbox, MIT) | orchestrator |
 | [skills-library](skills-library/SKILL.md) | Skillbox discovery protocol (vendored, MIT) | orchestrator |
+| [production-architecture-audit](production-architecture-audit/SKILL.md) | Boundary ladder (levels 0-3) and the six-pillar production-grade scorecard | architect, critic |
 
 ## Imported skill packs (pulled locally, not committed)
 

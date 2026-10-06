@@ -1,0 +1,34 @@
+{
+  "skill": "production-architecture-audit",
+  "test_cases": [
+    {
+      "name": "zevari_today_is_level_0",
+      "input": "Run the production architecture audit on Zevar i as described in the ladder. Today is raw SQL against any table.",
+      "assertions": [
+        "Places the system at Level 0 No boundary",
+        "Names Level 1 as the floor and Level 2 modular monolith as the gold standard",
+        "Does not recommend microservices as the next step",
+        "Lists the three adoption changes: domain grouping, mechanical lint rule, expand/contract"
+      ]
+    },
+    {
+      "name": "scorecard_uses_six_pillars",
+      "input": "Score this design against the production-grade architecture audit PDF.",
+      "assertions": [
+        "Scores all six pillars: SoC, data modeling, state, APIs, migrations, scalability",
+        "Each pillar is out of 15 with target >= 12",
+        "Total is out of 90, not 30",
+        "Evidence notes cite criteria rather than inventing new pillars"
+      ]
+    },
+    {
+      "name": "hexagonal_is_not_a_rung",
+      "input": "Should we add a hexagonal/DDD level between the modular monolith and microservices?",
+      "assertions": [
+        "Says clean/hexagonal architecture and DDD are not separate rungs",
+        "Says they describe how to build level 2 well",
+        "Keeps the lead module as a hexagonal port inside level 2"
+      ]
+    }
+  ]
+}
