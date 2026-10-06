@@ -1,7 +1,7 @@
 # Judge interview prep (15-minute Colosseum Zoom)
 
-For Joseph. This is the shortlist interview (`KB-HACK-01`: "a small group is invited to a 15-minute
-Zoom interview"). Use the opening, the live demo and the cheat sheet as-is; the 25 answers are the
+For Joseph. This is the shortlist interview (`KB-HACK-01`: "Shortlist gets a 15-minute Zoom
+interview"). Use the opening, the live demo and the cheat sheet as-is; the 25 answers are the
 short version of what is already written down in the repo.
 
 Honesty rules for this interview: nothing here claims a settlement that has not happened. There are
