@@ -34,17 +34,21 @@ settlement:
    bash scripts/real-payment-preflight.sh 8K5C7q93ANYbSz5M8Mho7Fra9WmBa58RAcMvycbxtB5D FFgkc6ZmZHPrRwjyBFL56VP6u572g27TAyAdVqmBro7d
    ```
 
-3. Then run the buyer against a gateway configured with the real PayAI facilitator (`agenttoll.example.yaml`
-   keeps `facilitator: https://facilitator.payai.network`):
+3. Then run the buyer against a gateway built with `demo/real-pay.yaml`. That config keeps the real
+   PayAI facilitator and moves the stack off the live-demo ports (origin `4300`, gateway `8702`,
+   admin `8703`), so a real payment cannot collide with the demo on 4000/8402/8403. It reads the
+   destination from the environment:
 
    ```bash
-   agenttoll-buyer --network solana --solana-keypair ~/agenttoll-buyer.json <gateway-url>/api/quote
+   export AGENTTOLL_SOLANA_PAYTO=FFgkc6ZmZHPrRwjyBFL56VP6u572g27TAyAdVqmBro7d
+   ORIGIN_LISTEN=127.0.0.1:4300 agenttoll-demo-origin &        # origin, on the spare port
+   agenttoll-gateway --config demo/real-pay.yaml &             # gateway, on 8702
+   agenttoll-buyer --network solana --solana-keypair ~/agenttoll-buyer.json http://127.0.0.1:8702/api/quote
    ```
 
    It prints the Solana Explorer link for the settlement. Only after this succeeds may any doc or the
-   demo video say a payment settled on chain. Do not repoint the live d8 gateway to the real
-   facilitator to make this happen; run the funded wallets through a gateway built with
-   `agenttoll.example.yaml`.
+   demo video say a payment settled on chain. Do not repoint the live gateway to the real facilitator
+   to make this happen; run the funded wallets through a gateway built with `demo/real-pay.yaml`.
 
 ## 1. Record the videos (Joseph only)
 
