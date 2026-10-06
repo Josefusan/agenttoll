@@ -1,0 +1,597 @@
+{
+  "generated_utc": "2026-10-05T01:06:40+00:00",
+  "stack": "STACK_ONLY=1 GATEWAY_PORT=8502 ADMIN_PORT=8503 ORIGIN_PORT=4100 FACILITATOR_PORT=4120 CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash scripts/demo-local.sh  (build, config, keypairs, token), then CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash video/captures/tools/stack-clean.sh (same binaries/config, no curl probe, empty ledger)",
+  "dashboard": "dashboard: apps/dashboard copied to ~/agenttoll-scratch/film-dash, NEXT_PUBLIC_GATEWAY_URL=http://127.0.0.1:8502 next build, AGENTTOLL_ADMIN_URL=http://127.0.0.1:8503 AGENTTOLL_ADMIN_TOKEN=\"$(cat .demo/admin-token)\" next start -H 127.0.0.1 -p 3502",
+  "ports": {
+    "gateway": 8502,
+    "admin": 8503,
+    "origin": 4100,
+    "facilitator_simulated": 4120,
+    "dashboard": 3502
+  },
+  "simulated": "Every payment in these captures went through the local mock facilitator (demo/mock-facilitator). tx ids start with SIMULATED-. No funds moved; nothing touched a chain. Buyer and pay_to keypairs are throwaway, unfunded, in .demo/ (gitignored).",
+  "secrets": "The admin token is read from .demo/admin-token inside commands and never printed; capture_terminal.py asserts it is absent from every output. Keypair files are never read into captures (only their public keys appear).",
+  "redactions": "Absolute paths: repo root -> $REPO, home -> $HOME; pay-mcp spend file/keypair/temp dir -> $SPEND_FILE/$KEYPAIR/$WORKDIR. Nothing else is edited.",
+  "outside_git": [
+    {
+      "path": "~/agenttoll-scratch/film-out/captures/dashboard-live-recordvideo.webm",
+      "what": "Playwright recordVideo of the dashboard, 1920x1080 25 fps VP8, ~39 s, 15 payments every ~2 s",
+      "bytes": 4763141
+    },
+    {
+      "path": "~/agenttoll-scratch/film-out/captures/dashboard-live-screencast.mp4",
+      "what": "Same session via CDP screencast (JPEG q95 frames, real timestamps) -> H.264 crf 14, 1920x1080 30 fps, ~34 s; sharper than the webm",
+      "bytes": 1442006
+    }
+  ],
+  "files": [
+    {
+      "path": "claude-pays/excerpts.json",
+      "what": "Verbatim Claude-pays excerpts (3 runs, refusal, banner) parsed from docs/assets/claude-pays-transcript.md",
+      "how": "Copied from the repo transcript of an earlier real claude -p run; not re-run for the film.",
+      "command": "python3 video/captures/tools/build_manifest.py",
+      "bytes": 14209,
+      "sha256": "85a817d75865c706d7520839e6bfe29400cb8839a152fa063a5ae6fbfca65dd4"
+    },
+    {
+      "path": "dashboard/dashboard-01-empty-full.png",
+      "what": "Dashboard @2x, full page. Empty ledger: 0 payments, 0 unbilled. The dashboard's onboarding card (3 steps).",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 01-empty",
+      "bytes": 442314,
+      "sha256": "e2be29348bb5d2668f9ca02da2dc375926f0ab36c2cf6fe7d2afd52ed966555f"
+    },
+    {
+      "path": "dashboard/dashboard-01-empty-mobile-390-full.png",
+      "what": "Mobile 390 px @3x, full page. Empty ledger: 0 payments, 0 unbilled. The dashboard's onboarding card (3 steps).",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs mobile 01-empty",
+      "bytes": 442994,
+      "sha256": "fd383858764b51783ab3a5f89c010bb4becbb410a7b7e44d14ad6f92d4a050d0"
+    },
+    {
+      "path": "dashboard/dashboard-01-empty-mobile-390.boxes.json",
+      "what": "Mobile 390 px @3x, boxes JSON. Empty ledger: 0 payments, 0 unbilled. The dashboard's onboarding card (3 steps).",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs mobile 01-empty",
+      "bytes": 1137,
+      "sha256": "4c4f6a5f82110a2f760318c056b68bc26d25cf802770535b2f36b59729683490"
+    },
+    {
+      "path": "dashboard/dashboard-01-empty-mobile-390.png",
+      "what": "Mobile 390 px @3x, viewport. Empty ledger: 0 payments, 0 unbilled. The dashboard's onboarding card (3 steps).",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs mobile 01-empty",
+      "bytes": 443029,
+      "sha256": "82e05fe3f5159071076ad389a7f15b7d72527e2bd3a73b5756e7b405022678df"
+    },
+    {
+      "path": "dashboard/dashboard-01-empty.boxes.json",
+      "what": "DOM bounding boxes (CSS px) of key elements + totals. Empty ledger: 0 payments, 0 unbilled. The dashboard's onboarding card (3 steps).",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 01-empty",
+      "bytes": 1556,
+      "sha256": "3266a4c427c79328e47ca0975c619daf9259eff701867fed137f0d2b12710324"
+    },
+    {
+      "path": "dashboard/dashboard-01-empty.png",
+      "what": "Dashboard @2x, 1920x1080 viewport. Empty ledger: 0 payments, 0 unbilled. The dashboard's onboarding card (3 steps).",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 01-empty",
+      "bytes": 442358,
+      "sha256": "c593ba6a1ceb60cd156140aecf496770a8f69ed9e036e9d500dcef59779258e4"
+    },
+    {
+      "path": "dashboard/dashboard-02-unbilled-no-payments-full.png",
+      "what": "Dashboard @2x, full page. Still 0 payments, after 7 crawler hits on free pages + 1 MCP discovery call: the 'Agent traffic you are not billing yet' card (ClaudeBot 3, GPTBot 2, CCBot 1, PerplexityBot 1, unknown/mcp-endpoint 1).",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 02-unbilled-no-payments",
+      "bytes": 734564,
+      "sha256": "d7a351475a1bf264c8cfe952e162c25cbb861af92822a41b3f08a557817b1df1"
+    },
+    {
+      "path": "dashboard/dashboard-02-unbilled-no-payments.boxes.json",
+      "what": "DOM bounding boxes (CSS px) of key elements + totals. Still 0 payments, after 7 crawler hits on free pages + 1 MCP discovery call: the 'Agent traffic you are not billing yet' card (ClaudeBot 3, GPTBot 2, CCBot 1, PerplexityBot 1, unknown/mcp-endpoint 1).",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 02-unbilled-no-payments",
+      "bytes": 2448,
+      "sha256": "f4882930f9ff0bf99d88aa7c6862e331ad9d1f1e946bb326cab9809fd3d1311f"
+    },
+    {
+      "path": "dashboard/dashboard-02-unbilled-no-payments.png",
+      "what": "Dashboard @2x, 1920x1080 viewport. Still 0 payments, after 7 crawler hits on free pages + 1 MCP discovery call: the 'Agent traffic you are not billing yet' card (ClaudeBot 3, GPTBot 2, CCBot 1, PerplexityBot 1, unknown/mcp-endpoint 1).",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 02-unbilled-no-payments",
+      "bytes": 729813,
+      "sha256": "bb54fece223bded764fceb4fa1b361b177ad192d313b53b86063348d1e442909"
+    },
+    {
+      "path": "dashboard/dashboard-03-one-payment-full.png",
+      "what": "Dashboard @2x, full page. After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 03-one-payment",
+      "bytes": 871686,
+      "sha256": "322192f5ac370edb4adc2812dc8185fa34e554c1609ef5cd10eed134c22abfb2"
+    },
+    {
+      "path": "dashboard/dashboard-03-one-payment-hover-simulated-badge.png",
+      "what": "Cursor hovering the first row's Simulated badge (native tooltip not painted headless; exact title text in the boxes JSON). After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 03-one-payment --hover-badge",
+      "bytes": 680683,
+      "sha256": "62ab3ca533344a970e55a426635a23699405cf0a05edd85a6e56f10237180de0"
+    },
+    {
+      "path": "dashboard/dashboard-03-one-payment.boxes.json",
+      "what": "DOM bounding boxes (CSS px) of key elements + totals. After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 03-one-payment",
+      "bytes": 7466,
+      "sha256": "05611fd1a3bfaf33a5a5d9cf0ae72e3b6fa1b64da345dcd3a69d41448569cff6"
+    },
+    {
+      "path": "dashboard/dashboard-03-one-payment.png",
+      "what": "Dashboard @2x, 1920x1080 viewport. After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 03-one-payment",
+      "bytes": 664576,
+      "sha256": "baabc69e35df0eb7d8e4c4809d63b291849e4d27e9daf63f660382f1b4560ba9"
+    },
+    {
+      "path": "dashboard/dashboard-04-buyer-and-pay-mcp-full.png",
+      "what": "Dashboard @2x, full page. After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 04-buyer-and-pay-mcp",
+      "bytes": 1057155,
+      "sha256": "a330907b3ad87d74156e80c7cdd505fddaf93a369c0be898e38b164f84c00b4a"
+    },
+    {
+      "path": "dashboard/dashboard-04-buyer-and-pay-mcp-hover-simulated-badge.png",
+      "what": "Cursor hovering the first row's Simulated badge (native tooltip not painted headless; exact title text in the boxes JSON). After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 04-buyer-and-pay-mcp --hover-badge",
+      "bytes": 801524,
+      "sha256": "ade10f9f321cb062819e4e6d0621a7e6f028ebf3f204d4c678df452e78fcc94e"
+    },
+    {
+      "path": "dashboard/dashboard-04-buyer-and-pay-mcp.boxes.json",
+      "what": "DOM bounding boxes (CSS px) of key elements + totals. After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 04-buyer-and-pay-mcp",
+      "bytes": 8009,
+      "sha256": "0cf56054457ee83bc9ee79c7692dc418048e27a16b87f65ea6b82007df62d366"
+    },
+    {
+      "path": "dashboard/dashboard-04-buyer-and-pay-mcp.png",
+      "what": "Dashboard @2x, 1920x1080 viewport. After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 04-buyer-and-pay-mcp",
+      "bytes": 798820,
+      "sha256": "32d51f9b4ab523abddbf72d7a57c56bd8bff15af1e19222342967006182aabb6"
+    },
+    {
+      "path": "dashboard/dashboard-05-many-payments-full.png",
+      "what": "Dashboard @2x, full page. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 05-many-payments",
+      "bytes": 1280280,
+      "sha256": "18782a93fc91d7fd7e73d6e65cc0cb83aa7aaa53c1db800c2d9dda41d5d19960"
+    },
+    {
+      "path": "dashboard/dashboard-05-many-payments-hover-simulated-badge.png",
+      "what": "Cursor hovering the first row's Simulated badge (native tooltip not painted headless; exact title text in the boxes JSON). After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 05-many-payments --hover-badge",
+      "bytes": 806784,
+      "sha256": "bc46f02fd16a76fb766776774bb481701578f9af0d601646c3802bcb93fc9a07"
+    },
+    {
+      "path": "dashboard/dashboard-05-many-payments-mobile-390-full.png",
+      "what": "Mobile 390 px @3x, full page. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs mobile 05-many-payments",
+      "bytes": 1949767,
+      "sha256": "576f807a55fb65f8ba71f907d6854f6aaef45260cec400446483f2cc1687a1f8"
+    },
+    {
+      "path": "dashboard/dashboard-05-many-payments-mobile-390.boxes.json",
+      "what": "Mobile 390 px @3x, boxes JSON. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs mobile 05-many-payments",
+      "bytes": 5202,
+      "sha256": "5daf433b95d98a271beeabd34f6c958c835025278331f83c00160ea510b5f2e6"
+    },
+    {
+      "path": "dashboard/dashboard-05-many-payments-mobile-390.png",
+      "what": "Mobile 390 px @3x, viewport. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs mobile 05-many-payments",
+      "bytes": 345503,
+      "sha256": "c0caec3b5f335ad2a1607e2b4ba8d099fd5254cfc14fad58d6909c6426d63d1f"
+    },
+    {
+      "path": "dashboard/dashboard-05-many-payments.boxes.json",
+      "what": "DOM bounding boxes (CSS px) of key elements + totals. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 05-many-payments",
+      "bytes": 7965,
+      "sha256": "17690dd1a9db99d1d2a1e4dee85d96a466479d7df3ae9cad0e0004a7eb317cec"
+    },
+    {
+      "path": "dashboard/dashboard-05-many-payments.png",
+      "what": "Dashboard @2x, 1920x1080 viewport. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Playwright against the live dashboard.",
+      "command": "node video/captures/tools/dash_capture.mjs shot 05-many-payments",
+      "bytes": 808099,
+      "sha256": "789b3a2c59d60e6e2a96ca43d13f0e6d77a8872b15e26e6ddbbf90ffc23ed9d6"
+    },
+    {
+      "path": "dashboard/dashboard-live-recording.json",
+      "what": "Timing of the 15 buyer payments fired during the live recording, and paths of the webm/mp4 (outside git)",
+      "how": "Real-time recording of the dashboard while real (SIMULATED) payments landed.",
+      "command": "node video/captures/tools/dash_capture.mjs record 30 $CARGO_TARGET_DIR/debug",
+      "bytes": 8008,
+      "sha256": "ab8d7e174b2edbef4e9746dfd63f5fe86af3142588c645307c3ed13df884caff"
+    },
+    {
+      "path": "dashboard/panel-02-unbilled-no-payments-unbilled-panel.png",
+      "what": "unbilled-panel panel cropped from the @2x full-page shot. Still 0 payments, after 7 crawler hits on free pages + 1 MCP discovery call: the 'Agent traffic you are not billing yet' card (ClaudeBot 3, GPTBot 2, CCBot 1, PerplexityBot 1, unknown/mcp-endpoint 1).",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 02-unbilled-no-payments",
+      "bytes": 164223,
+      "sha256": "c76b463121308e3b3ab21a1da68a772c26e15eb2fed0a367d011c080a1e349b5"
+    },
+    {
+      "path": "dashboard/panel-03-one-payment-cash-out.png",
+      "what": "cash-out panel cropped from the @2x full-page shot. After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 03-one-payment",
+      "bytes": 56329,
+      "sha256": "e38da2bdae3a0312e6fc1559b779754fa5eac97cce0fab76791dee438d425327"
+    },
+    {
+      "path": "dashboard/panel-03-one-payment-chart-card.png",
+      "what": "chart-card panel cropped from the @2x full-page shot. After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 03-one-payment",
+      "bytes": 48714,
+      "sha256": "b437fcee0b445fc7f8af14237275292e187baff1aa4ecec6c486a3c2f002cb94"
+    },
+    {
+      "path": "dashboard/panel-03-one-payment-kpi-revenue.png",
+      "what": "kpi-revenue panel cropped from the @2x full-page shot. After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 03-one-payment",
+      "bytes": 39022,
+      "sha256": "5170b20d854d70803ef3df7239d9f63b5e650ece2482e4ba19c2724db39182dc"
+    },
+    {
+      "path": "dashboard/panel-03-one-payment-live-feed-card.png",
+      "what": "live-feed-card panel cropped from the @2x full-page shot. After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 03-one-payment",
+      "bytes": 99910,
+      "sha256": "fd82d0668a8f9411b92574eccb3deda25dcac975aa5a48613ff1f166eb11acbd"
+    },
+    {
+      "path": "dashboard/panel-03-one-payment-network-split.png",
+      "what": "network-split panel cropped from the @2x full-page shot. After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 03-one-payment",
+      "bytes": 59186,
+      "sha256": "eb9b06f26931ad74d8fd3bc2212e69655234703b53be8f4e7fec0165e62e74b1"
+    },
+    {
+      "path": "dashboard/panel-03-one-payment-unbilled-panel.png",
+      "what": "unbilled-panel panel cropped from the @2x full-page shot. After the first buyer CLI payment: $0.002, 1 paid request, 1 live-feed row with Solana devnet + Simulated badges, cash out $0.00 spendable.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 03-one-payment",
+      "bytes": 157428,
+      "sha256": "5cbaae78b07885b1ad7a329330e46befc8cb01419784d14c12b079db7d9cd854"
+    },
+    {
+      "path": "dashboard/panel-04-buyer-and-pay-mcp-cash-out.png",
+      "what": "cash-out panel cropped from the @2x full-page shot. After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 04-buyer-and-pay-mcp",
+      "bytes": 55856,
+      "sha256": "9930480cbf3f2b675fd42cf503d87c7bb6b3754309971c4295a2bf188734e4af"
+    },
+    {
+      "path": "dashboard/panel-04-buyer-and-pay-mcp-chart-card.png",
+      "what": "chart-card panel cropped from the @2x full-page shot. After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 04-buyer-and-pay-mcp",
+      "bytes": 66124,
+      "sha256": "7a07910d1a4e528a8072c9b1b5875b83a72be07ab36229d030ca6e2cbee3d7b6"
+    },
+    {
+      "path": "dashboard/panel-04-buyer-and-pay-mcp-kpi-revenue.png",
+      "what": "kpi-revenue panel cropped from the @2x full-page shot. After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 04-buyer-and-pay-mcp",
+      "bytes": 41433,
+      "sha256": "5be113a451dbead4e2237c941b7920bad326087f266e1eab6781e4f57fd8b0d5"
+    },
+    {
+      "path": "dashboard/panel-04-buyer-and-pay-mcp-live-feed-card.png",
+      "what": "live-feed-card panel cropped from the @2x full-page shot. After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 04-buyer-and-pay-mcp",
+      "bytes": 164771,
+      "sha256": "84806ca2cd16f9039abe474573a2e8a1ff86197d0d7de713f6a1c54b43cccc5a"
+    },
+    {
+      "path": "dashboard/panel-04-buyer-and-pay-mcp-network-split.png",
+      "what": "network-split panel cropped from the @2x full-page shot. After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 04-buyer-and-pay-mcp",
+      "bytes": 58845,
+      "sha256": "8124567515a2c58787ce2a98e97250d8b9c5b00377609dfc2cedca4c4e3291a5"
+    },
+    {
+      "path": "dashboard/panel-04-buyer-and-pay-mcp-unbilled-panel.png",
+      "what": "unbilled-panel panel cropped from the @2x full-page shot. After the pay-mcp session (pay_and_fetch $0.002, search_docs $0.005, generate_report refused) and a $0.001 blog payment: 4 payments, $0.010, mcp search_docs row, chart starts.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 04-buyer-and-pay-mcp",
+      "bytes": 160871,
+      "sha256": "7e814620cabe0ff7c2f4834f835a3ac45e2698f67094fb01d8f8d930cc4d4e4b"
+    },
+    {
+      "path": "dashboard/panel-05-many-payments-cash-out.png",
+      "what": "cash-out panel cropped from the @2x full-page shot. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 05-many-payments",
+      "bytes": 56724,
+      "sha256": "fe08bc25f5faf64463002c19bf1c4c219f957d918588ef4397fc8dbaee6c0f78"
+    },
+    {
+      "path": "dashboard/panel-05-many-payments-chart-card.png",
+      "what": "chart-card panel cropped from the @2x full-page shot. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 05-many-payments",
+      "bytes": 67348,
+      "sha256": "5c3084c49ce8a2ada1027e199ed330dd06a10245e13111dae61d6e234b46007e"
+    },
+    {
+      "path": "dashboard/panel-05-many-payments-kpi-revenue.png",
+      "what": "kpi-revenue panel cropped from the @2x full-page shot. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 05-many-payments",
+      "bytes": 43512,
+      "sha256": "748f9af9817f354c7af3ae3c886dbe6f5e2ba7822e78f795fb8ed42dc2f95d95"
+    },
+    {
+      "path": "dashboard/panel-05-many-payments-live-feed-card.png",
+      "what": "live-feed-card panel cropped from the @2x full-page shot. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 05-many-payments",
+      "bytes": 329075,
+      "sha256": "b654c553ba95411f1823703fac47aadcb3e7cf34515e26ff9386ac8d4b5dff1f"
+    },
+    {
+      "path": "dashboard/panel-05-many-payments-network-split.png",
+      "what": "network-split panel cropped from the @2x full-page shot. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 05-many-payments",
+      "bytes": 60075,
+      "sha256": "45392c5fa248023ac5e47c110ec38ad6c29e6f73fee78e5a2dd4ef2bce519b28"
+    },
+    {
+      "path": "dashboard/panel-05-many-payments-unbilled-panel.png",
+      "what": "unbilled-panel panel cropped from the @2x full-page shot. After the 30 s live recording (15 more buyer payments): 19 payments, $0.034 (all simulated), 14 unbilled, full chart, routes /api/quote, mcp:search_docs, /blog/*.",
+      "how": "Pixel crop of the real screenshot using the DOM box.",
+      "command": "python3 video/captures/tools/crop_panels.py 05-many-payments",
+      "bytes": 160871,
+      "sha256": "7e814620cabe0ff7c2f4834f835a3ac45e2698f67094fb01d8f8d930cc4d4e4b"
+    },
+    {
+      "path": "origin/origin-api-quote.png",
+      "what": "What a human browser sees at the gateway: api-quote (1920x1080 @2x)",
+      "how": "Real browser load through the gateway with a desktop Chrome UA (200, no 402).",
+      "command": "node video/captures/tools/dash_capture.mjs origin",
+      "bytes": 49592,
+      "sha256": "7b2c57b3c0fb1066444dbef5677bac5ce52ba1de14a73cd237745ac616eaad9a"
+    },
+    {
+      "path": "origin/origin-blog-hello.png",
+      "what": "What a human browser sees at the gateway: blog-hello (1920x1080 @2x)",
+      "how": "Real browser load through the gateway with a desktop Chrome UA (200, no 402).",
+      "command": "node video/captures/tools/dash_capture.mjs origin",
+      "bytes": 50389,
+      "sha256": "c044c3b01f67b3f54018e0244dbe0ab4bc30bcb1393e5b8005717b41052037d3"
+    },
+    {
+      "path": "origin/origin-home.png",
+      "what": "What a human browser sees at the gateway: home (1920x1080 @2x)",
+      "how": "Real browser load through the gateway with a desktop Chrome UA (200, no 402).",
+      "command": "node video/captures/tools/dash_capture.mjs origin",
+      "bytes": 57722,
+      "sha256": "f31ecc4fa3d2316c82727c69bf8ec2411145f8d91bc624b0bfcd2aca5959b5a5"
+    },
+    {
+      "path": "origin/origin.json",
+      "what": "Status, response headers and page text for each origin screenshot",
+      "how": "Real browser load through the gateway with a desktop Chrome UA.",
+      "command": "node video/captures/tools/dash_capture.mjs origin",
+      "bytes": 1532,
+      "sha256": "d4fc3622c61a3eca2db354816d736f69b6a3d4a963db4a2dad5865bb9fc2b1a2"
+    },
+    {
+      "path": "terminal/admin-stats.json",
+      "what": "The founder's ledger from the admin API (token read from the mode-600 file inside the command, never printed)",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s -H \"Authorization: Bearer $(cat .demo/admin-token)\" http://127.0.0.1:8503/admin/stats | python3 -m json.tool",
+      "bytes": 15475,
+      "sha256": "c7348e5da4259fe02247d6657194380cbed4127452233db3f91466ed115e560a"
+    },
+    {
+      "path": "terminal/buyer-pay-1.json",
+      "what": "The buyer CLI pays $0.002 for /api/quote (SIMULATED settlement): status, body, receipt",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "BUYER_SOLANA_KEYPAIR=.demo/buyer.json agenttoll-buyer http://127.0.0.1:8502/api/quote",
+      "bytes": 1042,
+      "sha256": "6b9ec64daaaaca769fcb42c6b857a6e27637352e9e083fc60a78d4ee86ebbc9a"
+    },
+    {
+      "path": "terminal/buyer-pay-blog.json",
+      "what": "The buyer CLI pays $0.001 for a blog post (route GET /blog/*)",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "BUYER_SOLANA_KEYPAIR=.demo/buyer.json agenttoll-buyer http://127.0.0.1:8502/blog/hello",
+      "bytes": 1087,
+      "sha256": "186d488f5dbc1a2838123226d74e0d1846eb3c2661f0764f75b392b8ceffa713"
+    },
+    {
+      "path": "terminal/claude-user-402.json",
+      "what": "Claude-User/1.0 asks for the same URL: 402 Payment Required with the full headers",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s -i -A 'Claude-User/1.0' http://127.0.0.1:8502/api/quote",
+      "bytes": 1924,
+      "sha256": "ac7ec428b4eca520fcc56ba334325b88ffe436148d61467f9ae57945db4674e4"
+    },
+    {
+      "path": "terminal/claudebot-402.json",
+      "what": "ClaudeBot asks for the same URL: 402 Payment Required with the full headers",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s -i -A 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' http://127.0.0.1:8502/api/quote",
+      "bytes": 1938,
+      "sha256": "64515e8e40a4448e14c0608fedc09be72a5e7e5b18ef9e270d69c6db4f54f4a7"
+    },
+    {
+      "path": "terminal/crawler-hits-free-pages.json",
+      "what": "AI crawlers read free pages (price 0): served, and counted as unbilled agent traffic",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "for ua in 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' 'Mozilla/5.0 (compatible; ClaudeBot/1.0)' 'Mozilla/5.0 (compatible; GPTBot/1.2)' 'Mozilla/5.0 (compatible; GPTBot/1.2)' 'Mozilla/5.0 (compatible; PerplexityBot/1.0)' 'CCBot/2.0'; do curl -s -o /dev/null -w \"%{http_code}  $ua\\n\" -A \"$ua\" http://127.0.0.1:8502/; done",
+      "bytes": 1237,
+      "sha256": "30cbbdb8efeceb4fcafdce10ce9b9ef671f2ee7bbd1fc9ad2b6736573256c2a2"
+    },
+    {
+      "path": "terminal/demo-config.json",
+      "what": "The whole demo price file (no secrets in it: pay_to is an env placeholder)",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "cat demo/agenttoll.demo.yaml",
+      "bytes": 1714,
+      "sha256": "7991d928cce37be8c322a63d4867dc198a2a962c4a4296863ea9afef2b176320"
+    },
+    {
+      "path": "terminal/gptbot-402.json",
+      "what": "GPTBot asks for the same URL: 402 Payment Required with the full headers",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s -i -A 'Mozilla/5.0 (compatible; GPTBot/1.2)' http://127.0.0.1:8502/api/quote",
+      "bytes": 1926,
+      "sha256": "626163f7e40de73f674de89a666bdc8d1ac2e6de03a771d0ecb4e6f8b26aa016"
+    },
+    {
+      "path": "terminal/human-get-quote.json",
+      "what": "A human browser asks for /api/quote: free, 200 + the JSON body",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s -i -A 'Mozilla/5.0 (Macintosh) Chrome/141' -H 'Accept-Language: en' -H 'Sec-Fetch-Mode: navigate' http://127.0.0.1:8502/api/quote",
+      "bytes": 899,
+      "sha256": "b11e056530dc60d5fe99caca54e6d9da22dfd59ad34267fef9ca5da9ac2fd6c8"
+    },
+    {
+      "path": "terminal/mcp-generate-report-challenge.json",
+      "what": "MCP tools/call generate_report without payment: the $0.05 challenge the wallet later refuses",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s http://127.0.0.1:8502/mcp -H 'content-type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"generate_report\",\"arguments\":{}}}' | python3 -m json.tool",
+      "bytes": 2645,
+      "sha256": "92317e77d245fc84043a5b4938ac353a33dcd6e2fcdb3bb66080ac2e5451af8f"
+    },
+    {
+      "path": "terminal/mcp-search-docs-challenge.json",
+      "what": "MCP tools/call search_docs without payment: MCP-native x402 challenge (isError + accepts)",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s http://127.0.0.1:8502/mcp -H 'content-type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"search_docs\",\"arguments\":{\"query\":\"x402\"}}}' | python3 -m json.tool",
+      "bytes": 2633,
+      "sha256": "079fa9a37bc6018b647a423cd5dfb6d2b79bf5a38935f455e8d55db5588eb78b"
+    },
+    {
+      "path": "terminal/mcp-tools-list.json",
+      "what": "MCP tools/list through the gateway: free discovery, prices in each description",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s http://127.0.0.1:8502/mcp -H 'content-type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}' | python3 -m json.tool",
+      "bytes": 2152,
+      "sha256": "4067a999f1251e75e6b26a9b71790181db3e7ab23ceeba5bcfdd6f86b475aad9"
+    },
+    {
+      "path": "terminal/pay-mcp-session.json",
+      "what": "Real pay-mcp tool calls over stdio against the film stack (SIMULATED facilitator). Driven by a script, not by an LLM; the Claude-driven runs are in docs/assets/claude-pays-transcript.md.",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "node video/captures/tools/pay_mcp_driver.mjs video/captures/terminal/pay-mcp-session.json",
+      "bytes": 21463,
+      "sha256": "2a8842498b7ba2893e764ae3502c36d36b85a312d6073fa6874e2dcb5a10d299"
+    },
+    {
+      "path": "terminal/payment-required-decoded.json",
+      "what": "The PAYMENT-REQUIRED header from the 402, base64-decoded into the x402 quote",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s -D - -o /dev/null -A 'Claude-User/1.0' http://127.0.0.1:8502/api/quote | sed -n 's/^payment-required: //Ip' | tr -d '\\r' | base64 -d | python3 -m json.tool",
+      "bytes": 1459,
+      "sha256": "e163e0d3ac339da4f89db539027355b86a710d1c373f680f63194cef50318e63"
+    },
+    {
+      "path": "terminal/stack-only.json",
+      "what": "STACK_ONLY=1 scripts/demo-local.sh on the film spare ports: origin + SIMULATED facilitator + gateway with an empty ledger (stopped with tmux kill-session after the banner)",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "STACK_ONLY=1 GATEWAY_PORT=8502 ADMIN_PORT=8503 ORIGIN_PORT=4100 FACILITATOR_PORT=4120 CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash scripts/demo-local.sh",
+      "bytes": 1239,
+      "sha256": "da6ea421e51f9bd6909d0830b4d1a80478c04d0a5492ec7975d173d80bbd8380"
+    },
+    {
+      "path": "terminal/well-known.json",
+      "what": "The public price list agents read before spending",
+      "how": "Real run against the film stack (gateway :8502, SIMULATED facilitator :4120).",
+      "command": "curl -s http://127.0.0.1:8502/.well-known/agenttoll.json | python3 -m json.tool",
+      "bytes": 1911,
+      "sha256": "7b2381d852cfdb3280119ae638ee54496d1493b020ddf37f3b1feea443f65ced"
+    },
+    {
+      "path": "tools/build_manifest.py",
+      "what": "Capture tooling (rerunnable)",
+      "how": "Source",
+      "command": null,
+      "bytes": 9358,
+      "sha256": "c62e09bcfcafdf34309f7122388d0b097bd2b10b37dd5a08f2ff6e6ed1be63fa"
+    },
+    {
+      "path": "tools/capture_terminal.py",
+      "what": "Capture tooling (rerunnable)",
+      "how": "Source",
+      "command": null,
+      "bytes": 7384,
+      "sha256": "ee774e2eb59cce10b768264e89630922dafdc79c629e5779442a981a250c7620"
+    },
+    {
+      "path": "tools/crop_panels.py",
+      "what": "Capture tooling (rerunnable)",
+      "how": "Source",
+      "command": null,
+      "bytes": 1615,
+      "sha256": "26063604705e3706d949d519081088619e1606b02447ab074e3a8dc07175023b"
+    },
+    {
+      "path": "tools/dash_capture.mjs",
+      "what": "Capture tooling (rerunnable)",
+      "how": "Source",
+      "command": null,
+      "bytes": 14155,
+      "sha256": "59354abe8b04c667954e144c79f1b52b1aea3b961a6c78da55624dd0222f76a5"
+    },
+    {
+      "path": "tools/pay_mcp_driver.mjs",
+      "what": "Capture tooling (rerunnable)",
+      "how": "Source",
+      "command": null,
+      "bytes": 4381,
+      "sha256": "5cdcb0eaed841cdff90d744cae060afa5c33e54586d59a576efafe20a3fe9fa5"
+    },
+    {
+      "path": "tools/stack-clean.sh",
+      "what": "Capture tooling (rerunnable)",
+      "how": "Source",
+      "command": null,
+      "bytes": 1717,
+      "sha256": "9da25d28b3da088ffac272c8d7a8a1c0f4fc0b968bffd48f6ec56c65b77cfa60"
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+[
+ {
+  "id": "p01",
+  "start": 1.6,
+  "end": 5.45,
+  "text": "Hi, I'm Joseph's AI assistant. Let me show you AgentToll.",
+  "say": "Hi, I'm Joseph's AI assistant. Let me show you Agent Toll."
+ },
+ {
+  "id": "p02",
+  "start": 5.6,
+  "end": 9.2,
+  "text": "Agents read your site all day. They pay nothing.",
+  "say": "Agents read your site all day. They pay nothing."
+ },
+ {
+  "id": "p03",
+  "start": 9.35,
+  "end": 13.8,
+  "text": "8 agent requests, no price: $0.016 left on the table.",
+  "say": "eight agent requests, no price: one point six cents left on the table."
+ },
+ {
+  "id": "p04",
+  "start": 14.3,
+  "end": 17.3,
+  "text": "Same URL. A person gets the data, free.",
+  "say": "Same U R L. A person gets the data, free."
+ },
+ {
+  "id": "p05",
+  "start": 17.45,
+  "end": 20.9,
+  "text": "An agent gets 402 Payment Required.",
+  "say": "An agent gets four oh two, Payment Required."
+ },
+ {
+  "id": "p06",
+  "start": 21.05,
+  "end": 25.6,
+  "text": "People: free. Agents: $0.002.",
+  "say": "People: free. Agents: two tenths of a cent."
+ },
+ {
+  "id": "p07",
+  "start": 25.8,
+  "end": 28.15,
+  "text": "Claude gets a capped wallet.",
+  "say": "Claude gets a capped wallet."
+ },
+ {
+  "id": "p08",
+  "start": 28.25,
+  "end": 31.85,
+  "text": "It checks the price and caps, then pays $0.002.",
+  "say": "It checks the price and caps, then pays two tenths of a cent."
+ },
+ {
+  "id": "p09",
+  "start": 31.95,
+  "end": 33.8,
+  "text": "The receipt says SIMULATED.",
+  "say": "The receipt says simulated."
+ },
+ {
+  "id": "p10",
+  "start": 33.95,
+  "end": 38.35,
+  "text": "It lands on the founder's dashboard, simulated: no transaction exists.",
+  "say": "It lands on the founder's dashboard, simulated: no transaction exists."
+ },
+ {
+  "id": "p11",
+  "start": 38.45,
+  "end": 41.65,
+  "text": "Now a $0.05 tool, over the $0.01 per-call cap.",
+  "say": "Now a five-cent tool, over the one-cent per-call cap."
+ },
+ {
+  "id": "p12",
+  "start": 42.05,
+  "end": 44.05,
+  "text": "Refused before signing.",
+  "say": "Refused before signing."
+ },
+ {
+  "id": "p13",
+  "start": 44.45,
+  "end": 49.45,
+  "text": "No money moved. The caps win, and Claude does not work around them.",
+  "say": "No money moved. The caps win, and Claude does not work around them."
+ },
+ {
+  "id": "p14",
+  "start": 51.25,
+  "end": 56.95,
+  "text": "MCP servers sell per tool. Discovery stays free; search_docs costs $0.005.",
+  "say": "M C P servers sell per tool. Discovery stays free; search docs costs half a cent."
+ },
+ {
+  "id": "p15",
+  "start": 57.1,
+  "end": 62.35,
+  "text": "Solana leads x402: about $3.3M settled in one week.",
+  "say": "Solana leads x four oh two: about three point three million dollars settled in one week."
+ },
+ {
+  "id": "p16",
+  "start": 62.52,
+  "end": 67.83,
+  "text": "With a funded wallet, USDC settles to your pay_to after the origin succeeds.",
+  "say": "With a funded wallet, U S D C settles to your pay to after the origin succeeds."
+ },
+ {
+  "id": "p17",
+  "start": 67.95,
+  "end": 72.25,
+  "text": "Why now? PayAI batch settlement on Solana, Sep 30.",
+  "say": "Why now? Pay A I batch settlement on Solana, September thirtieth."
+ },
+ {
+  "id": "p18",
+  "start": 72.45,
+  "end": 77.25,
+  "text": "Cloudflare announced a gateway in July: waitlist-only, tied to its network.",
+  "say": "Cloudflare announced a gateway in July: waitlist-only, tied to its network."
+ },
+ {
+  "id": "p19",
+  "start": 77.4,
+  "end": 82.7,
+  "text": "Coinbase's Payments MCP already pays x402 on Solana.",
+  "say": "Coinbase's Payments M C P already pays x four oh two on Solana."
+ },
+ {
+  "id": "p20",
+  "start": 82.95,
+  "end": 86.85,
+  "text": "The open, self-hosted version was not built. So we built it.",
+  "say": "The open, self-hosted version was not built. So we built it."
+ },
+ {
+  "id": "p21",
+  "start": 87.75,
+  "end": 91.15,
+  "text": "Who buys? Sellers whose product agents already use.",
+  "say": "Who buys? Sellers whose product agents already use."
+ },
+ {
+  "id": "p22",
+  "start": 91.45,
+  "end": 93.75,
+  "text": "Say you run a small data API.",
+  "say": "Say you run a small data A P I."
+ },
+ {
+  "id": "p23",
+  "start": 94.05,
+  "end": 97.85,
+  "text": "Agents call it all day, and none of them can sign up for a key.",
+  "say": "Agents call it all day, and none of them can sign up for a key."
+ },
+ {
+  "id": "p24",
+  "start": 98.15,
+  "end": 102.05,
+  "text": "Put AgentToll in front: each call quotes $0.002.",
+  "say": "Put Agent Toll in front: each call quotes two tenths of a cent."
+ },
+ {
+  "id": "p25",
+  "start": 102.35,
+  "end": 105.85,
+  "text": "The agent pays in USDC, straight to your own pay_to.",
+  "say": "The agent pays in U S D C, straight to your own pay to."
+ },
+ {
+  "id": "p26",
+  "start": 106.05,
+  "end": 109.75,
+  "text": "A card can't bill $0.002. x402 can.",
+  "say": "A card can't bill two tenths of a cent. x four oh two can."
+ },
+ {
+  "id": "p27",
+  "start": 110.05,
+  "end": 113.45,
+  "text": "How we make money: a plan. No revenue yet.",
+  "say": "How we make money: a plan. No revenue yet."
+ },
+ {
+  "id": "p28",
+  "start": 113.75,
+  "end": 118.25,
+  "text": "The core is free. Hosted: a flat tier plus a fee on settled volume.",
+  "say": "The core is free. Hosted: a flat tier plus a fee on settled volume."
+ },
+ {
+  "id": "p29",
+  "start": 118.55,
+  "end": 122.25,
+  "text": "We charge for convenience, never by holding the seller's funds.",
+  "say": "We charge for convenience, never by holding the seller's funds."
+ },
+ {
+  "id": "p30",
+  "start": 123.15,
+  "end": 127.45,
+  "text": "Distribution: we already ship landing pages to small businesses.",
+  "say": "Distribution: we already ship landing pages to small businesses."
+ },
+ {
+  "id": "p31",
+  "start": 127.75,
+  "end": 130.75,
+  "text": "The plan: each client's pay_to is their own address.",
+  "say": "The plan: each client's pay to is their own address."
+ },
+ {
+  "id": "p32",
+  "start": 131.55,
+  "end": 136.55,
+  "text": "119 of 119 evals pass. Run them yourself.",
+  "say": "one hundred nineteen of one hundred nineteen evals pass. Run them yourself."
+ },
+ {
+  "id": "p33",
+  "start": 136.7,
+  "end": 140.8,
+  "text": "What's next, as a plan: a funded devnet settlement, then mainnet.",
+  "say": "What's next, as a plan: a funded dev net settlement, then main net."
+ },
+ {
+  "id": "p34",
+  "start": 141.1,
+  "end": 144.0,
+  "text": "A funded wallet is the only missing piece.",
+  "say": "A funded wallet is the only missing piece."
+ },
+ {
+  "id": "p35",
+  "start": 144.8,
+  "end": 148.8,
+  "text": "Joseph Clark builds AgentToll, at Clark Technology Ventures.",
+  "say": "Joseph Clark builds Agent Toll, at Clark Technology Ventures."
+ },
+ {
+  "id": "p36",
+  "start": 149.05,
+  "end": 152.5,
+  "text": "A solo builder, working with AI coding agents.",
+  "say": "A solo builder, working with AI coding agents."
+ },
+ {
+  "id": "p37",
+  "start": 152.85,
+  "end": 156.35,
+  "text": "Open source. One command, no wallet needed.",
+  "say": "Open source. One command, no wallet needed."
+ }
+]

@@ -32,7 +32,8 @@ fn app() -> Router {
 
 async fn home() -> Html<&'static str> {
     Html(concat!(
-        "<!doctype html><html lang=en><head><meta charset=utf-8><title>Acme Data</title></head>",
+        "<!doctype html><html lang=en><head><meta charset=utf-8><title>Acme Data</title>",
+        "<style>:root{color-scheme:dark}body{margin:0;padding:64px 80px;background:#0B0A16;color:#F5F4FF;font:22px/1.6 -apple-system,\"Segoe UI\",Inter,system-ui,sans-serif}h1{margin:0 0 14px;font-size:48px;line-height:1.1;letter-spacing:-.02em}p{margin:0 0 12px;color:#A9A6C9}a{color:#2DD4BF}</style></head>",
         "<body><h1>Acme Data</h1><p>Humans read this page for free.</p>",
         "<p><a href=/blog/agent-economy>Read the blog</a></p></body></html>"
     ))
@@ -44,7 +45,7 @@ async fn blog(Path(slug): Path<String>) -> Html<String> {
         .filter(|c| c.is_ascii_alphanumeric() || *c == '-')
         .collect();
     Html(format!(
-        "<!doctype html><html lang=en><head><meta charset=utf-8><title>{slug}</title></head>\
+        "<!doctype html><html lang=en><head><meta charset=utf-8><title>{slug}</title><style>:root{{color-scheme:dark}}body{{margin:0;padding:64px 80px;background:#0B0A16;color:#F5F4FF;font:22px/1.6 -apple-system,\"Segoe UI\",Inter,system-ui,sans-serif}}h1{{margin:0 0 14px;font-size:48px;line-height:1.1;letter-spacing:-.02em}}p{{margin:0 0 12px;color:#A9A6C9}}a{{color:#2DD4BF}}</style></head>\
          <body><h1>{slug}</h1><p>A blog post agents pay a tenth of a cent to read.</p></body></html>"
     ))
 }

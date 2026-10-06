@@ -1,0 +1,16 @@
+{
+  "id": "buyer-pay-blog",
+  "what": "The buyer CLI pays $0.001 for a blog post (route GET /blog/*)",
+  "command": "BUYER_SOLANA_KEYPAIR=.demo/buyer.json agenttoll-buyer http://127.0.0.1:8502/blog/hello",
+  "cwd": "$REPO",
+  "path_prepend": "$CARGO_TARGET_DIR/debug (prebuilt agenttoll-* binaries)",
+  "exit": 0,
+  "duration_ms": 507.6,
+  "started_utc": "2026-10-04T22:20:01.946+00:00",
+  "stdout": "status: 200 OK\nbody:   <!doctype html><html lang=en><head><meta charset=utf-8><title>hello</title></head><body><h1>hello</h1><p>A blog post agents pay a tenth of a cent to read.</p></body></html>\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-44fc39cc23387a8045233989\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n",
+  "stderr": "buyer 9MXtsuUyy9UF3NNTD9BDkXyFj9CDUMrYYXvPyr1DbbRh on Solana devnet\n",
+  "stdout_sha256": "12af00d4b35db149c9c90258d7a2bc79e0e04045e292d2d7173555803d6f8a21",
+  "stderr_sha256": "51fd29ed7f9318155d2b4d3bd40c9ea4a656ab15a622cb28f3295a91158779ea",
+  "redactions": [],
+  "simulated": true
+}

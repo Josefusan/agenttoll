@@ -1,0 +1,46 @@
+{
+  "state": "01-empty",
+  "captured_utc": "2026-10-04T22:17:44.002Z",
+  "url": "http://127.0.0.1:3502/",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "deviceScaleFactor": 2,
+  "coords": "CSS px from the top-left of the page at scroll 0; multiply by 2 for PNG pixels",
+  "page_height": 1080,
+  "screenshot": "dashboard/dashboard-01-empty.png",
+  "fullpage_screenshot": "dashboard/dashboard-01-empty-full.png",
+  "stats_totals": {
+    "revenue_atomic": 0,
+    "payments": 0,
+    "unique_agents": 0,
+    "unbilled_agent_requests": 0,
+    "simulated_atomic": 0,
+    "unconfirmed_atomic": 0
+  },
+  "elements": {
+    "header": {
+      "x": 352,
+      "y": 0,
+      "width": 1216,
+      "height": 78.5,
+      "text": "AgentToll\nRevenue\nAgents pay per request in USDC. Humans browse free.\nLive, waiting for settlements"
+    },
+    "live_indicator": {
+      "x": 1372.3,
+      "y": 24.3,
+      "width": 195.7,
+      "height": 30,
+      "text": "Live, waiting for settlements"
+    },
+    "empty_state": {
+      "x": 352,
+      "y": 78.5,
+      "width": 1216,
+      "height": 512.1,
+      "text": "NO AGENT PAYMENTS YET\nPoint an agent at your gateway and this page fills itself.\nHumans who open your site still get the normal page. An agent hitting a priced route gets a 402 with the USDC price, pays, and the settlement shows up here within a second.\n1\nSee the challenge an agent sees\ncurl -i -A \"ClaudeBot/1.0\" http://127.0.0.1:8502/api/quote\n2\nPay it with the demo buyer (devnet USDC)\ncargo run "
+    },
+    "live_feed_rows": 0
+  }
+}

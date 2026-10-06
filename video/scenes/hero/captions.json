@@ -1,0 +1,237 @@
+[
+  {
+    "start": 1.6,
+    "end": 5.45,
+    "text": "Hi, I'm Joseph's AI assistant. Let me show you AgentToll.",
+    "kind": "caption",
+    "only": "pitch"
+  },
+  {
+    "start": 2.5,
+    "end": 5.9,
+    "text": "Agents already use your product. Now you can bill them.",
+    "kind": "title"
+  },
+  {
+    "start": 5.1,
+    "end": 8.5,
+    "text": "Agents read. Founders pay.",
+    "kind": "title"
+  },
+  {
+    "start": 5.6,
+    "end": 9.2,
+    "text": "Agents read your site all day. They pay nothing.",
+    "kind": "caption"
+  },
+  {
+    "start": 6.3,
+    "end": 8.55,
+    "text": "Until now the choices were block them or absorb it.",
+    "kind": "title"
+  },
+  {
+    "start": 7.1,
+    "end": 8.65,
+    "text": "7 agent reads · $0 billed",
+    "kind": "title"
+  },
+  {
+    "start": 9.35,
+    "end": 13.8,
+    "text": "8 agent requests, no price: $0.016 left on the table.",
+    "kind": "caption"
+  },
+  {
+    "start": 14.3,
+    "end": 17.3,
+    "text": "Same URL. A person gets the data, free.",
+    "kind": "caption"
+  },
+  {
+    "start": 17.45,
+    "end": 20.9,
+    "text": "An agent gets 402 Payment Required.",
+    "kind": "caption"
+  },
+  {
+    "start": 21.05,
+    "end": 25.6,
+    "text": "People: free. Agents: $0.002.",
+    "kind": "caption"
+  },
+  {
+    "start": 26.05,
+    "end": 28.05,
+    "text": "x402: the web's 402 status code, finally paid.",
+    "kind": "title"
+  },
+  {
+    "start": 26.75,
+    "end": 32.0,
+    "text": "Solana leads x402: about $3.3M settled in one week.",
+    "kind": "caption"
+  },
+  {
+    "start": 28.1,
+    "end": 33.0,
+    "text": "≈ $3.3M USDC settled over x402 on Solana in one week. Solana took the top spot for agent payments.",
+    "kind": "title"
+  },
+  {
+    "start": 29.0,
+    "end": 33.0,
+    "text": "KB-SOL-03 PayAI batch settlement: a mainnet path for sub-cent traffic",
+    "kind": "title"
+  },
+  {
+    "start": 29.35,
+    "end": 33.0,
+    "text": "KB-SOL-02 The agent only holds USDC: the facilitator pays the fee",
+    "kind": "title"
+  },
+  {
+    "start": 32.3,
+    "end": 44.3,
+    "text": "03 HOW A REAL PAYMENT FLOWS",
+    "kind": "title"
+  },
+  {
+    "start": 33.0,
+    "end": 37.6,
+    "text": "The agent signs. The facilitator verifies. The origin answers.",
+    "kind": "caption"
+  },
+  {
+    "start": 38.02,
+    "end": 43.33,
+    "text": "With a funded wallet, USDC settles to your pay_to after the origin succeeds.",
+    "kind": "caption"
+  },
+  {
+    "start": 40.45,
+    "end": 44.3,
+    "text": "Funds go to your pay_to. AgentToll holds nothing.",
+    "kind": "title"
+  },
+  {
+    "start": 44.75,
+    "end": 47.1,
+    "text": "Claude gets a capped wallet.",
+    "kind": "caption"
+  },
+  {
+    "start": 47.2,
+    "end": 50.8,
+    "text": "It checks the price and caps, then pays $0.002.",
+    "kind": "caption"
+  },
+  {
+    "start": 50.9,
+    "end": 52.75,
+    "text": "The receipt says SIMULATED.",
+    "kind": "caption"
+  },
+  {
+    "start": 52.9,
+    "end": 57.3,
+    "text": "It lands on the founder's dashboard, simulated: no transaction exists.",
+    "kind": "caption"
+  },
+  {
+    "start": 57.4,
+    "end": 60.6,
+    "text": "Now a $0.05 tool, over the $0.01 per-call cap.",
+    "kind": "caption"
+  },
+  {
+    "start": 61.0,
+    "end": 63.0,
+    "text": "Refused before signing.",
+    "kind": "caption"
+  },
+  {
+    "start": 63.4,
+    "end": 68.4,
+    "text": "No money moved. The caps win, and Claude does not work around them.",
+    "kind": "caption"
+  },
+  {
+    "start": 70.2,
+    "end": 75.9,
+    "text": "MCP servers sell per tool. Discovery stays free; search_docs costs $0.005.",
+    "kind": "caption"
+  },
+  {
+    "start": 76.3,
+    "end": 80.4,
+    "text": "HOW AGENTTOLL MAKES MONEY. Open-source core: Free. MIT, self-hosted, non-custodial. No take rate in the gateway. Hosted edition: Flat tier + volume fee. A fee on settled volume, billed off-chain. pay_to stays the founder's. PLAN · NO REVENUE YET",
+    "kind": "title"
+  },
+  {
+    "start": 76.5,
+    "end": 79.6,
+    "text": "The plan: free open-source core, paid hosted edition.",
+    "kind": "caption"
+  },
+  {
+    "start": 79.8,
+    "end": 87.2,
+    "text": "The repo grades itself. Run it yourself.",
+    "kind": "title"
+  },
+  {
+    "start": 81.2,
+    "end": 86.2,
+    "text": "119 of 119 evals pass. Run them yourself.",
+    "kind": "caption"
+  },
+  {
+    "start": 82.6,
+    "end": 87.2,
+    "text": "Talks to the real PayAI and x402.org facilitators. Settlement waits on funded devnet and testnet wallets.",
+    "kind": "title"
+  },
+  {
+    "start": 86.9,
+    "end": 91.5,
+    "text": "Agents already use your product. Now you can bill them.",
+    "kind": "title"
+  },
+  {
+    "start": 87.3,
+    "end": 91.5,
+    "text": "github.com/Josefusan/agenttoll",
+    "kind": "title"
+  },
+  {
+    "start": 87.6,
+    "end": 91.5,
+    "text": "Run it: KEEP=1 bash scripts/demo-local.sh",
+    "kind": "title"
+  },
+  {
+    "start": 87.7,
+    "end": 91.2,
+    "text": "Open source. One command, no wallet needed.",
+    "kind": "caption"
+  },
+  {
+    "start": 87.85,
+    "end": 91.5,
+    "text": "Devnet and testnet only. Every payment in this film was simulated.",
+    "kind": "title"
+  },
+  {
+    "start": 88.1,
+    "end": 91.5,
+    "text": "COLOSSEUM CRYPTO WORLD'S FAIR",
+    "kind": "title"
+  },
+  {
+    "start": 88.3,
+    "end": 91.5,
+    "text": "Narration: AI voice (Kokoro TTS) · Joseph's AI assistant",
+    "kind": "title"
+  }
+]

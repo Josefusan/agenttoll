@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AgentToll pitch insert</title>
+<!--
+  The new sections of the pitch cut, 81.7 s, in two parts that video/render/edl.mjs splices between
+  hero segments (video/scenes/pitch/EDL.json):
+    part 1, 0-63.7 s:    06 Why now, 07 Who buys + one use case told end to end (an example, not a
+                       customer), 08 Business model (PLAN), 09 Distribution (PLAN)
+    part 2, 64.7-81.3 s: 11 What's next (PLAN), 12 Team: the founder card
+  The captions are the narration's subtitles, word for word (video/vo/narration.py); the narrator is
+  a stock female AI voice presented as Joseph's AI assistant, never as a person.
+  Every line on screen is quoted from docs/launch/PITCH_VIDEO.md, docs/COLOSSEUM_SUBMISSION.md,
+  docs/KNOWLEDGE_BASE.md, docs/USE_CASES.md, docs/launch/STABLE_URL.md or
+  docs/assets/real-facilitator-handshake.md (ids and files shown on screen). Anything about money
+  AgentToll might make, or work not done yet, carries a gold PLAN badge: there are no customers and
+  no revenue. No unexplained proper nouns: the landing-page service is described, not named.
+-->
+<link rel="stylesheet" href="../../engine/engine.css">
+<script src="../../engine/timeline.js"></script>
+<style>
+  .kcard { position: absolute; width: 528px; height: 336px; padding: 30px 34px; border-radius: 22px; background: rgba(14,12,32,0.92);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 1px 0 rgba(255,255,255,0.06) inset, 0 40px 80px -28px rgba(0,0,0,0.7); }
+  .kcard .ring, .bcard .ring { position: absolute; inset: 0; border-radius: 22px; padding: 2px; background: var(--grad); opacity: 0;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .kcard .id { font: 600 15px/1 var(--mono); letter-spacing: 0.2em; color: var(--teal); }
+  .kcard .big { margin-top: 18px; font: 800 58px/1 var(--sans); letter-spacing: -0.035em; white-space: nowrap;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; display: inline-block; }
+  .kcard .tx { margin-top: 18px; font: 500 25px/1.38 var(--sans); color: var(--text); letter-spacing: -0.01em; }
+  .kcard .so { position: absolute; left: 34px; bottom: 24px; font: 400 15px/1 var(--mono); color: var(--dim); }
+  .closer { position: absolute; left: 0; width: 1920px; text-align: center; }
+
+  .honest { position: absolute; font: 500 22px/1.4 var(--mono); color: var(--muted); letter-spacing: 0.02em; white-space: nowrap; }
+  .honest b { color: var(--text); }
+  .bgrid { position: absolute; left: 128px; width: 1664px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .bcard { position: relative; display: flex; gap: 26px; align-items: flex-start; height: 210px; padding: 32px 34px; border-radius: 20px;
+    background: rgba(14,12,32,0.9); box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 30px 60px -28px rgba(0,0,0,0.7); }
+  .bcard svg { flex: none; width: 60px; height: 60px; padding: 12px; border-radius: 16px; background: rgba(45,212,191,0.10);
+    box-shadow: 0 0 0 1px rgba(45,212,191,0.4) inset; stroke: var(--teal); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .bcard .b { font: 700 34px/1.15 var(--sans); color: var(--text); letter-spacing: -0.02em; }
+  .bcard .w { margin-top: 12px; font: 400 25px/1.38 var(--sans); color: var(--muted); }
+  .bcard .w code { font: 500 0.9em var(--mono); color: var(--text); }
+
+  .tiers { position: absolute; left: 0; width: 1920px; display: flex; justify-content: center; gap: 40px; }
+  .tier { width: 800px; padding: 40px 44px 44px; border-radius: 24px; background: rgba(14,12,32,0.92); box-shadow: 0 0 0 1px rgba(255,255,255,0.09), 0 40px 80px -28px rgba(0,0,0,0.7); }
+  .tier .tg { font: 600 18px/1 var(--mono); letter-spacing: 0.2em; color: var(--teal); }
+  .tier .hv { margin-top: 22px; font: 800 72px/1.04 var(--sans); letter-spacing: -0.04em; color: var(--text); }
+  .tier .hv.g { font-size: 56px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tier .tx { margin-top: 20px; font: 500 28px/1.4 var(--sans); color: var(--muted); }
+
+  .flow { position: absolute; left: 0; width: 1920px; display: flex; justify-content: center; align-items: center; gap: 0; }
+  .fnode { width: 440px; padding: 30px 36px; border-radius: 22px; background: rgba(16,14,36,0.94); box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 30px 70px -30px rgba(0,0,0,0.8); }
+  .fnode.gw { box-shadow: 0 0 0 1.5px rgba(139,92,246,0.7) inset, 0 0 44px rgba(139,92,246,0.3), 0 30px 70px -30px rgba(0,0,0,0.8); }
+  .fnode .tg { font: 600 16px/1 var(--mono); letter-spacing: 0.18em; color: var(--teal); }
+  .fnode .tt { margin-top: 14px; font: 700 40px/1.1 var(--sans); color: var(--text); letter-spacing: -0.02em; white-space: nowrap; }
+  .farr { position: relative; width: 150px; height: 4px; margin: 0 14px; border-radius: 2px; background: rgba(255,255,255,0.14); }
+  .farr .hd { position: absolute; top: -9px; width: 0; height: 0; border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
+  .farr.l .hd { left: -6px; border-right: 16px solid rgba(255,255,255,0.3); }
+  .farr.r .hd { right: -6px; border-left: 16px solid rgba(255,255,255,0.3); }
+  .farr .pk { position: absolute; top: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 18px var(--teal); opacity: 0; }
+  .wf { position: absolute; left: 0; width: 1920px; text-align: center; font: 400 30px/1.5 var(--sans); color: var(--muted); }
+  .wf code { font: 600 0.9em var(--mono); color: var(--text); }
+
+  .nrows { position: absolute; left: 128px; width: 1664px; }
+  .nr { position: relative; display: flex; gap: 26px; align-items: center; height: 84px; padding: 0 32px; margin-bottom: 16px; border-radius: 18px;
+    background: rgba(14,12,32,0.9); box-shadow: 0 0 0 1px rgba(255,255,255,0.07); }
+  .nr .n { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font: 700 18px/1 var(--mono); color: var(--ink); background: var(--teal); }
+  .nr .t { font: 400 29px/1.3 var(--sans); color: var(--muted); white-space: nowrap; }
+  .nr .t b { color: var(--text); font-weight: 700; }
+  .missing { position: absolute; left: 0; width: 1920px; text-align: center; font: 800 46px/1.2 var(--sans); letter-spacing: -0.025em;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .missing-src { position: absolute; left: 0; width: 1920px; text-align: center; font: 400 16px/1 var(--mono); color: var(--dim); }
+
+  .case-tag { position: absolute; font: 500 22px/1.4 var(--mono); color: var(--muted); letter-spacing: 0.02em; white-space: nowrap; }
+  .case-tag b { color: var(--teal); font-weight: 600; }
+  .srows { position: absolute; left: 128px; width: 1664px; }
+  .sr { position: relative; display: flex; gap: 28px; align-items: center; height: 104px; padding: 0 36px; margin-bottom: 18px; border-radius: 20px;
+    background: rgba(14,12,32,0.92); box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 30px 60px -30px rgba(0,0,0,0.7); }
+  .sr .ring { position: absolute; inset: 0; border-radius: 20px; padding: 2px; background: var(--grad); opacity: 0;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .sr .n { flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font: 700 20px/1 var(--mono); color: var(--ink); background: var(--teal); }
+  .sr .t { font: 400 33px/1.3 var(--sans); color: var(--muted); white-space: nowrap; letter-spacing: -0.01em; }
+  .sr .t b { color: var(--text); font-weight: 700; }
+  .sr .t .gd { color: var(--gold); font-weight: 700; }
+  .sr .t code { font: 600 0.88em var(--mono); color: var(--text); }
+  .punch { position: absolute; left: 0; width: 1920px; text-align: center; font: 800 56px/1.15 var(--sans); letter-spacing: -0.03em; color: var(--text); }
+  .punch .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .punch .gd { color: var(--gold); }
+
+  .mono-disc { position: absolute; left: 876px; width: 168px; height: 168px; border-radius: 50%; display: grid; place-items: center;
+    background: radial-gradient(circle at 50% 35%, #1E1A48, #0B0A1A 70%); box-shadow: 0 0 60px rgba(109,40,217,0.45), 0 30px 60px -20px rgba(0,0,0,0.8); }
+  .mono-disc::before { content: ''; position: absolute; inset: 0; border-radius: 50%; padding: 3px; background: var(--grad);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .mono-disc span { font: 800 64px/1 var(--sans); letter-spacing: -0.04em; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .team-co { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 42px/1 var(--sans); color: var(--text); letter-spacing: -0.02em; }
+  .chips { position: absolute; left: 0; width: 1920px; display: flex; justify-content: center; gap: 16px; }
+  .chip { padding: 14px 24px; border-radius: 999px; font: 500 24px/1 var(--sans); color: var(--text); background: rgba(14,12,32,0.92);
+    box-shadow: 0 0 0 1px rgba(45,212,191,0.35) inset; white-space: nowrap; }
+  .team-tag { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 18px/1 var(--mono); letter-spacing: 0.3em; color: var(--teal); }
+  .team-sub { position: absolute; left: 0; width: 1920px; text-align: center; font: 500 28px/1.35 var(--sans); color: var(--muted); letter-spacing: -0.015em; }
+  .team-sub b { color: var(--text); font-weight: 600; }
+  .team-gh { position: absolute; left: 0; width: 1920px; text-align: center; font: 600 28px/1 var(--mono); color: var(--teal); }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+'use strict';
+const S = AT.scene({ duration: 81.7, progress: false, seed: 23 });
+const { el, style, show, progress, ease, lerp, spring } = AT;
+const W = 1920;
+const node = (html, cls, parent, pos) => { const e = el('div', cls, parent, html); AT.place(e, pos || {}); return e; };
+const anim = (e, o) => { S.every(t => show(e, t, o)); return e; };
+const center = h => { h.el.style.width = W + 'px'; h.el.style.left = '0px'; h.el.style.textAlign = 'center'; for (const ln of h.el.querySelectorAll('.line')) ln.style.margin = '0 auto'; return h; };
+// a gradient ring that is on over [a, b]
+const ringOn = (ring, a, b) => S.every(t => { ring.style.opacity = (ease.easeOutCubic(progress(t, a, a + 0.3)) * (1 - ease.easeInCubic(progress(t, b, b + 0.3)))).toFixed(3); });
+// Shots are AT.Group: each dissolves under the next one as the next becomes readable (no empty
+// frame), the last one holds. EDL cut points sit where only one shot is on screen: 63.7 and 64.7.
+// Section times follow the narration: each caption is a spoken line (video/vo/narration.py).
+
+/* ================================================================== 06 WHY NOW (0 - 20.6)
+   Frame 0 is already composed (it follows the hero's how-it-works on a crossfade). Three cards,
+   no camera moves: the card being read gets a gradient ring, the others step back. */
+const gNow = AT.Group({ name: 'now', t0: 0, t1: 20.6, enter: 'none', drift: 0.012 }).e;
+AT.SectionLabel({ parent: gNow, num: '06', text: 'WHY NOW', at: -1, x: 128, y: 120 });
+const nowHead = AT.Headline({ parent: gNow, lines: ['The rails just landed.'], at: -1, x: 122, y: 166, size: 72 });
+const CARDS = [
+  { id: 'KB-SOL-03', big: 'Sep 30, 2026', tx: 'PayAI opened x402 batch settlement on Solana in public preview: a mainnet path for sub-cent traffic.', so: 'docs/KNOWLEDGE_BASE.md · solanacompass.com', on: [0.3, 4.9] },
+  { id: 'KB-MKT-01', big: 'Waitlist only', tx: 'Cloudflare opened a waitlist for an x402 Monetization Gateway on 2026-07-01, for Cloudflare customers only.', so: 'docs/KNOWLEDGE_BASE.md · explainx.ai', on: [4.9, 9.9] },
+  { id: 'KB-PAY-06', big: 'Agent wallets', tx: "Coinbase's own Payments MCP already pays x402 on Solana, so agent wallets exist today.", so: 'docs/KNOWLEDGE_BASE.md · docs.cdp.coinbase.com', on: [9.9, 15.1] },
+];
+CARDS.forEach((c, i) => {
+  const e = node(`<div class="ring"></div><div class="id">${c.id}</div><div class="big">${c.big}</div><div class="tx">${c.tx}</div><div class="so">${c.so}</div>`, 'kcard', gNow, { x: 128 + i * 568, y: 330 });
+  S.every(t => show(e, t, { at: 0.05 + i * 0.12, dur: 0.7, y: 28, blur: 8, scale: 0.97 }));
+  ringOn(e.querySelector('.ring'), c.on[0], c.on[1]);
+  // the other cards step back while one is read; all of them step back for the closing line
+  AT.dim(e, CARDS.map((d, j) => (j === i ? null : d.on)).filter(Boolean), { o: 0.5, blur: 0, ramp: 0.3 });
+  AT.dim(e, [[15.1, 99]], { o: 0.1, blur: 8, ramp: 0.5 });
+  AT.sfx(c.on[0] + 0.05, 'tick', { gain: 0.6 });
+});
+AT.dim(nowHead.el, [[15.1, 99]], { o: 0.15, blur: 6, ramp: 0.5 });
+center(AT.Headline({ parent: gNow, lines: ['The open, self-hosted, non-custodial version', { text: 'was not built. So we built it.', grad: true }], at: 15.35, y: 400, size: 66, stagger: 0.035 }));
+
+/* ================================================================== 07 WHO BUYS (19.8 - 27.2)
+   Four seller types as a 2x2 that builds together; the narration picks one: the data API. */
+const gWho = AT.Group({ name: 'who', t0: 19.8, t1: 27.2 }).e;
+AT.SectionLabel({ parent: gWho, num: '07', text: 'WHO BUYS', at: 19.95, x: 128, y: 120 });
+AT.Headline({ parent: gWho, lines: ['Sellers whose product', { text: 'agents already use.', grad: true }], at: 20, x: 122, y: 160, size: 60, stagger: 0.04 });
+anim(node('<b>Buyer types, not customers.</b> No customers and no revenue yet.', 'honest', gWho, { x: 128, y: 322 }), { at: 20.7, y: 8, blur: 3 });
+const ICON = {
+  api: '<path d="M9 7 4 12l5 5M15 7l5 5-5 5"/>',
+  doc: '<path d="M7 3h7l4 4v14H7zM14 3v4h4M9.5 12h6M9.5 15.5h6"/>',
+  mcp: '<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/>',
+  agency: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
+};
+const BUYERS = [
+  ['api', 'API or data founder', 'A price per call any agent can pay in seconds, no signup, no key issuing'],
+  ['doc', 'Publisher or docs site', 'Agents pay to read, people read free, plus a report of unbilled agent traffic'],
+  ['mcp', 'MCP server author', 'A price per tool; <code>initialize</code> and <code>tools/list</code> stay free'],
+  ['agency', 'Agency', "Agent revenue as a line item on every client site, funds to the client's own address"],
+];
+const bg = node('', 'bgrid', gWho, { y: 372 });
+BUYERS.forEach(([ic, b, w], i) => {
+  const r = el('div', 'bcard', bg, `<div class="ring"></div><svg viewBox="0 0 24 24">${ICON[ic]}</svg><div><div class="b">${b}</div><div class="w">${w}</div></div>`);
+  S.every(t => show(r, t, { at: 20.35 + i * 0.12, dur: 0.7, y: 26, blur: 8, scale: 0.97 }));
+  if (i === 0) ringOn(r.querySelector('.ring'), 24, 99);          // "Say you run a small data API."
+  else AT.dim(r, [[24, 99]], { o: 0.35, blur: 2, ramp: 0.4 });
+});
+AT.sfx(20.35, 'tick', { gain: 0.55 });
+AT.sfx(24.05, 'tick', { gain: 0.6 });
+
+/* ================================================================== 07 THE USE CASE (26.3 - 42.1)
+   One seller told end to end, as an example (docs/USE_CASES.md case 1, prices from the demo
+   config): agents call, the gateway quotes, the agent pays to the seller's own pay_to. Each step
+   lands on its spoken line and keeps a ring while it is the one being read. */
+const gCase = AT.Group({ name: 'case', t0: 26.3, t1: 43.1 }).e;
+AT.SectionLabel({ parent: gCase, num: '07', text: 'ONE USE CASE', at: 26.4, x: 128, y: 120 });
+AT.Headline({ parent: gCase, lines: ['Say you run', { text: 'a small data API.', grad: true }], at: 26.4, x: 122, y: 160, size: 60, stagger: 0.04 });
+anim(node('<b>One seller, end to end.</b> Prices from the demo config.', 'case-tag', gCase, { x: 128, y: 322 }), { at: 26.7, y: 8, blur: 3 });
+const STEPS = [
+  { at: 26.6, html: '<b>Agents call your API all day.</b> None of them can sign up for a key.', on: [26.6, 30.6] },
+  { at: 30.7, html: '<b>AgentToll answers 402 with a price:</b> <span class="gd">$0.002</span> per call. No account.', on: [30.7, 34.8] },
+  { at: 34.9, html: '<b>The agent pays in USDC,</b> straight to your own <code>pay_to</code>. AgentToll holds nothing.', on: [34.9, 38.6] },
+];
+const sr = node('', 'srows', gCase, { y: 380 });
+STEPS.forEach((st, i) => {
+  const r = el('div', 'sr', sr, `<div class="ring"></div><span class="n">${i + 1}</span><span class="t">${st.html}</span>`);
+  S.every(t => show(r, t, { at: st.at, dur: 0.6, x: -24, y: 0, blur: 6 }));
+  ringOn(r.querySelector('.ring'), st.on[0], st.on[1]);
+  AT.sfx(st.at + 0.05, i === 1 ? 'coin' : 'tick', { gain: i === 1 ? 0.45 : 0.5 });
+});
+anim(node('A card can\'t bill <span class="gd">$0.002</span>. <span class="g">x402 can.</span>', 'punch', gCase, { y: 760 }), { at: 38.75, dur: 0.8, y: 18, blur: 8 });
+AT.Badge({ text: 'EXAMPLE · not a customer', at: 26.8, out: 41.5, right: 64, y: 96 });
+
+/* ================================================================== 08 BUSINESS MODEL, PLAN (42.2 - 56.1)
+   Two tier cards revealed by a left-to-right wipe. */
+const gBiz = AT.Group({ name: 'biz', t0: 42.2, t1: 56.1 }).e;
+AT.SectionLabel({ parent: gBiz, num: '08', text: 'BUSINESS MODEL', at: 42.35, x: 128, y: 120 });
+AT.Headline({ parent: gBiz, lines: ['How we make money:', { text: 'a plan, no revenue yet.', grad: true }], at: 42.4, x: 122, y: 160, size: 60, stagger: 0.04 });
+{
+  const tiers = node(`<div class="tier"><div class="tg">OPEN-SOURCE CORE</div><div class="hv">Free</div><div class="tx">MIT and non-custodial.<br>No take rate in the gateway.</div></div>
+    <div class="tier"><div class="tg">HOSTED EDITION</div><div class="hv g">Flat tier + a fee on settled volume</div><div class="tx">Billed off-chain.<br>pay_to stays the founder's.</div></div>`, 'tiers', gBiz, { y: 380 });
+  [...tiers.children].forEach((c, i) => S.every(t => {
+    const p = ease.easeInOutCubic(progress(t, 42.9 + i * 0.45, 43.7 + i * 0.45));
+    c.style.clipPath = p >= 1 ? 'none' : `inset(-40px ${(100 - p * 100).toFixed(2)}% -40px -40px round 24px)`;
+    c.style.opacity = p > 0 ? '1' : '0';
+  }));
+  AT.dim(tiers.children[1], [[46.3, 48.3]], { o: 0.45, blur: 0, ramp: 0.3 });   // "The core is free." reads the free card first
+  AT.sfx(42.9, 'whoosh', { gain: 0.35, pan: -0.3 });
+}
+AT.Badge({ text: 'PLAN · no revenue yet', at: 42.6, out: 55.5, right: 64, y: 96 });
+
+/* ================================================================== 09 DISTRIBUTION, PLAN (55.3 - 63.8)
+   The flow with a packet on the payout leg; no product names the viewer has to look up. */
+const gDist = AT.Group({ name: 'dist', t0: 55.3, t1: 64.6, drift: 0.03 }).e;
+AT.SectionLabel({ parent: gDist, num: '09', text: 'DISTRIBUTION', at: 55.45, x: 128, y: 120 });
+center(AT.Headline({ parent: gDist, lines: ['We already ship landing pages', { text: 'to small businesses.', grad: true }], at: 55.5, y: 176, size: 72, stagger: 0.035 }));
+const flow = node(`<div class="fnode"><div class="tg">CLIENT SITE</div><div class="tt">Vercel origin</div></div>
+  <div class="farr l"><div class="hd"></div></div>
+  <div class="fnode gw"><div class="tg">GATEWAY</div><div class="tt">AgentToll</div></div>
+  <div class="farr r"><div class="hd"></div><div class="pk"></div></div>
+  <div class="fnode"><div class="tg">PAY_TO</div><div class="tt">client's address</div></div>`, 'flow', gDist, { y: 456 });
+{
+  const kids = [...flow.children], order = [2, 1, 3, 0, 4];   // build from the gateway outward
+  order.forEach((k, n) => S.every(t => show(kids[k], t, { at: 56 + n * 0.1, dur: 0.6, y: 20, blur: 6, scale: 0.95 })));
+  const pk = flow.querySelector('.pk');
+  S.every(t => {
+    const c = (t - 56.9) / 1.4, ph = c - Math.floor(c), live = t >= 56.9 && t < 63.9;
+    pk.style.opacity = live ? (Math.sin(Math.PI * ph)).toFixed(3) : '0';
+    pk.style.left = (ph * 134).toFixed(1) + 'px';
+  });
+}
+anim(node('Plan: the gateway in front of each client site, <code>pay_to</code> set to the client\'s own address.', 'wf', gDist, { y: 690 }), { at: 56.6, y: 14, blur: 6 });
+AT.Badge({ text: 'PLAN · no client site runs AgentToll yet', at: 55.8, out: 63.3, right: 64, y: 96 });
+
+/* ================================================================== 11 WHAT'S NEXT, PLAN (63.8 - 73.5) */
+const gNext = AT.Group({ name: 'next', t0: 63.8, t1: 73.5 }).e;
+AT.SectionLabel({ parent: gNext, num: '11', text: "WHAT'S NEXT", at: 63.95, x: 128, y: 120 });
+AT.Headline({ parent: gNext, lines: ['From devnet to mainnet:', { text: 'the plan.', grad: true }], at: 64, x: 122, y: 160, size: 60, stagger: 0.04 });
+const NEXT = [
+  ['Fund the devnet buyer:', 'the first real settlement, with a Solana Explorer link.'],
+  ['A named Cloudflare tunnel:', 'a permanent public URL for the gateway.'],
+  ['Mainnet through PayAI batch settlement:', 'sub-cent traffic settled as channel claims.'],
+  ['First design partners:', 'the landing pages we already ship.'],
+];
+const nr = node('', 'nrows', gNext, { y: 330 });
+NEXT.forEach(([k, v], i) => {
+  const r = el('div', 'nr', nr, `<span class="n">${i + 1}</span><span class="t"><b>${k}</b> ${v}</span>`);
+  S.every(t => show(r, t, { at: 64.3 + i * 0.14, dur: 0.6, x: -24, y: 0, blur: 6 }));
+});
+AT.sfx(64.3, 'tick', { gain: 0.5 });
+anim(node('A funded wallet is the only missing piece.', 'missing', gNext, { y: 744 }), { at: 69.2, dur: 0.8, y: 18, blur: 8 });
+anim(node('docs/assets/real-facilitator-handshake.md', 'missing-src', gNext, { y: 808 }), { at: 69.5, y: 6, blur: 2 });
+AT.Badge({ text: 'PLAN · next steps, not done yet', at: 64.2, out: 72.9, right: 64, y: 96 });
+
+/* ================================================================== 12 TEAM: the founder card (72.7 - 81.7)
+   Only facts from the repo: docs/COLOSSEUM_SUBMISSION.md (solo builder, based in the United States,
+   AI coding agents plus an adversarial critic agent on every pull request, the landing-page
+   service), docs/launch/PITCH_VIDEO.md (Clark Technology Ventures), README.md (@Josefusan). */
+const gTeam = AT.Group({ name: 'team', t0: 72.7, t1: 81.7 }).e;
+AT.SectionLabel({ parent: gTeam, num: '12', text: 'TEAM', at: 72.85, x: 128, y: 120 });
+{
+  const disc = node('<span>JC</span>', 'mono-disc', gTeam, { y: 196 });
+  S.every(t => { const sp = spring(t - 76.55, 180, 18); style(disc, { o: ease.easeOutCubic(progress(t, 72.85, 69.45)), s: lerp(0.6, 1, sp), y: (1 - Math.min(1, sp)) * 24 }); });
+}
+center(AT.Headline({ parent: gTeam, lines: [{ text: 'Joseph Clark', grad: true }], at: 73.05, y: 400, size: 112 }));
+anim(node('Clark Technology Ventures', 'team-co', gTeam, { y: 542 }), { at: 73.45, y: 14, blur: 6 });
+{
+  const chips = node('', 'chips', gTeam, { y: 624 });
+  ['Solo builder', 'Based in the United States', 'Runs an AI landing-page service'].forEach((c, i) => {
+    const e = el('div', 'chip', chips, c);
+    S.every(t => show(e, t, { at: 73.8 + i * 0.12, dur: 0.6, y: 14, blur: 5, scale: 0.96 }));
+  });
+}
+anim(node('Built with AI coding agents. <b>An adversarial critic agent reviews every pull request.</b>', 'team-sub', gTeam, { y: 712 }), { at: 77.6, y: 12, blur: 6 });
+anim(node('github.com/Josefusan', 'team-gh', gTeam, { y: 790 }), { at: 74.3, y: 10, blur: 4 });
+AT.sfx(72.85, 'lift', { gain: 0.55 });
+
+AT.sfx(19.8, 'whoosh', { gain: 0.45 });
+AT.sfx(26.3, 'whoosh', { gain: 0.35 });
+AT.sfx(42.2, 'whoosh', { gain: 0.45 });
+AT.sfx(55.3, 'whoosh', { gain: 0.45 });
+AT.sfx(63.8, 'whoosh', { gain: 0.45 });
+AT.sfx(72.7, 'whoosh', { gain: 0.45 });
+
+for (const [html, at, out] of [
+  ['<b>Why now:</b> docs/KNOWLEDGE_BASE.md (KB-SOL-03, KB-MKT-01, KB-PAY-06) · docs/COLOSSEUM_SUBMISSION.md · re-check each figure on submit day', 0.3, 19.7],
+  ['<b>Who buys:</b> docs/launch/PITCH_VIDEO.md (buyer types, not customers)', 20.4, 26.2],
+  ['<b>Use case (example):</b> docs/USE_CASES.md case 1 (API founder: pay per call, no keys; card fees exceed $0.002) · demo config agenttoll.yaml', 26.7, 42.1],
+  ['<b>Plan:</b> docs/COLOSSEUM_SUBMISSION.md (business model, plan) · docs/launch/PITCH_VIDEO.md', 42.8, 55.2],
+  ['<b>Distribution (plan):</b> docs/COLOSSEUM_SUBMISSION.md ("We run … an AI landing-page service", go-to-market)', 55.8, 63.7],
+  ['<b>Next (plan):</b> README.md (real devnet payments) · docs/launch/STABLE_URL.md (named tunnel) · KB-SOL-03 · docs/COLOSSEUM_SUBMISSION.md (next)', 64.4, 72.6],
+  ['<b>Team:</b> docs/COLOSSEUM_SUBMISSION.md (solo builder, United States, AI agents) · docs/launch/PITCH_VIDEO.md (Clark Technology Ventures) · README.md', 73.3, 81.7],
+]) AT.Source({ html, at, out });
+
+AT.Caption({ cues: [
+  { at: 0.5, end: 4.8, text: 'Why now? PayAI batch settlement on Solana, Sep 30.' },
+  { at: 5.0, end: 9.8, text: 'Cloudflare announced a gateway in July: waitlist-only, tied to its network.' },
+  { at: 9.95, end: 15.25, text: "Coinbase's Payments MCP already pays x402 on Solana." },
+  { at: 15.5, end: 19.4, text: 'The open, self-hosted version was not built. So we built it.' },
+  { at: 20.3, end: 23.7, text: 'Who buys? Sellers whose product agents already use.' },
+  { at: 24.0, end: 26.3, text: 'Say you run a small data API.', hl: ['data', 'API.'] },
+  { at: 26.6, end: 30.4, text: 'Agents call it all day, and none of them can sign up for a key.' },
+  { at: 30.7, end: 34.6, text: 'Put AgentToll in front: each call quotes $0.002.', gold: ['$0.002.'] },
+  { at: 34.9, end: 38.4, text: 'The agent pays in USDC, straight to your own pay_to.', hl: ['pay_to.'] },
+  { at: 38.6, end: 42.3, text: "A card can't bill $0.002. x402 can.", gold: ['$0.002.'], hl: ['can.'] },
+  { at: 42.6, end: 46.0, text: 'How we make money: a plan. No revenue yet.', gold: ['plan.'] },
+  { at: 46.3, end: 50.8, text: 'The core is free. Hosted: a flat tier plus a fee on settled volume.', hl: ['free.', 'Hosted:'] },
+  { at: 51.1, end: 54.8, text: "We charge for convenience, never by holding the seller's funds.", hl: ['convenience,'] },
+  { at: 55.7, end: 60.0, text: 'Distribution: we already ship landing pages to small businesses.' },
+  { at: 60.3, end: 63.3, text: "The plan: each client's pay_to is their own address.", gold: ['plan:'] },
+  { at: 65.2, end: 69.3, text: "What's next, as a plan: a funded devnet settlement, then mainnet.", gold: ['plan:'] },
+  { at: 69.6, end: 72.5, text: 'A funded wallet is the only missing piece.' },
+  { at: 73.3, end: 77.3, text: 'Joseph Clark builds AgentToll, at Clark Technology Ventures.', hl: ['Joseph', 'Clark'] },
+  { at: 77.55, end: 81.0, text: 'A solo builder, working with AI coding agents.' },
+] });
+</script>
+</body>
+</html>

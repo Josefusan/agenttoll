@@ -1,0 +1,132 @@
+{
+  "captured_utc": "2026-10-04T22:22:40.225Z",
+  "recordvideo_webm": "~/agenttoll-scratch/film-out/captures/dashboard-live-recordvideo.webm",
+  "recordvideo_bytes": 4763141,
+  "screencast_mp4": "~/agenttoll-scratch/film-out/captures/dashboard-live-screencast.mp4",
+  "screencast_bytes": 1442006,
+  "screencast_frames": 155,
+  "screencast_started_video_ms": 4793,
+  "note": "video_ms is milliseconds since page.goto in the recordVideo webm (the webm starts at context creation, a few hundred ms earlier). The screencast MP4 starts at screencast_started_video_ms. Every payment is SIMULATED (local mock facilitator).",
+  "payments": [
+    {
+      "i": 0,
+      "path": "/api/quote",
+      "video_ms": 6794,
+      "done_ms": 7575,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152446,\"paid\":true,\"price\":140.46,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-b97184c93200b2973f24737e\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 1,
+      "path": "/api/quote",
+      "video_ms": 8795,
+      "done_ms": 9335,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152448,\"paid\":true,\"price\":140.48,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-d21ee15cc9d75544a89e89cf\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 2,
+      "path": "/blog/x402-explained",
+      "video_ms": 10818,
+      "done_ms": 11430,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   <!doctype html><html lang=en><head><meta charset=utf-8><title>x402-explained</title></head><body><h1>x402-explained</h1><p>A blog post agents pay a tenth of a cent to read.</p></body></html>\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-e916e87574ab8be19df5207a\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 3,
+      "path": "/api/quote",
+      "video_ms": 12811,
+      "done_ms": 14300,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152453,\"paid\":true,\"price\":140.53,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-7e2fe5224cc86576e7fef173\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 4,
+      "path": "/blog/agents-pay",
+      "video_ms": 14803,
+      "done_ms": 18714,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   <!doctype html><html lang=en><head><meta charset=utf-8><title>agents-pay</title></head><body><h1>agents-pay</h1><p>A blog post agents pay a tenth of a cent to read.</p></body></html>\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-0a8ade54da37197ca9d2c783\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 5,
+      "path": "/api/quote",
+      "video_ms": 18714,
+      "done_ms": 19922,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152458,\"paid\":true,\"price\":140.58,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-07a42c9b0e562f41f7a52f03\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 6,
+      "path": "/api/quote",
+      "video_ms": 19922,
+      "done_ms": 20635,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152459,\"paid\":true,\"price\":140.59,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-e41a27837f3554d4b3d1d1de\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 7,
+      "path": "/blog/x402-explained",
+      "video_ms": 20800,
+      "done_ms": 21868,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   <!doctype html><html lang=en><head><meta charset=utf-8><title>x402-explained</title></head><body><h1>x402-explained</h1><p>A blog post agents pay a tenth of a cent to read.</p></body></html>\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-8062fb553f3d31320ad15b1d\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 8,
+      "path": "/api/quote",
+      "video_ms": 22801,
+      "done_ms": 23281,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152462,\"paid\":true,\"price\":140.62,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-f19ae20d50da555d730e799e\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 9,
+      "path": "/blog/agents-pay",
+      "video_ms": 24802,
+      "done_ms": 25260,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   <!doctype html><html lang=en><head><meta charset=utf-8><title>agents-pay</title></head><body><h1>agents-pay</h1><p>A blog post agents pay a tenth of a cent to read.</p></body></html>\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-c33eb6e0797e796f92d5c6d7\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 10,
+      "path": "/api/quote",
+      "video_ms": 26805,
+      "done_ms": 28029,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152466,\"paid\":true,\"price\":140.66,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-d70961f71ba00e28403627af\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 11,
+      "path": "/api/quote",
+      "video_ms": 28803,
+      "done_ms": 29646,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152468,\"paid\":true,\"price\":140.68,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-b6fc5a199783a1c998b75ea8\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 12,
+      "path": "/blog/x402-explained",
+      "video_ms": 30806,
+      "done_ms": 31571,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   <!doctype html><html lang=en><head><meta charset=utf-8><title>x402-explained</title></head><body><h1>x402-explained</h1><p>A blog post agents pay a tenth of a cent to read.</p></body></html>\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-2c141538a4c3f48515a78e63\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 13,
+      "path": "/api/quote",
+      "video_ms": 32893,
+      "done_ms": 33999,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   {\"agent\":\"AgentToll-Buyer\",\"as_of\":1791152472,\"paid\":true,\"price\":140.72,\"symbol\":\"SOL/USD\"}\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-09821d78cd9baf924fc3a547\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    },
+    {
+      "i": 14,
+      "path": "/blog/agents-pay",
+      "video_ms": 34808,
+      "done_ms": 35756,
+      "exit": 0,
+      "stdout": "status: 200 OK\nbody:   <!doctype html><html lang=en><head><meta charset=utf-8><title>agents-pay</title></head><body><h1>agents-pay</h1><p>A blog post agents pay a tenth of a cent to read.</p></body></html>\npaid:   true on solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\ntx:     SIMULATED-e182426ff577e5498ff77ac6\nnote:   SIMULATED settlement from a local test facilitator; nothing went on chain\n"
+    }
+  ]
+}

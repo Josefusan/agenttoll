@@ -1,0 +1,16 @@
+{
+  "id": "claude-user-402",
+  "what": "Claude-User/1.0 asks for the same URL: 402 Payment Required with the full headers",
+  "command": "curl -s -i -A 'Claude-User/1.0' http://127.0.0.1:8502/api/quote",
+  "cwd": "$REPO",
+  "path_prepend": "$CARGO_TARGET_DIR/debug (prebuilt agenttoll-* binaries)",
+  "exit": 0,
+  "duration_ms": 22.3,
+  "started_utc": "2026-10-04T22:18:14.075+00:00",
+  "stdout": "HTTP/1.1 402 Payment Required\r\ncontent-type: application/json\r\npayment-required: eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQQVlNRU5ULVNJR05BVFVSRSBoZWFkZXIgaXMgcmVxdWlyZWQiLCJyZXNvdXJjZSI6eyJ1cmwiOiJodHRwOi8vMTI3LjAuMC4xOjg1MDIvYXBpL3F1b3RlIiwiZGVzY3JpcHRpb24iOiJMaXZlIHByaWNlIHF1b3RlIn0sImFjY2VwdHMiOlt7InNjaGVtZSI6ImV4YWN0IiwibmV0d29yayI6InNvbGFuYTpFdFdUUkFCWmFZcTZpTWZlWUtvdVJ1MTY2VlUyeHFhMSIsImFtb3VudCI6IjIwMDAiLCJhc3NldCI6IjR6TU1DOXNydDVSaTVYMTRHQWdYaGFIaWkzR25QQUVFUllQSmdaSkRuY0RVIiwicGF5VG8iOiJHM3I5bTdFamoxVG4xVWR4RkZCckpSdzUyWDZWN1FnejJSYnJvckp0bW9VdCIsIm1heFRpbWVvdXRTZWNvbmRzIjo2MCwiZXh0cmEiOnsiZmVlUGF5ZXIiOiJHTG9VM2UxUFZUbU5OTTVQSllKc3IzRnVpWkd5cWZ0N1BxRmNrOGd5QnQxQSJ9fV19\r\nx-agenttoll-verdict: ua:Claude-User\r\ncontent-length: 450\r\ndate: Sun, 04 Oct 2026 22:18:14 GMT\r\n\r\n{\"x402Version\":2,\"error\":\"PAYMENT-SIGNATURE header is required\",\"resource\":{\"url\":\"http://127.0.0.1:8502/api/quote\",\"description\":\"Live price quote\"},\"accepts\":[{\"scheme\":\"exact\",\"network\":\"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\",\"amount\":\"2000\",\"asset\":\"4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU\",\"payTo\":\"G3r9m7Ejj1Tn1UdxFFBrJRw52X6V7Qgz2RbrorJtmoUt\",\"maxTimeoutSeconds\":60,\"extra\":{\"feePayer\":\"GLoU3e1PVTmNNM5PJYJsr3FuiZGyqft7PqFck8gyBt1A\"}}]}",
+  "stderr": "",
+  "stdout_sha256": "3fd645ef9cc2bac5b5365331d706a96ab85062be205fc65d1fda043b6e49ba5b",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "redactions": [],
+  "simulated": false
+}

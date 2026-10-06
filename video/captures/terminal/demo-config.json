@@ -1,0 +1,16 @@
+{
+  "id": "demo-config",
+  "what": "The whole demo price file (no secrets in it: pay_to is an env placeholder)",
+  "command": "cat demo/agenttoll.demo.yaml",
+  "cwd": "$REPO",
+  "path_prepend": "$CARGO_TARGET_DIR/debug (prebuilt agenttoll-* binaries)",
+  "exit": 0,
+  "duration_ms": 9.6,
+  "started_utc": "2026-10-04T22:18:14.599+00:00",
+  "stdout": "# Local demo config: the gateway in front of demo/origin, settling through the SIMULATED\n# facilitator (demo/mock-facilitator). No chain, no money; every payment is labelled\n# simulated. For real devnet payments use agenttoll.example.yaml.\norigin: http://127.0.0.1:4000\nlisten: 127.0.0.1:8402\nadmin_listen: 127.0.0.1:8403\npublic_url: http://127.0.0.1:8402\ndetection: agents-only\n\nnetworks:\n  solana:\n    network: \"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1\"   # devnet (KB-SOL-01)\n    asset: \"4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU\" # devnet USDC (KB-SOL-01)\n    pay_to: \"${AGENTTOLL_SOLANA_PAYTO}\"\n    facilitator: \"http://127.0.0.1:4020\"                  # SIMULATED\n\nroutes:\n  - match: \"GET /api/quote\"\n    price_usd: \"0.002\"\n    description: \"Live price quote\"\n  - match: \"GET /api/*\"\n    price_usd: \"0.001\"\n  - match: \"GET /blog/*\"\n    price_usd: \"0.001\"\n  - match: \"/*\"\n    price_usd: \"0\"\n\nmcp:\n  endpoint: /mcp\n  advertise_prices: true\n  tools:\n    search_docs: \"0.005\"\n    generate_report: \"0.05\"\n\nledger:\n  url: \"sqlite://.demo/agenttoll-demo.db\"\n",
+  "stderr": "",
+  "stdout_sha256": "445c85b7f8042033cbd8904abf0efa657c1b6fd75753e301ec5bddf891095b81",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "redactions": [],
+  "simulated": false
+}

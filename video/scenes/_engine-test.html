@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Engine test</title>
+<!-- Exercises every engine primitive in 8 s. Strings come from docs/launch/DEMO_VIDEO.md,
+     docs/launch/PITCH_VIDEO.md and README.md; the browser shows the committed real
+     screenshot docs/assets/dashboard-1440.png (captured on the dashboard at 127.0.0.1:3123). -->
+<link rel="stylesheet" href="../engine/engine.css">
+<script src="../engine/timeline.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+// Round-2 engine rules exercised here: frame 0 is composed (headline pre-built), section labels are
+// fixed overlay chrome that follow their group, the push-in fades the half-cropped terminal and
+// ticker, the cursor parks beside the 402 line instead of on it, captions grow word by word,
+// shot A dissolves under shot B as B builds (AT.Group exit 'under'), the badge sits in the top band.
+const S = AT.scene({ duration: 8, progress: { ticks: [5.2] } });
+
+const gA = AT.Group({ name: 'a', t0: 0, t1: 5.9, enter: 'none' }).e;
+const gB = AT.Group({ name: 'b', t0: 5.0, t1: 8, enter: 'fade' }).e;
+
+AT.SectionLabel({ parent: gA, num: '00', text: 'ENGINE TEST', at: 0.2, x: 128, y: 136 });
+AT.Headline({ parent: gA, lines: ['Agents read.', { text: 'Founders pay.', grad: true }], at: -1.4, x: 128, y: 184, size: 88 });
+
+const term = AT.Terminal({
+  parent: gA, x: 128, y: 440, w: 808, h: 448, title: 'zsh — demo stack', at: 0.85, wrap: true,
+  lines: [
+    { cmd: 'curl -s -D - -o /dev/null -A "Mozilla/5.0 (compatible; ClaudeBot/1.0)" http://127.0.0.1:8402/api/quote | cut -c1-90', at: 1.35, dur: 1.35 },
+    { out: [['HTTP/1.1 402 Payment Required', 'yellow bold']], at: 2.85 },
+    { out: [['x-agenttoll-verdict: ', 'dim'], ['ua:ClaudeBot', 'cyan']], at: 2.92 },
+    { prompt: true, at: 3.1 },
+  ],
+});
+
+AT.Browser({
+  parent: gA, x: 1000, y: 300, w: 792, h: 588, at: 1.0,
+  url: 'http://127.0.0.1:3123', tabs: ['AgentToll Revenue', 'New Tab'],
+  img: '../../docs/assets/dashboard-1440.png',
+  scroll: [[0, 0], [3.9, 0], [4.6, 384, AT.easeInOutCubic]],
+});
+
+AT.Ticker({ parent: gA, to: 119, suffix: '/119', at: 1.6, label: 'evals passing', x: 1000, y: 100 });
+
+AT.Cursor({
+  at: 1.5, out: 5.2,
+  path: [
+    { t: 1.5, x: 1560, y: 1000 },
+    { t: 3.2, park: term.park(/^HTTP\/1\.1 402/, 3.2) },
+    { t: 4.3, x: 1260, y: 470, click: true },
+  ],
+});
+
+AT.Camera({
+  keys: [
+    { t: 3.45, to: [1000, 300, 792, 446], dur: 0.85 },
+    { t: 4.6, to: 'full', dur: 0.7 },
+  ],
+});
+
+AT.Badge({ at: 3.1 });
+
+AT.SectionLabel({ parent: gB, num: '01', text: 'HANDOFF', at: 5.1, x: 64, y: 100 });
+AT.Diagram({
+  parent: gB, x: 0, y: 0, w: 1920, h: 1080,
+  nodes: [
+    { id: 'agent', x: 360, y: 520, w: 320, title: 'Agent', sub: 'Claude + pay-mcp', tag: 'BUYER', at: 5.1 },
+    { id: 'gw', x: 960, y: 520, w: 320, title: 'AgentToll', sub: 'gateway', tag: 'TOLL', at: 5.2, active: [[6.75, 8.2]] },
+    { id: 'origin', x: 1560, y: 520, w: 320, title: 'Your origin', sub: 'GET /api/quote', tag: 'SELLER', at: 5.3 },
+    { id: 'fac', x: 960, y: 780, w: 320, title: 'Facilitator', sub: 'verify + settle', tag: 'x402', at: 5.4 },
+  ],
+  edges: [
+    { id: 'req', from: 'agent', to: 'gw', lane: -16, at: 5.75 },
+    { id: 'res', from: 'agent', to: 'gw', lane: 16, at: 5.8 },
+    { id: 'fwd', from: 'gw', to: 'origin', at: 5.9 },
+    { id: 'ver', from: 'gw', to: 'fac', at: 6.0 },
+  ],
+  packets: [
+    { edge: 'req', at: 6.1, dur: 0.6, label: 'GET /api/quote' },
+    { edge: 'res', at: 6.6, dur: 0.6, label: '402 · $0.002', color: '#FBBF24', reverse: true, chipSide: 1 },
+    { edge: 'req', at: 7.05, dur: 0.6, label: 'signed payment', color: '#8B5CF6' },
+    { edge: 'ver', at: 7.4, dur: 0.5, label: 'verify', color: '#3B82F6' },
+  ],
+});
+
+AT.Caption({ cues: [
+  { at: 1.0, end: 3.3, text: 'Same URL. People: free. Agents: $0.002.', gold: ['$0.002.'] },
+  { at: 5.9, end: 7.75, text: 'Funds go to your pay_to. AgentToll holds nothing.', hl: ['pay_to.'] },
+] });
+</script>
+</body>
+</html>

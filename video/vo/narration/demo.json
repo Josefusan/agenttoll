@@ -1,0 +1,289 @@
+[
+ {
+  "id": "d01",
+  "start": 0.3,
+  "end": 4.6,
+  "text": "Hi, I'm Joseph's AI assistant. Let me show you AgentToll.",
+  "say": "Hi, I'm Joseph's AI assistant. Let me show you Agent Toll."
+ },
+ {
+  "id": "d02",
+  "start": 6.4,
+  "end": 9.4,
+  "text": "Every payment here is simulated.",
+  "say": "Every payment here is simulated."
+ },
+ {
+  "id": "d03",
+  "start": 9.9,
+  "end": 12.38,
+  "text": "One YAML file. Paid to your own pay_to.",
+  "say": "One yammel file. Paid to your own pay to."
+ },
+ {
+  "id": "d04",
+  "start": 12.8,
+  "end": 16.98,
+  "text": "A quote costs agents $0.002. Tools have prices too.",
+  "say": "A quote costs agents two tenths of a cent. Tools have prices too."
+ },
+ {
+  "id": "d05",
+  "start": 17.4,
+  "end": 19.4,
+  "text": "One command starts the stack.",
+  "say": "One command starts the stack."
+ },
+ {
+  "id": "d06",
+  "start": 20.1,
+  "end": 23.68,
+  "text": "A person opens the site through the gateway: free.",
+  "say": "A person opens the site through the gateway: free."
+ },
+ {
+  "id": "d07",
+  "start": 24.1,
+  "end": 27.5,
+  "text": "A browser gets the quote, with paid: false.",
+  "say": "A browser gets the quote, with paid: false."
+ },
+ {
+  "id": "d08",
+  "start": 28.0,
+  "end": 31.78,
+  "text": "Claude-User gets 402 Payment Required.",
+  "say": "Claude User gets four oh two, Payment Required."
+ },
+ {
+  "id": "d09",
+  "start": 32.2,
+  "end": 35.88,
+  "text": "The header decodes to a price: $0.002.",
+  "say": "The header decodes to a price: two tenths of a cent."
+ },
+ {
+  "id": "d10",
+  "start": 36.3,
+  "end": 39.6,
+  "text": "Plus network, asset and payTo.",
+  "say": "Plus network, asset and pay to."
+ },
+ {
+  "id": "d11",
+  "start": 40.5,
+  "end": 44.28,
+  "text": "Agents can read the price list first, for free.",
+  "say": "Agents can read the price list first, for free."
+ },
+ {
+  "id": "d12",
+  "start": 44.7,
+  "end": 49.08,
+  "text": "Routes, tools and networks, all from the same YAML file.",
+  "say": "Routes, tools and networks, all from the same yammel file."
+ },
+ {
+  "id": "d13",
+  "start": 49.5,
+  "end": 53.48,
+  "text": "The buyer CLI gets the 402, signs, and retries.",
+  "say": "The buyer C L I gets the four oh two, signs, and retries."
+ },
+ {
+  "id": "d14",
+  "start": 53.9,
+  "end": 57.68,
+  "text": "200 OK. The receipt comes back in a header.",
+  "say": "two hundred OK. The receipt comes back in a header."
+ },
+ {
+  "id": "d15",
+  "start": 58.1,
+  "end": 61.68,
+  "text": "The dashboard gets the row: +$0.002.",
+  "say": "The dashboard gets the row: plus two tenths of a cent."
+ },
+ {
+  "id": "d16",
+  "start": 62.1,
+  "end": 66.58,
+  "text": "Same simulated id on both sides. No funds moved.",
+  "say": "Same simulated id on both sides. No funds moved."
+ },
+ {
+  "id": "d17",
+  "start": 67.0,
+  "end": 70.38,
+  "text": "Claude gets a capped wallet, and reads the price first.",
+  "say": "Claude gets a capped wallet, and reads the price first."
+ },
+ {
+  "id": "d18",
+  "start": 70.8,
+  "end": 74.78,
+  "text": "$0.002 is under both caps, so Claude pays: simulated.",
+  "say": "two tenths of a cent is under both caps, so Claude pays: simulated."
+ },
+ {
+  "id": "d19",
+  "start": 75.2,
+  "end": 79.4,
+  "text": "Next, a $0.05 tool. Claude is told: up to 10 cents.",
+  "say": "Next, a five-cent tool. Claude is told: up to ten cents."
+ },
+ {
+  "id": "d20",
+  "start": 80.0,
+  "end": 83.58,
+  "text": "The wallet refuses: the per-call cap is $0.01.",
+  "say": "The wallet refuses: the per-call cap is one cent."
+ },
+ {
+  "id": "d21",
+  "start": 84.0,
+  "end": 87.18,
+  "text": "Nothing was signed. Claude did not work around it.",
+  "say": "Nothing was signed. Claude did not work around it."
+ },
+ {
+  "id": "d22",
+  "start": 87.6,
+  "end": 90.58,
+  "text": "On the film stack: the same refusal, word for word.",
+  "say": "On the film stack: the same refusal, word for word."
+ },
+ {
+  "id": "d23",
+  "start": 91.0,
+  "end": 94.98,
+  "text": "MCP servers sell per tool; tools/list stays free.",
+  "say": "M C P servers sell per tool; tools list stays free."
+ },
+ {
+  "id": "d24",
+  "start": 95.4,
+  "end": 99.78,
+  "text": "An unpaid tool call gets a quote: $0.005.",
+  "say": "An unpaid tool call gets a quote: half a cent."
+ },
+ {
+  "id": "d25",
+  "start": 100.2,
+  "end": 104.4,
+  "text": "Paid through pay-mcp, the tool gets its own dashboard row.",
+  "say": "Paid through pay M C P, the tool gets its own dashboard row."
+ },
+ {
+  "id": "d26",
+  "start": 105.0,
+  "end": 109.78,
+  "text": "Recorded from the running dashboard: the buyer CLI pays every 2 s.",
+  "say": "Recorded from the running dashboard: the buyer C L I pays every two seconds."
+ },
+ {
+  "id": "d27",
+  "start": 110.2,
+  "end": 113.0,
+  "text": "Each simulated payment updates the totals.",
+  "say": "Each simulated payment updates the totals."
+ },
+ {
+  "id": "d28",
+  "start": 113.9,
+  "end": 117.38,
+  "text": "19 payments: $0.034, all simulated.",
+  "say": "nineteen payments: three point four cents, all simulated."
+ },
+ {
+  "id": "d29",
+  "start": 117.8,
+  "end": 121.18,
+  "text": "By network: 100% Solana devnet.",
+  "say": "By network: one hundred percent Solana dev net."
+ },
+ {
+  "id": "d30",
+  "start": 121.6,
+  "end": 124.98,
+  "text": "The feed: 19 of 19 simulated.",
+  "say": "The feed: nineteen of nineteen simulated."
+ },
+ {
+  "id": "d31",
+  "start": 125.4,
+  "end": 128.78,
+  "text": "Agent traffic you are not billing yet, by name.",
+  "say": "Agent traffic you are not billing yet, by name."
+ },
+ {
+  "id": "d32",
+  "start": 129.2,
+  "end": 132.78,
+  "text": "Spendable: $0.00. It was all simulated.",
+  "say": "Spendable: zero dollars. It was all simulated."
+ },
+ {
+  "id": "d33",
+  "start": 133.2,
+  "end": 136.38,
+  "text": "Funds go to your pay_to. AgentToll holds nothing.",
+  "say": "Funds go to your pay to. Agent Toll holds nothing."
+ },
+ {
+  "id": "d34",
+  "start": 136.8,
+  "end": 139.6,
+  "text": "The same dashboard on a phone.",
+  "say": "The same dashboard on a phone."
+ },
+ {
+  "id": "d35",
+  "start": 140.2,
+  "end": 143.98,
+  "text": "The same core runs as a Cloudflare Worker, in WebAssembly.",
+  "say": "The same core runs as a Cloudflare Worker, in WebAssembly."
+ },
+ {
+  "id": "d36",
+  "start": 144.4,
+  "end": 149.4,
+  "text": "21 parity tests check byte-identical quotes against the Rust gateway.",
+  "say": "twenty-one parity tests check byte-identical quotes against the Rust gateway."
+ },
+ {
+  "id": "d37",
+  "start": 150.0,
+  "end": 153.78,
+  "text": "119 of 119 evals pass.",
+  "say": "one hundred nineteen of one hundred nineteen evals pass."
+ },
+ {
+  "id": "d38",
+  "start": 154.2,
+  "end": 158.68,
+  "text": "Wired to the real PayAI and x402.org facilitators.",
+  "say": "Wired to the real Pay A I, and x four oh two dot org facilitators."
+ },
+ {
+  "id": "d39",
+  "start": 159.1,
+  "end": 163.08,
+  "text": "Both rejected the unfunded throwaway wallets, as expected.",
+  "say": "Both rejected the unfunded throwaway wallets, as expected."
+ },
+ {
+  "id": "d40",
+  "start": 163.5,
+  "end": 166.6,
+  "text": "A funded wallet is the only missing piece.",
+  "say": "A funded wallet is the only missing piece."
+ },
+ {
+  "id": "d41",
+  "start": 167.35,
+  "end": 170.65,
+  "text": "Open source. One command, no wallet needed.",
+  "say": "Open source. One command, no wallet needed."
+ }
+]

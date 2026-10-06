@@ -1,0 +1,415 @@
+{
+ "film": "AgentToll full product demo (video/scenes/demo/index.html)",
+ "note": "Burned-in captions = the narration's subtitles, word for word: video/vo/narration.py builds the voice script (video/vo/narration/demo.json) from these cues, and the voice is a stock female Kokoro TTS voice presented as Joseph's AI assistant (she says so in the first line; the end card credits the AI voice). Music bed + UI sound from video/render/audio.mjs. Cue times are seconds from the start of their act; acts[].start is absolute; demo.js ends a cue 0.42 s before the next one starts. Every payment in this film is SIMULATED (local test facilitator, no funds moved). Words banned for the simulated variant by docs/launch/DEMO_VIDEO.md (on-chain, settled, live, real payment, transaction link, explorer, mainnet, revenue earned) are not used in captions. The dashboard's own product labels ('Live settlements', 'Settled') appear in screenshots; the push-in on the Settled tile carries a gold 'Settled = SIMULATED settlements · no funds moved' callout.",
+ "duration": 171.2,
+ "acts": [
+  {
+   "id": "a0",
+   "start": 0,
+   "title": "Cold open: same URL, two answers"
+  },
+  {
+   "id": "a1",
+   "start": 6.0,
+   "title": "Title"
+  },
+  {
+   "id": "a2",
+   "start": 9.6,
+   "title": "01 One config file + the stack"
+  },
+  {
+   "id": "a3",
+   "start": 19.6,
+   "title": "02 Same URL, two answers"
+  },
+  {
+   "id": "a4",
+   "start": 40.1,
+   "title": "03 A price list for agents"
+  },
+  {
+   "id": "a5",
+   "start": 49.1,
+   "title": "04 The buyer CLI pays"
+  },
+  {
+   "id": "a6",
+   "start": 66.6,
+   "title": "05 Claude pays, within caps"
+  },
+  {
+   "id": "a7",
+   "start": 90.6,
+   "title": "06 MCP servers sell per tool"
+  },
+  {
+   "id": "a8",
+   "start": 104.6,
+   "title": "07 The founder's dashboard"
+  },
+  {
+   "id": "a9",
+   "start": 139.8,
+   "title": "08 Same rules at the edge"
+  },
+  {
+   "id": "a10",
+   "start": 148.8,
+   "title": "09 Proof"
+  },
+  {
+   "id": "a11",
+   "start": 154.1,
+   "title": "10 Wired to real facilitators"
+  },
+  {
+   "id": "a12",
+   "start": 166.75,
+   "title": "Close"
+  }
+ ],
+ "cues": [
+  {
+   "act": "a0",
+   "at": 0.3,
+   "end": 4.6,
+   "text": "Hi, I'm Joseph's AI assistant. Let me show you AgentToll."
+  },
+  {
+   "act": "a1",
+   "at": 0.4,
+   "end": 3.4,
+   "text": "Every payment here is simulated.",
+   "gold": [
+    "simulated."
+   ]
+  },
+  {
+   "act": "a2",
+   "at": 0.3,
+   "end": 2.9,
+   "text": "One YAML file. Paid to your own pay_to.",
+   "hl": [
+    "pay_to."
+   ]
+  },
+  {
+   "act": "a2",
+   "at": 3.2,
+   "end": 7.4,
+   "text": "A quote costs agents $0.002. Tools have prices too.",
+   "gold": [
+    "$0.002."
+   ]
+  },
+  {
+   "act": "a2",
+   "at": 7.8,
+   "end": 9.8,
+   "text": "One command starts the stack."
+  },
+  {
+   "act": "a3",
+   "at": 0.5,
+   "end": 4.3,
+   "text": "A person opens the site through the gateway: free.",
+   "hl": [
+    "free."
+   ]
+  },
+  {
+   "act": "a3",
+   "at": 4.5,
+   "end": 7.9,
+   "text": "A browser gets the quote, with paid: false.",
+   "hl": [
+    "false."
+   ]
+  },
+  {
+   "act": "a3",
+   "at": 8.4,
+   "end": 12.4,
+   "text": "Claude-User gets 402 Payment Required.",
+   "gold": [
+    "402"
+   ]
+  },
+  {
+   "act": "a3",
+   "at": 12.6,
+   "end": 16.3,
+   "text": "The header decodes to a price: $0.002.",
+   "gold": [
+    "$0.002."
+   ]
+  },
+  {
+   "act": "a3",
+   "at": 16.7,
+   "end": 20.0,
+   "text": "Plus network, asset and payTo.",
+   "hl": [
+    "payTo:"
+   ]
+  },
+  {
+   "act": "a4",
+   "at": 0.4,
+   "end": 4.4,
+   "text": "Agents can read the price list first, for free.",
+   "hl": [
+    "free."
+   ]
+  },
+  {
+   "act": "a4",
+   "at": 4.6,
+   "end": 9.0,
+   "text": "Routes, tools and networks, all from the same YAML file."
+  },
+  {
+   "act": "a5",
+   "at": 0.4,
+   "end": 4.6,
+   "text": "The buyer CLI gets the 402, signs, and retries."
+  },
+  {
+   "act": "a5",
+   "at": 4.8,
+   "end": 8.6,
+   "text": "200 OK. The receipt comes back in a header.",
+   "hl": [
+    "200",
+    "OK."
+   ]
+  },
+  {
+   "act": "a5",
+   "at": 9.0,
+   "end": 12.8,
+   "text": "The dashboard gets the row: +$0.002.",
+   "gold": [
+    "+$0.002."
+   ]
+  },
+  {
+   "act": "a5",
+   "at": 13.0,
+   "end": 17.6,
+   "text": "Same simulated id on both sides. No funds moved.",
+   "gold": [
+    "simulated"
+   ]
+  },
+  {
+   "act": "a6",
+   "at": 0.4,
+   "end": 4.0,
+   "text": "Claude gets a capped wallet, and reads the price first."
+  },
+  {
+   "act": "a6",
+   "at": 4.2,
+   "end": 8.4,
+   "text": "$0.002 is under both caps, so Claude pays: simulated.",
+   "gold": [
+    "$0.002",
+    "simulated."
+   ]
+  },
+  {
+   "act": "a6",
+   "at": 8.6,
+   "end": 12.8,
+   "text": "Next, a $0.05 tool. Claude is told: up to 10 cents.",
+   "gold": [
+    "$0.05"
+   ]
+  },
+  {
+   "act": "a6",
+   "at": 13.4,
+   "end": 17.2,
+   "text": "The wallet refuses: the per-call cap is $0.01.",
+   "hl": [
+    "refuses:"
+   ],
+   "gold": [
+    "$0.01."
+   ]
+  },
+  {
+   "act": "a6",
+   "at": 17.4,
+   "end": 20.8,
+   "text": "Nothing was signed. Claude did not work around it."
+  },
+  {
+   "act": "a6",
+   "at": 21.0,
+   "end": 24.0,
+   "text": "On the film stack: the same refusal, word for word."
+  },
+  {
+   "act": "a7",
+   "at": 0.4,
+   "end": 4.6,
+   "text": "MCP servers sell per tool; tools/list stays free.",
+   "hl": [
+    "free."
+   ]
+  },
+  {
+   "act": "a7",
+   "at": 4.8,
+   "end": 9.4,
+   "text": "An unpaid tool call gets a quote: $0.005.",
+   "gold": [
+    "$0.005."
+   ]
+  },
+  {
+   "act": "a7",
+   "at": 9.6,
+   "end": 13.8,
+   "text": "Paid through pay-mcp, the tool gets its own dashboard row."
+  },
+  {
+   "act": "a8",
+   "at": 0.4,
+   "end": 5.4,
+   "text": "Recorded from the running dashboard: the buyer CLI pays every 2 s.",
+   "hl": [
+    "every",
+    "2",
+    "s."
+   ]
+  },
+  {
+   "act": "a8",
+   "at": 5.6,
+   "end": 8.4,
+   "text": "Each simulated payment updates the totals."
+  },
+  {
+   "act": "a8",
+   "at": 9.3,
+   "end": 13.0,
+   "text": "19 payments: $0.034, all simulated.",
+   "gold": [
+    "$0.034,"
+   ]
+  },
+  {
+   "act": "a8",
+   "at": 13.2,
+   "end": 16.8,
+   "text": "By network: 100% Solana devnet."
+  },
+  {
+   "act": "a8",
+   "at": 17.0,
+   "end": 20.6,
+   "text": "The feed: 19 of 19 simulated.",
+   "gold": [
+    "simulated."
+   ]
+  },
+  {
+   "act": "a8",
+   "at": 20.8,
+   "end": 24.4,
+   "text": "Agent traffic you are not billing yet, by name.",
+   "hl": [
+    "not",
+    "billing",
+    "yet,"
+   ]
+  },
+  {
+   "act": "a8",
+   "at": 24.6,
+   "end": 28.4,
+   "text": "Spendable: $0.00. It was all simulated.",
+   "gold": [
+    "$0.00."
+   ]
+  },
+  {
+   "act": "a8",
+   "at": 28.6,
+   "end": 32.0,
+   "text": "Funds go to your pay_to. AgentToll holds nothing.",
+   "hl": [
+    "pay_to."
+   ]
+  },
+  {
+   "act": "a8",
+   "at": 32.2,
+   "end": 35.0,
+   "text": "The same dashboard on a phone."
+  },
+  {
+   "act": "a9",
+   "at": 0.4,
+   "end": 4.4,
+   "text": "The same core runs as a Cloudflare Worker, in WebAssembly."
+  },
+  {
+   "act": "a9",
+   "at": 4.6,
+   "end": 9.6,
+   "text": "21 parity tests check byte-identical quotes against the Rust gateway.",
+   "hl": [
+    "byte-identical"
+   ]
+  },
+  {
+   "act": "a10",
+   "at": 1.2,
+   "end": 5.0,
+   "text": "119 of 119 evals pass.",
+   "hl": [
+    "119"
+   ]
+  },
+  {
+   "act": "a11",
+   "at": 0.1,
+   "end": 4.6,
+   "text": "Wired to the real PayAI and x402.org facilitators.",
+   "hl": [
+    "PayAI",
+    "x402.org"
+   ]
+  },
+  {
+   "act": "a11",
+   "at": 5.0,
+   "end": 8.98,
+   "text": "Both rejected the unfunded throwaway wallets, as expected."
+  },
+  {
+   "act": "a11",
+   "at": 9.4,
+   "end": 12.5,
+   "text": "A funded wallet is the only missing piece.",
+   "hl": [
+    "funded"
+   ]
+  },
+  {
+   "act": "a12",
+   "at": 0.6,
+   "end": 3.9,
+   "text": "Open source. One command, no wallet needed.",
+   "hl": [
+    "One",
+    "command,"
+   ]
+  }
+ ]
+}

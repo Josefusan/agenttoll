@@ -1,0 +1,16 @@
+{
+  "id": "human-get-quote",
+  "what": "A human browser asks for /api/quote: free, 200 + the JSON body",
+  "command": "curl -s -i -A 'Mozilla/5.0 (Macintosh) Chrome/141' -H 'Accept-Language: en' -H 'Sec-Fetch-Mode: navigate' http://127.0.0.1:8502/api/quote",
+  "cwd": "$REPO",
+  "path_prepend": "$CARGO_TARGET_DIR/debug (prebuilt agenttoll-* binaries)",
+  "exit": 0,
+  "duration_ms": 57.1,
+  "started_utc": "2026-10-04T22:18:14.015+00:00",
+  "stdout": "HTTP/1.1 200 OK\r\ncontent-type: application/json\r\ncontent-length: 80\r\ndate: Sun, 04 Oct 2026 22:18:14 GMT\r\n\r\n{\"agent\":null,\"as_of\":1791152294,\"paid\":false,\"price\":144.94,\"symbol\":\"SOL/USD\"}",
+  "stderr": "",
+  "stdout_sha256": "14418ac393c7c63f83ee7097de3d52b5168227cb2be9081b71c5929c135df6b3",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "redactions": [],
+  "simulated": false
+}

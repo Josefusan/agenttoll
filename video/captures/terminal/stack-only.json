@@ -1,0 +1,17 @@
+{
+  "id": "stack-only",
+  "what": "STACK_ONLY=1 scripts/demo-local.sh on the film spare ports: origin + SIMULATED facilitator + gateway with an empty ledger (stopped with tmux kill-session after the banner)",
+  "command": "STACK_ONLY=1 GATEWAY_PORT=8502 ADMIN_PORT=8503 ORIGIN_PORT=4100 FACILITATOR_PORT=4120 CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash scripts/demo-local.sh",
+  "cwd": "$REPO",
+  "exit": null,
+  "exit_note": "long-running by design (wait); stopped by the capturer, so no exit code",
+  "started_utc": "2026-10-04T22:50:21.585Z",
+  "stdout": "Building (first run compiles about 590 crates; later runs are instant)...\n\n\u001b[1;36m== Stack is running with an empty ledger. Ctrl-C stops it.\u001b[0m\ngateway http://127.0.0.1:8502 | admin http://127.0.0.1:8503 | origin :4100 | facilitator :4120 (SIMULATED)\nbuyer keypair: $REPO/.demo/buyer.json | pay_to: G3r9m7Ejj1Tn1UdxFFBrJRw52X6V7Qgz2RbrorJtmoUt\nadmin token file (mode 600, not printed): $REPO/.demo/admin-token\n",
+  "stderr": "",
+  "stdout_sha256": "9efe863af498410ff0f8406082c8fa027370ea409435bf32ecd914e010d478b7",
+  "redactions": [
+    "repo root -> $REPO"
+  ],
+  "simulated": true,
+  "secrets": "admin token asserted absent from stdout/stderr"
+}
