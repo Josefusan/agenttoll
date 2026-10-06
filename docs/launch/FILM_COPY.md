@@ -164,6 +164,9 @@ Narrated by an AI voice (Kokoro TTS) presented as Joseph's AI assistant. Payment
 - Chapter times are set against the final render; if a film is re-rendered, re-check them.
 - Confirm the narrator disclosure sentence is in all three descriptions, unchanged.
 - Confirm each film's on-screen label reads `simulated settlement, no funds moved` on every payment
-  shot, and that no film says on-chain.
+  shot. The demo film avoids every word `DEMO_VIDEO.md` bans for variant B. The hero film — and the
+  pitch cut, which reuses its segments — deliberately uses five of them (`settled`, `real payment`,
+  `mainnet`) as the protocol, a conditional and the KB-MKT-01 market figure; the reasons are written
+  out in `video/scenes/hero/SHOTLIST.md`, and every payment shot still carries the gold SIMULATED badge.
 - Keep each title at 70 characters or fewer and each thumbnail line at 5 words or fewer.
 - Upload unlisted, then replace `<FILM_URL>` in `POSTS.md` with the real links.
