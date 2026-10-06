@@ -135,48 +135,61 @@ Post when the demo video exists. Structure: problem, 30 s clip, three bullets, r
 
 ### X thread (DRAFT)
 
-1/ AI agents read your site, your API, your MCP server all day. You pay for it. They pay nothing. The only options were block or absorb.
+Six posts, each 280 characters or fewer (count in brackets). Replace `<FILM_URL>` with the unlisted
+YouTube links from `docs/launch/FILM_COPY.md`. Do not post before the film and its artifact exist.
+Keep the SIMULATED line in every post that shows a payment.
 
-AgentToll is a third option: an open-source proxy that charges agents per request in USDC and keeps people free.
+1/ AI agents read your site, your API, your MCP server all day. You pay for the bandwidth and the content. They pay nothing. Block or absorb were the only two options.
 
-2/ [30 s clip]
-A person loads the page free. Claude gets a 402, pays $0.002 within caps its owner set, gets the data, and the founder's dashboard ticks.
+AgentToll adds a third: an open-source proxy that charges agents per request in USDC and keeps people free.
+[273]
 
-[B: Settlement in this clip is simulated by the facilitator that ships with the repo. No funds moved. The label is in the frame.]
-[A: Settled on Solana devnet. The explorer link is in the clip.]
+2/ 90 seconds on what AgentToll does: <FILM_URL>
 
-3/ How it works, three things:
+A person loads the page free. An agent gets a 402, pays $0.002 in USDC within the caps its owner set, and gets the data.
+
+[SIMULATED settlement in this film; no funds moved.]
+[221]
+
+3/ Three things:
+
 - One YAML file: a price per route, a price per MCP tool, your payout address. Unmatched routes are free.
-- Settle only after your origin succeeds. Agents never pay for a 500, and paid content is released only after settlement.
-- Non-custodial. Funds go straight to the pay_to you choose. AgentToll holds no keys and no money.
+- Settle only after your origin succeeds. Agents never pay for a 500.
+- Non-custodial. Funds go straight to the pay_to you choose.
+[251]
 
-4/ Runs as a Rust binary or a Cloudflare Worker (same core, compiled to WASM, parity-tested). x402 v2 over HTTP and the MCP-native transport. Solana devnet first, Base Sepolia second.
+4/ Rust binary or a Cloudflare Worker (same core compiled to WASM, parity-tested). x402 v2 over HTTP and the MCP-native transport. Solana devnet first, Base Sepolia second.
 
 Repo: github.com/Josefusan/agenttoll
-One command, no wallet needed: bash scripts/demo-local.sh
+One command, no wallet: bash scripts/demo-local.sh
+[258]
 
-5/ Ask: put it in front of something agents already read and tell me what breaks. Issues and PRs open. If you run an MCP server and want per-tool prices, I want to hear from you.
+5/ Status: devnet and testnet only. No customers, no revenue yet. Every payment in the demo is simulated by the facilitator that ships with the repo.
 
-Built solo with AI coding agents and an adversarial critic agent on every PR, for the Colosseum Crypto World's Fair (Solana track).
+Full demo: <FILM_URL>
+
+Built solo with AI coding agents, for the Colosseum Crypto World's Fair (Solana track).
+[258]
+
+6/ Ask: put it in front of something agents already read and tell me what breaks. Issues and PRs open. If you run an MCP server and want per-tool prices, I want to hear from you.
+[175]
 
 ### LinkedIn (DRAFT)
 
-The sites we ship through Website Factory get read by AI agents all day. The owner pays for the bandwidth and the content. The agents pay nothing.
+AI agents read the sites we ship through Website Factory all day. The owner pays for the bandwidth and the content. The agents pay nothing.
 
-So I built AgentToll for the Colosseum Crypto World's Fair. It is an open-source proxy you put in front of a site, API or MCP server. People keep browsing free. AI agents get an HTTP 402 with a price and pay per request in USDC over x402.
+So I built AgentToll for the Colosseum Crypto World's Fair: an open-source proxy you put in front of a site, API or MCP server. People browse free. Agents get an HTTP 402 with a price and pay per request in USDC over x402.
 
-What is in the repo today:
-- Rust gateway: per-route and per-MCP-tool pricing in one YAML file, x402 v2 over HTTP and the MCP-native transport, settlement only after the origin succeeds, replay guard, discovery document at /.well-known/agenttoll.json
-- pay-mcp: a wallet for Claude with hard per-call and per-day caps
-- A founder dashboard with a live settlement feed and a report of agent traffic you are not billing yet
-- A Cloudflare Worker edition sharing the Rust core via WASM, parity-tested
-- One command to run the whole stack with no wallet: bash scripts/demo-local.sh
+The three films:
+- Pitch (2:30): <FILM_URL>
+- Full demo: <FILM_URL>
+- 90 seconds: <FILM_URL>
 
-What is not in it: a mainnet deployment, a funded wallet, customers. It is devnet and testnet only, and the one-command demo settles through a simulated facilitator that labels every payment as simulated.
+In the repo: a Rust gateway (per-route and per-MCP-tool prices in one YAML file, x402 v2 over HTTP and the MCP-native transport, settle only after the origin succeeds, discovery at /.well-known/agenttoll.json), pay-mcp (a wallet for Claude with hard per-call and per-day caps), a founder dashboard with a live settlement feed and a report of agent traffic you are not billing yet, and a Cloudflare Worker edition sharing the core via WASM.
 
-[Clip. B: label in frame, simulated settlement, no funds moved. A: devnet settlement with explorer link.]
+Not in it: no mainnet, no funded wallet, no customers, no revenue yet. Devnet and testnet only; the demo settles through a simulated facilitator and labels every payment simulated.
 
-Repo: github.com/Josefusan/agenttoll. If you run an API or an MCP server that agents already call, I would like to know what price you would set.
+Repo: github.com/Josefusan/agenttoll. If you run an API or an MCP server that agents already call, what price would you set?
 
 ---
 
