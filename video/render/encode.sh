@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Frames -> MP4 master (+ optional GIF cut, contact sheet, stills).
 #
-#   video/render/encode.sh --frames ~/agenttoll-scratch/frames/test --fps 30 --out ~/agenttoll-scratch/film-out/test.mp4 \
-#       [--gif ~/agenttoll-scratch/film-out/test.gif --gif-from 0 --gif-to 20 --gif-fps 15 --gif-width 960 --gif-max-mb 10] \
+#   video/render/encode.sh --frames ~/agenttoll/scratch/frames/test --fps 30 --out ~/agenttoll/scratch/film-out/test.mp4 \
+#       [--gif ~/agenttoll/scratch/film-out/test.gif --gif-from 0 --gif-to 20 --gif-fps 15 --gif-width 960 --gif-max-mb 10] \
 #       [--sheet ~/vps-audit/film-shots/test] [--every 2] [--clean]
 #   video/render/encode.sh --in existing.mp4 --gif out.gif [...]      # GIF/sheet from an MP4, no re-encode
 #

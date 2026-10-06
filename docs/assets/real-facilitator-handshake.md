@@ -1,4 +1,6 @@
 # Real-facilitator handshake (Solana devnet, no funds)
+> **Path note (added 2026-10-06).** Commands below are the pre-reorg paths, kept as the record of what was run on 2026-10-04. `~/agenttoll-scratch` is now `~/agenttoll/scratch`; see `~/AGENT_CONTEXT.md` for the full old-to-new map.
+
 
 **Real PayAI facilitator on Solana devnet, unfunded throwaway wallet. The payment was rejected as expected, so no transaction exists. This shows the wire format and verify path against the real facilitator, not a settlement.**
 

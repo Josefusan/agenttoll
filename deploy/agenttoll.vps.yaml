@@ -1,6 +1,6 @@
 # Gateway config for the no-sudo VPS demo (pm2 + Cloudflare quick tunnel).
 # Every payment is SIMULATED: the facilitator is demo/mock-facilitator and nothing touches
-# a chain. Secrets and the public URL come from the env file (~/agenttoll-live.env).
+# a chain. Secrets and the public URL come from the env file (~/agenttoll/config/agenttoll-live.env).
 origin: http://127.0.0.1:4000
 listen: "${AGENTTOLL_LISTEN}"              # set by deploy/pm2.config.cjs (default 127.0.0.1:8402)
 admin_listen: "${AGENTTOLL_ADMIN_LISTEN}"  # set by pm2 (default 127.0.0.1:8403); never exposed through a tunnel

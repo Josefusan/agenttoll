@@ -1,7 +1,7 @@
 # Narration: an AI voice, presented as Joseph's AI assistant
 
 All three films are narrated by a stock **female synthetic voice**: Kokoro-82M v1.0, voice
-`af_heart` (kokoro-onnx on CPU, set up in `~/agenttoll-vo/` on the VPS). Joseph's voice is not
+`af_heart` (kokoro-onnx on CPU, set up in `~/agenttoll/vo/` on the VPS). Joseph's voice is not
 cloned, and the voice never claims to be a person or to be Joseph.
 
 - The pitch and the full demo open with her naming herself: "Hi, I'm Joseph's AI assistant. Let
@@ -18,7 +18,7 @@ cloned, and the voice never claims to be a person or to be Joseph.
 
 Every spoken line is a burned-in caption, word for word, at the same time. The `say` field in the
 scripts differs from `text` only in pronunciation spelling ("x402" -> "x four oh two", "$0.002" ->
-"two tenths of a cent", "USDC" -> "U S D C"; the rules are `~/agenttoll-vo/lexicon.json` plus
+"two tenths of a cent", "USDC" -> "U S D C"; the rules are `~/agenttoll/vo/lexicon.json` plus
 `SAY` in `narration.py`). To change a line, change the caption, then rebuild:
 
 | Film | Captions live in | Spoken lines |
@@ -37,11 +37,11 @@ On the VPS, in `~/Hackathons/AgentToll-film`:
 
 ```bash
 python3 video/scenes/hero/captions.py                       # hero captions.json from index.html
-~/agenttoll-vo/.venv/bin/python video/vo/narration.py --check   # scripts + pace table; fails on a line
+~/agenttoll/vo/.venv/bin/python video/vo/narration.py --check   # scripts + pace table; fails on a line
                                                             # inside a pitch dissolve or past its segment
 python3 video/vo/claims_check.py                            # System-1 claim checks over the spoken text
 for f in hero demo pitch; do                                # voice tracks at absolute film time, -16 LUFS
-  ~/agenttoll-vo/.venv/bin/python ~/agenttoll-vo/narrate.py --script video/vo/narration/$f.json \
+  ~/agenttoll/vo/.venv/bin/python ~/agenttoll/vo/narrate.py --script video/vo/narration/$f.json \
     --out-dir video/vo/narration/out/$f --voice af_heart --max-speed 1.12 --threads 4 \
     --duration $(case $f in hero) echo 91.5;; demo) echo 171.2;; pitch) echo 156.65;; esac)
   cp video/vo/narration/out/$f/report.json video/vo/narration/report-$f.json   # committed
@@ -60,11 +60,11 @@ sound from `audio.mjs`, then `mux.sh --vo` ducks the bed under the voice (sidech
 loudness-normalises the mix to -16 LUFS:
 
 ```bash
-node video/render/render.mjs --scene video/scenes/hero/index.html --cues ~/agenttoll-scratch/audio/hero.cues.json
-node video/render/audio.mjs --cues ~/agenttoll-scratch/audio/hero.cues.json --out ~/agenttoll-scratch/audio/hero.wav
-bash video/render/mux.sh --video ~/agenttoll-scratch/film-out/agenttoll-film-90s-picture.mp4 \
-  --audio ~/agenttoll-scratch/audio/hero.wav --vo video/vo/narration/out/hero/voice.wav \
-  --out ~/agenttoll-scratch/film-out/agenttoll-film-90s.mp4
+node video/render/render.mjs --scene video/scenes/hero/index.html --cues ~/agenttoll/scratch/audio/hero.cues.json
+node video/render/audio.mjs --cues ~/agenttoll/scratch/audio/hero.cues.json --out ~/agenttoll/scratch/audio/hero.wav
+bash video/render/mux.sh --video ~/agenttoll/scratch/film-out/agenttoll-film-90s-picture.mp4 \
+  --audio ~/agenttoll/scratch/audio/hero.wav --vo video/vo/narration/out/hero/voice.wav \
+  --out ~/agenttoll/scratch/film-out/agenttoll-film-90s.mp4
 # pitch: edl.mjs writes <out>.cues.json next to the picture; feed that to audio.mjs, then mux the same way
 ```
 

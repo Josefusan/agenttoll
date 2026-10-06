@@ -43,7 +43,7 @@ settlement:
    export AGENTTOLL_SOLANA_PAYTO=FFgkc6ZmZHPrRwjyBFL56VP6u572g27TAyAdVqmBro7d
    ORIGIN_LISTEN=127.0.0.1:4300 agenttoll-demo-origin &        # origin, on the spare port
    agenttoll-gateway --config demo/real-pay.yaml &             # gateway, on 8702
-   agenttoll-buyer --network solana --solana-keypair ~/agenttoll-buyer.json http://127.0.0.1:8702/api/quote
+   agenttoll-buyer --network solana --solana-keypair ~/agenttoll/config/agenttoll-buyer.json http://127.0.0.1:8702/api/quote
    ```
 
    It prints the Solana Explorer link for the settlement. Only after this succeeds may any doc or the
