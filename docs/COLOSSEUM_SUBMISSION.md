@@ -97,9 +97,9 @@ Do not claim in any field: Supabase, shadcn/ui, Kora, Circle CCTP, x402-axum, Ho
 
 ## Media and code (fill by D9)
 
-- [ ] GitHub repo: https://github.com/Josefusan/agenttoll (public). Confirm the release branch is merged to `main` or that the README on `main` points at the release branch before submitting.
-- [ ] Demo video (3:00 max), unlisted link. Script: `docs/launch/DEMO_VIDEO.md`. Variant A (real devnet) or B (simulated) chosen and consistent throughout.
-- [ ] Pitch video (Colosseum asks for two to three minutes; aim for 2:30 to 2:50), unlisted link. Script: `docs/launch/PITCH_VIDEO.md`.
+- [x] GitHub repo: https://github.com/Josefusan/agenttoll (public). D1-D13 are all merged to `main` (2026-10-06), so `main` holds the release.
+- [x] Demo video (2:51, 3:00 max), unlisted link: https://www.youtube.com/watch?v=nyrIfNXOOe8. Variant B (simulated) throughout. Script: `docs/launch/DEMO_VIDEO.md`.
+- [x] Pitch video (2:36, within the two-to-three-minute ask), unlisted link: https://www.youtube.com/watch?v=moqrTnDGUT0. Script: `docs/launch/PITCH_VIDEO.md`.
 - [ ] Logo: `brand/logo-square.png`. Cover: `brand/banner.png`.
 - [ ] Project website: only if a public demo URL exists.
 - [ ] Screenshots (if the form takes them): `docs/assets/dashboard-1440.png`, `payment-required.png`, `terminal-demo.png`.

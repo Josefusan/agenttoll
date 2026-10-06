@@ -87,8 +87,8 @@ Regenerate the copy-paste page with `python3 scripts/build-submission-page.py` b
 | Anything else judges should know (500) | Paste as is. It includes the prior-work disclosure and the test counts. | doc |
 | Go-to-market, demand validation, distribution | Paste the "Go-to-market" answer. Check the field limit in the editor first. | doc, "Go-to-market" |
 | GitHub repository | `https://github.com/Josefusan/agenttoll` | repo is public, MIT |
-| Presentation video | The unlisted pitch video link | section 1 |
-| Demo video | The unlisted demo video link | section 1 |
+| Presentation video | https://www.youtube.com/watch?v=moqrTnDGUT0 | unlisted, 2:36 |
+| Demo video | https://www.youtube.com/watch?v=nyrIfNXOOe8 | unlisted, 2:51 |
 | Logo | `brand/logo-square.png` | repo |
 | Cover or graphic | `brand/banner.png` | repo |
 | Screenshots, if the form takes them | `docs/assets/dashboard-1440.png`, `docs/assets/payment-required.png`, `docs/assets/terminal-demo.png` | repo |

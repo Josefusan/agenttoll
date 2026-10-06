@@ -1,6 +1,6 @@
 # Film copy (three films)
 
-Status: DRAFT for Joseph to upload. Agents never upload, post or submit anything. These are the three
+Status: UPLOADED unlisted 2026-10-06. Agents never upload, post or submit anything. These are the three
 films Claude's film build produces, and the copy that goes with each:
 
 | Film | Field in the form | Length rule |
@@ -9,8 +9,16 @@ films Claude's film build produces, and the copy that goes with each:
 | `agenttoll-full-demo.mp4` | Product demo video | 3:00 at most |
 | `agenttoll-film-90s.mp4` | (with a README GIF) | about 90 s |
 
-Upload each to YouTube as **unlisted**, open the link in a private window to confirm it plays, then
-paste the link in the Colosseum form and wherever `<FILM_URL>` appears in `POSTS.md`. Every title below
+Uploaded, unlisted (2026-10-06):
+
+| Film | Link |
+|---|---|
+| `agenttoll-pitch.mp4` | https://www.youtube.com/watch?v=moqrTnDGUT0 |
+| `agenttoll-full-demo.mp4` | https://www.youtube.com/watch?v=nyrIfNXOOe8 |
+| `agenttoll-film-90s.mp4` | https://www.youtube.com/watch?v=Yv9R690Vy5s |
+
+Uploaded to YouTube as **unlisted** on 2026-10-06 (links above); confirm each plays in a private
+window. Every title below
 is 70 characters or fewer (count is shown); check it again before pasting. Payments shown are SIMULATED
 on Solana devnet; no funds moved.
 
@@ -169,4 +177,4 @@ Narrated by an AI voice (Kokoro TTS) presented as Joseph's AI assistant. Payment
   `mainnet`) as the protocol, a conditional and the KB-MKT-01 market figure; the reasons are written
   out in `video/scenes/hero/SHOTLIST.md`, and every payment shot still carries the gold SIMULATED badge.
 - Keep each title at 70 characters or fewer and each thumbnail line at 5 words or fewer.
-- Upload unlisted, then replace `<FILM_URL>` in `POSTS.md` with the real links.
+- Uploaded unlisted on 2026-10-06; `POSTS.md` and the submission docs carry the real links.
