@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Assemble a cut from segments of rendered scenes (the pitch cut), picture and sound cues.
 //
-//   node video/render/edl.mjs --edl video/scenes/pitch/EDL.json --frames ~/agenttoll-scratch/frames/pitch \
-//        --out ~/agenttoll-scratch/film-out/agenttoll-pitch.mp4 [--jobs 3] [--cues-only] [--fps 10] [--scale 0.5]
+//   node video/render/edl.mjs --edl video/scenes/pitch/EDL.json --frames ~/agenttoll/scratch/frames/pitch \
+//        --out ~/agenttoll/scratch/film-out/agenttoll-pitch.mp4 [--jobs 3] [--cues-only] [--fps 10] [--scale 0.5]
 //
 // For each segment it renders [from, to) of its scene with render.mjs (the segment's query, e.g.
 // noprogress&cut=pitch), links the frames into one sequence, encodes it with encode.sh, and writes

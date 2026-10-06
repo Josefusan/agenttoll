@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Contact sheets + full-res stills for vision review.
 #
-#   video/render/sheet.sh ~/agenttoll-scratch/film-out/test.mp4 [~/vps-audit/film-shots/test]
+#   video/render/sheet.sh ~/agenttoll/scratch/film-out/test.mp4 [~/vps-audit/film-shots/test]
 #   EVERY=0.5 COLS=4 ROWS=3 TILE=480 STILLS="1.2 3.217 6" video/render/sheet.sh in.mp4 outdir
 #
 # Writes outdir/sheet-NN.png (COLSxROWS tiles of TILE px, one frame every EVERY s, each stamped

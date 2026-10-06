@@ -1,8 +1,8 @@
 {
   "captured_utc": "2026-10-04T22:22:40.225Z",
-  "recordvideo_webm": "~/agenttoll-scratch/film-out/captures/dashboard-live-recordvideo.webm",
+  "recordvideo_webm": "~/agenttoll/scratch/film-out/captures/dashboard-live-recordvideo.webm",
   "recordvideo_bytes": 4763141,
-  "screencast_mp4": "~/agenttoll-scratch/film-out/captures/dashboard-live-screencast.mp4",
+  "screencast_mp4": "~/agenttoll/scratch/film-out/captures/dashboard-live-screencast.mp4",
   "screencast_bytes": 1442006,
   "screencast_frames": 155,
   "screencast_started_video_ms": 4793,

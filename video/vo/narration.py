@@ -10,15 +10,15 @@ the SAY overrides below). Times are absolute film time (the pitch's are cut time
     python3 video/vo/narration.py --check    # exit 1 if a line needs more than MAX_STRETCH x natural pace
     python3 video/vo/narration.py --md       # also print the VO_SCRIPT.md tables
 
-The spoken form uses ~/agenttoll-vo/narrate.py's spoken() when it is importable (run with
-~/agenttoll-vo/.venv/bin/python); otherwise "say" is the caption text plus the SAY overrides.
+The spoken form uses ~/agenttoll/vo/narrate.py's spoken() when it is importable (run with
+~/agenttoll/vo/.venv/bin/python); otherwise "say" is the caption text plus the SAY overrides.
 """
 import json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..'))
 OUT = os.path.join(HERE, 'narration')
-VO_ENGINE = os.path.expanduser('~/agenttoll-vo')
+VO_ENGINE = os.path.expanduser('~/agenttoll/vo')
 # Kokoro af_heart at speed 1.0 takes about 0.232 s per syllable plus 0.19 s per pause mark
 # (least squares over 30 measured takes, mean error 0.24 s). A line whose estimate is over its
 # window by more than MAX_STRETCH would need narrate.py to speed it up past a natural pace.

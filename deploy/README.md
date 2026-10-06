@@ -33,14 +33,14 @@ Needs: Rust release binaries, node, pnpm, pm2, cloudflared. Quick tunnels are ou
 cargo build --release -p agenttoll-gateway -p agenttoll-demo-origin -p agenttoll-mock-facilitator -p agenttoll-buyer
 
 # 2. Secrets file outside git, mode 600. Never print it.
-cat > ~/agenttoll-live.env <<'ENV'
+cat > ~/agenttoll/config/agenttoll-live.env <<'ENV'
 AGENTTOLL_SOLANA_PAYTO=<public address>
 AGENTTOLL_ADMIN_TOKEN=<24+ random chars>
 AGENTTOLL_PUBLIC_URL=http://127.0.0.1:8402
-AGENTTOLL_DATA_DIR=/home/<you>/agenttoll-data
+AGENTTOLL_DATA_DIR=/home/<you>/agenttoll/data
 ENV
-chmod 600 ~/agenttoll-live.env
-mkdir -p ~/agenttoll-data/logs
+chmod 600 ~/agenttoll/config/agenttoll-live.env
+mkdir -p ~/agenttoll/data/logs
 
 # 3. Build the dashboard
 cd apps/dashboard
@@ -64,8 +64,8 @@ Override defaults with env vars before `pm2 start`: `AGENTTOLL_BIN` (binary dir)
 Quick tunnel URLs change every time a tunnel process restarts.
 
 ```bash
-grep -ho 'https://[a-z0-9-]*\.trycloudflare\.com' ~/agenttoll-data/logs/at-tunnel-gw.err.log | tail -1     # gateway
-grep -ho 'https://[a-z0-9-]*\.trycloudflare\.com' ~/agenttoll-data/logs/at-tunnel-dash.err.log | tail -1   # dashboard
+grep -ho 'https://[a-z0-9-]*\.trycloudflare\.com' ~/agenttoll/data/logs/at-tunnel-gw.err.log | tail -1     # gateway
+grep -ho 'https://[a-z0-9-]*\.trycloudflare\.com' ~/agenttoll/data/logs/at-tunnel-dash.err.log | tail -1   # dashboard
 ```
 
 ### Point quotes at the gateway URL
@@ -73,8 +73,8 @@ grep -ho 'https://[a-z0-9-]*\.trycloudflare\.com' ~/agenttoll-data/logs/at-tunne
 The gateway quotes `public_url` as the resource URL in 402 responses. After a tunnel URL changes:
 
 ```bash
-GW=$(grep -ho 'https://[a-z0-9-]*\.trycloudflare\.com' ~/agenttoll-data/logs/at-tunnel-gw.err.log | tail -1)
-sed -i "s|^AGENTTOLL_PUBLIC_URL=.*|AGENTTOLL_PUBLIC_URL=$GW|" ~/agenttoll-live.env
+GW=$(grep -ho 'https://[a-z0-9-]*\.trycloudflare\.com' ~/agenttoll/data/logs/at-tunnel-gw.err.log | tail -1)
+sed -i "s|^AGENTTOLL_PUBLIC_URL=.*|AGENTTOLL_PUBLIC_URL=$GW|" ~/agenttoll/config/agenttoll-live.env
 pm2 restart at-gateway --update-env
 pm2 save
 ```

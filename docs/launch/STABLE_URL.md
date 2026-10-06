@@ -95,7 +95,7 @@ Who runs it: you or an agent.
 
 ```bash
 pm2 restart at-tunnel-gw at-tunnel-dash
-grep -h 'https://[a-z0-9-]*\.trycloudflare\.com' ~/agenttoll-data/logs/at-tunnel-gw.err.log | tail -1
+grep -h 'https://[a-z0-9-]*\.trycloudflare\.com' ~/agenttoll/data/logs/at-tunnel-gw.err.log | tail -1
 bash scripts/refresh-live-urls.sh --check     # exits 1 on a stale or dead URL
 bash scripts/refresh-live-urls.sh --apply     # rewrites tracked copies; does not commit
 ```

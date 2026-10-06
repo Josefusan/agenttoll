@@ -73,12 +73,12 @@ Every window has a mono source note (now on the fixed provenance line, bottom-le
 ```bash
 cd ~/Hackathons/AgentToll-film && export PATH=$HOME/.local/bin:$PATH
 # preview (10 fps, half scale)
-node video/render/render.mjs --scene video/scenes/demo/index.html --fps 10 --scale 0.5 --out ~/agenttoll-scratch/frames/demo-preview --jobs 2
-video/render/encode.sh --frames ~/agenttoll-scratch/frames/demo-preview --fps 10 --out ~/agenttoll-scratch/film-out/demo-preview.mp4 --clean
-EVERY=2 video/render/sheet.sh ~/agenttoll-scratch/film-out/demo-preview.mp4 ~/vps-audit/film-shots/demo-preview
+node video/render/render.mjs --scene video/scenes/demo/index.html --fps 10 --scale 0.5 --out ~/agenttoll/scratch/frames/demo-preview --jobs 2
+video/render/encode.sh --frames ~/agenttoll/scratch/frames/demo-preview --fps 10 --out ~/agenttoll/scratch/film-out/demo-preview.mp4 --clean
+EVERY=2 video/render/sheet.sh ~/agenttoll/scratch/film-out/demo-preview.mp4 ~/vps-audit/film-shots/demo-preview
 # final master (not done by this stage): 30 fps, scale 1, about 5,025 frames
-node video/render/render.mjs --scene video/scenes/demo/index.html --fps 30 --out ~/agenttoll-scratch/frames/demo --jobs 3
-video/render/encode.sh --frames ~/agenttoll-scratch/frames/demo --fps 30 --out ~/agenttoll-scratch/film-out/agenttoll-full-demo.mp4 --crf 18 --clean
+node video/render/render.mjs --scene video/scenes/demo/index.html --fps 30 --out ~/agenttoll/scratch/frames/demo --jobs 3
+video/render/encode.sh --frames ~/agenttoll/scratch/frames/demo --fps 30 --out ~/agenttoll/scratch/film-out/agenttoll-full-demo.mp4 --crf 18 --clean
 ```
 
 At 30 fps the master is about 5,025 frames. At the engine's measured rate under load, 2.6–3.9 frames/s with 2–3 shards, that is about 22–32 minutes. Before seeking, the video layer waits for the `seeked` event on the WebM, so the same `t` always gives the same frame.

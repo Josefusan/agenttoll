@@ -2,7 +2,7 @@
 // Music bed + UI sound design for an AgentToll film, synthesized from the scene's own cue list.
 //
 //   node video/render/render.mjs --scene video/scenes/hero/index.html --cues /tmp/hero.cues.json
-//   node video/render/audio.mjs --cues /tmp/hero.cues.json --out ~/agenttoll-scratch/film-out/hero.wav [--seed 7]
+//   node video/render/audio.mjs --cues /tmp/hero.cues.json --out ~/agenttoll/scratch/film-out/hero.wav [--seed 7]
 //
 // Everything is generated here from oscillators and seeded noise: no samples, no third-party
 // audio, so the track is ours to release (CC0, see video/assets/audio/LICENSE.md).

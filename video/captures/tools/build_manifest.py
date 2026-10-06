@@ -54,7 +54,7 @@ D = "node video/captures/tools/dash_capture.mjs "
 STACK = ("STACK_ONLY=1 GATEWAY_PORT=8502 ADMIN_PORT=8503 ORIGIN_PORT=4100 FACILITATOR_PORT=4120 "
          "CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash scripts/demo-local.sh  (build, config, keypairs, token), "
          "then CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash video/captures/tools/stack-clean.sh (same binaries/config, no curl probe, empty ledger)")
-DASH = ("dashboard: apps/dashboard copied to ~/agenttoll-scratch/film-dash, NEXT_PUBLIC_GATEWAY_URL=http://127.0.0.1:8502 next build, "
+DASH = ("dashboard: apps/dashboard copied to ~/agenttoll/scratch/film-dash, NEXT_PUBLIC_GATEWAY_URL=http://127.0.0.1:8502 next build, "
         "AGENTTOLL_ADMIN_URL=http://127.0.0.1:8503 AGENTTOLL_ADMIN_TOKEN=\"$(cat .demo/admin-token)\" next start -H 127.0.0.1 -p 3502")
 
 STATES = {

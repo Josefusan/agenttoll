@@ -1,7 +1,7 @@
 {
   "generated_utc": "2026-10-05T01:06:40+00:00",
   "stack": "STACK_ONLY=1 GATEWAY_PORT=8502 ADMIN_PORT=8503 ORIGIN_PORT=4100 FACILITATOR_PORT=4120 CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash scripts/demo-local.sh  (build, config, keypairs, token), then CARGO_TARGET_DIR=$HOME/Hackathons/AgentToll-d8/target bash video/captures/tools/stack-clean.sh (same binaries/config, no curl probe, empty ledger)",
-  "dashboard": "dashboard: apps/dashboard copied to ~/agenttoll-scratch/film-dash, NEXT_PUBLIC_GATEWAY_URL=http://127.0.0.1:8502 next build, AGENTTOLL_ADMIN_URL=http://127.0.0.1:8503 AGENTTOLL_ADMIN_TOKEN=\"$(cat .demo/admin-token)\" next start -H 127.0.0.1 -p 3502",
+  "dashboard": "dashboard: apps/dashboard copied to ~/agenttoll/scratch/film-dash, NEXT_PUBLIC_GATEWAY_URL=http://127.0.0.1:8502 next build, AGENTTOLL_ADMIN_URL=http://127.0.0.1:8503 AGENTTOLL_ADMIN_TOKEN=\"$(cat .demo/admin-token)\" next start -H 127.0.0.1 -p 3502",
   "ports": {
     "gateway": 8502,
     "admin": 8503,
@@ -14,12 +14,12 @@
   "redactions": "Absolute paths: repo root -> $REPO, home -> $HOME; pay-mcp spend file/keypair/temp dir -> $SPEND_FILE/$KEYPAIR/$WORKDIR. Nothing else is edited.",
   "outside_git": [
     {
-      "path": "~/agenttoll-scratch/film-out/captures/dashboard-live-recordvideo.webm",
+      "path": "~/agenttoll/scratch/film-out/captures/dashboard-live-recordvideo.webm",
       "what": "Playwright recordVideo of the dashboard, 1920x1080 25 fps VP8, ~39 s, 15 payments every ~2 s",
       "bytes": 4763141
     },
     {
-      "path": "~/agenttoll-scratch/film-out/captures/dashboard-live-screencast.mp4",
+      "path": "~/agenttoll/scratch/film-out/captures/dashboard-live-screencast.mp4",
       "what": "Same session via CDP screencast (JPEG q95 frames, real timestamps) -> H.264 crf 14, 1920x1080 30 fps, ~34 s; sharper than the webm",
       "bytes": 1442006
     }

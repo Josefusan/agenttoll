@@ -103,7 +103,7 @@ Finding: no secrets in git history on any branch. No value was printed during th
 
 `.gitignore` before this change covered `.env`, `.env.*` (except `.env.example`), `.demo/`, `*.db`, `*.keypair.json`, `id.json`, `agenttoll.yaml`. It did not cover other keypair file names, for example `buyer.json` or `my-keypair.json`. This lane adds `*keypair*.json`, `buyer.json`, `payto.json` and `wallet*.json`. Checked that no tracked file matches the new patterns.
 
-The scan covers this repository only. Local files outside the repo (`~/agenttoll-buyer.json`, `~/agenttoll-payto.json`, the mode-600 `.env` in the release worktree) were not read or touched.
+The scan covers this repository only. Local files outside the repo (`~/agenttoll/config/agenttoll-buyer.json`, `~/agenttoll/config/agenttoll-payto.json`, the mode-600 `.env` in the release worktree) were not read or touched.
 
 ## Test counts (re-run 2026-10-04 at commit 0c54a00)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Deterministic frame renderer for AgentToll scenes.
 //
-//   node video/render/render.mjs --scene video/scenes/_engine-test.html --fps 30 --out ~/agenttoll-scratch/frames/test
+//   node video/render/render.mjs --scene video/scenes/_engine-test.html --fps 30 --out ~/agenttoll/scratch/frames/test
 //   node video/render/render.mjs --scene ... --fps 60 --out DIR --jobs 3          # 3 shard processes
 //   node video/render/render.mjs --scene ... --fps 60 --out DIR --shard 2/3       # one shard by hand
 //   node video/render/render.mjs --scene ... --out DIR --times 0.5,3.217 --format png   # stills only

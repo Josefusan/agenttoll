@@ -1,14 +1,14 @@
 // pm2 process list for the no-sudo VPS demo (README path B).
 //   pm2 start deploy/pm2.config.cjs && pm2 save
-// Secrets live in a mode-600 env file outside git (default ~/agenttoll-live.env).
+// Secrets live in a mode-600 env file outside git (default ~/agenttoll/config/agenttoll-live.env).
 // Every payment on this stack is SIMULATED (demo/mock-facilitator).
 const path = require("path");
 const os = require("os");
 
 const root = path.resolve(__dirname, "..");
 const home = os.homedir();
-const envFile = process.env.AGENTTOLL_ENV_FILE || path.join(home, "agenttoll-live.env");
-const dataDir = process.env.AGENTTOLL_DATA_DIR || path.join(home, "agenttoll-data");
+const envFile = process.env.AGENTTOLL_ENV_FILE || path.join(home, "agenttoll", "config", "agenttoll-live.env");
+const dataDir = process.env.AGENTTOLL_DATA_DIR || path.join(home, "agenttoll", "data");
 const bin = process.env.AGENTTOLL_BIN || path.join(root, "target", "release");
 const cloudflared = process.env.CLOUDFLARED || path.join(home, "bin", "cloudflared");
 const gwPort = process.env.AGENTTOLL_GATEWAY_PORT || "8402";
